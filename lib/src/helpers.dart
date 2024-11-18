@@ -2,7 +2,7 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:timely_x_flutter_example/models/tyx_resource.dart';
+import 'package:timely_x_flutter/src/models/tyx_resource.dart';
 
 import 'models/tyx_event.dart';
 
@@ -17,8 +17,8 @@ List<TyxResource> generateResources(int count) {
 }
 
 // Function to generate random events for today associated with resources
-List<TyxEvent> generateEventsForToday(List<TyxResource> resources) {
-  var now = DateTime.now();
+List<TyxEvent> generateEventsForDay(List<TyxResource> resources, DateTime day) {
+  var now = day;
   var todayStart = DateTime(now.year, now.month, now.day);
   var todayEnd = DateTime(now.year, now.month, now.day, 23, 59);
 
