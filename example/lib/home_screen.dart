@@ -27,88 +27,24 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Reservations",
               style: TextStyle(fontSize: 22),
             ),
-            const SizedBox(height: 5),
-            const Text("Tous vos services enregistrées sur la plateforme"),
-            const SizedBox(height: 10),
+            SizedBox(height: 5),
+            Text("Tous vos services enregistrées sur la plateforme"),
+            SizedBox(height: 10),
             Expanded(
-              child: TyxResourceView(
-                onDateChanged: (date) {
-                  setState(() {
-                    _currentDate = date;
-                    allEvents =
-                        generateEventsForDay(allResources, _currentDate);
-                  });
-                },
-                option: TyxResourceOption(
-                  initialDate: _currentDate,
-                  resources: allResources,
-                  events: allEvents,
-                  eventBuilder: (context, e) {
-                    return InkWell(
-                      onTap: () {},
-                      child: Container(
-                        padding: const EdgeInsets.all(5),
-                        width: e.width,
-                        height: e.height,
-                        decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 255, 250, 244),
-                          border: Border.all(
-                            color: Theme.of(context).primaryColor,
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ListView(
-                          children: [
-                            Text(
-                              "${TimeOfDay.fromDateTime(e.e.start).format(context)} - ${TimeOfDay.fromDateTime(e.e.end).format(context)}",
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            Text(
-                              "${e.e.resourceId}",
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                  resourceBuilder: (context, item) {
-                    return Container(
-                      decoration: BoxDecoration(),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 5, horizontal: 8),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(25),
-                                border: Border.all(
-                                  color: Theme.of(context).primaryColor,
-                                )),
-                            child: Text(
-                              item.resource?.name ?? "",
-                              style: const TextStyle(fontSize: 10),
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
+              child: TyxCalendarView(
+                  option: TyxCalendarOption(
+                      initialView: TyxView.day,
+                      events:
+                          generateEventsForMonth(allResources, _currentDate))),
             ),
           ],
         ),

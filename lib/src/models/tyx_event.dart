@@ -5,12 +5,18 @@ class TyxEvent {
   DateTime end;
   Color color;
   String? resourceId;
+  String? title;
+  String? description;
+  String? location;
 
   TyxEvent({
     required this.start,
     required this.end,
     required this.color,
     this.resourceId,
+    this.title,
+    this.description,
+    this.location,
   });
 
   @override
@@ -20,10 +26,19 @@ class TyxEvent {
     return other.start == start &&
         other.end == end &&
         other.color == color &&
+        other.title == title &&
+        other.description == description &&
+        other.location == location &&
         other.resourceId == resourceId;
   }
 
   @override
   int get hashCode =>
-      start.hashCode ^ end.hashCode ^ color.hashCode ^ resourceId.hashCode;
+      start.hashCode ^
+      end.hashCode ^
+      color.hashCode ^
+      resourceId.hashCode ^
+      title.hashCode ^
+      location.hashCode ^
+      description.hashCode;
 }

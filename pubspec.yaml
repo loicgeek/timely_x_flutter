@@ -15,6 +15,7 @@ dependencies:
   gradient_borders: ^1.0.1
   plugin_platform_interface: ^2.0.2
   jiffy: ^6.3.1
+  intl: ^0.20.2
 
 
 dev_dependencies:

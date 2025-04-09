@@ -54,6 +54,7 @@ class _TyxResourceViewState extends State<TyxResourceView> {
   }
 
   _onShowDatePicker({required BuildContext ctx}) async {
+    if (!mounted) return;
     var pickedDate = widget.onShowDatePicker != null
         ? await widget.onShowDatePicker?.call(context: ctx)
         : await showDatePicker(
@@ -63,7 +64,7 @@ class _TyxResourceViewState extends State<TyxResourceView> {
             lastDate: DateTime.now().add(const Duration(days: 365)),
           );
     if (pickedDate != null) {
-      _onDateChanged(pickedDate as DateTime);
+      _onDateChanged(pickedDate);
     }
   }
 
@@ -117,32 +118,42 @@ class _TyxResourceViewState extends State<TyxResourceView> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
                         border: Border.all(
-                          color: Colors.grey.shade300,
+                          color: Theme.of(context).colorScheme.outline,
                         ),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
-                          Icon(
-                            Icons.chevron_left,
-                            weight: .5,
-                            size: 17,
-                            color: Color(0Xff5C5F62),
-                          ),
-                          SizedBox(width: 2),
-                          Text(
-                            "Aujourd'hui",
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Color(0Xff5C5F62),
-                              fontWeight: FontWeight.w500,
+                          InkWell(
+                            onTap: _gotoPreviousDate,
+                            child: Icon(
+                              Icons.chevron_left,
+                              weight: .5,
+                              size: 17,
+                              color: Theme.of(context).iconTheme.color,
                             ),
                           ),
-                          SizedBox(width: 2),
-                          Icon(
-                            Icons.chevron_right,
-                            weight: .5,
-                            size: 17,
-                            color: Color(0Xff5C5F62),
+                          const SizedBox(width: 2),
+                          Text(
+                            "Aujourd'hui",
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(
+                                  fontSize: 11,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
+                          const SizedBox(width: 2),
+                          InkWell(
+                            onTap: _gotoNextDate,
+                            child: Icon(
+                              Icons.chevron_right,
+                              weight: .5,
+                              size: 17,
+                              color: Theme.of(context).iconTheme.color,
+                            ),
                           )
                         ],
                       ),
@@ -163,7 +174,7 @@ class _TyxResourceViewState extends State<TyxResourceView> {
                     child: Text(
                       "Jour",
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                     ),
                   ),
@@ -179,7 +190,7 @@ class _TyxResourceViewState extends State<TyxResourceView> {
                     child: Text(
                       "Semaine",
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                     ),
                   ),
@@ -195,7 +206,7 @@ class _TyxResourceViewState extends State<TyxResourceView> {
                     child: Text(
                       "Mois",
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                     ),
                   ),

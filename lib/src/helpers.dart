@@ -53,3 +53,42 @@ List<TyxEvent> generateEventsForDay(List<TyxResource> resources, DateTime day) {
 
   return events;
 }
+
+List<TyxEvent> generateEventsForMonth(
+    List<TyxResource> resources, DateTime day) {
+  var now = day;
+  var monthStart = DateTime(now.year, now.month, 1);
+  var monthEnd = DateTime(now.year, now.month + 1, 1);
+
+  List<TyxEvent> events = [];
+  Random random = Random();
+
+  for (var resource in resources) {
+    int eventCount = random.nextInt(4) + 1; // 1-4 events per resource
+    for (int i = 0; i < eventCount; i++) {
+      // Generate random start and end times within today
+      DateTime start = monthStart.add(Duration(days: random.nextInt(30))).add(
+          Duration(
+              minutes: random.nextInt(1440))); // random minute within the month
+      DateTime end = start.add(Duration(
+          minutes: random.nextInt(120) +
+              15)); // random duration between 15-135 minutes
+
+      // Ensure end time doesn't exceed today's end
+      if (end.isAfter(monthEnd)) {
+        end = monthEnd;
+      }
+
+      // Create event and add to the list
+      events.add(TyxEvent(
+        start: start,
+        end: end,
+        color: Color.fromARGB(
+            255, random.nextInt(256), random.nextInt(256), random.nextInt(256)),
+        resourceId: resource.id,
+      ));
+    }
+  }
+
+  return events;
+}
