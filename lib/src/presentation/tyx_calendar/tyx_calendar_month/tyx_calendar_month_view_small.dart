@@ -85,27 +85,29 @@ class _TyxCalendarMonthViewSmallState extends State<TyxCalendarMonthViewSmall> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Today button
-              OutlinedButton(
-                onPressed: () {
-                  final now = DateTime.now();
-                  setState(() {
-                    _selectedDate = now;
-                  });
-                  widget.onDateChanged?.call(now);
-                },
-                child: const Text('Today'),
-              ),
-              const SizedBox(width: 16),
+              // OutlinedButton(
+              //   onPressed: () {
+              //     final now = DateTime.now();
+              //     setState(() {
+              //       _selectedDate = now;
+              //     });
+              //     widget.onDateChanged?.call(now);
+              //   },
+              //   child: const Text('Today'),
+              // ),
+              // const SizedBox(width: 16),
               // View type selector
-              SegmentedButton<TyxView>(
-                segments: TyxView.values
-                    .map((view) =>
-                        ButtonSegment(value: view, label: Text(view.name)))
-                    .toList(),
-                selected: {widget.view},
-                onSelectionChanged: (Set<TyxView> newSelection) {
-                  widget.onViewChanged?.call(newSelection.first);
-                },
+              Expanded(
+                child: SegmentedButton<TyxView>(
+                  segments: TyxView.values
+                      .map((view) =>
+                          ButtonSegment(value: view, label: Text(view.name)))
+                      .toList(),
+                  selected: {widget.view},
+                  onSelectionChanged: (Set<TyxView> newSelection) {
+                    widget.onViewChanged?.call(newSelection.first);
+                  },
+                ),
               ),
             ],
           ),

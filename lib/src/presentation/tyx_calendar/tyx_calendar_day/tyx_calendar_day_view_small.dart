@@ -32,15 +32,27 @@ class TyxCalendarDayViewSmall extends StatefulWidget {
 class _TyxCalendarDayViewSmallState extends State<TyxCalendarDayViewSmall> {
   late DateTime _selectedDate;
   late ScrollController _scrollController;
-  late double _hourHeight;
+
+  late double _timeslotHeight;
+  late Duration _slotDuration;
+  late double _timeColumnWidth;
+
+  // Track scroll position for now indicator
+  double _scrollOffset = 0.0;
 
   @override
   void initState() {
     super.initState();
     _selectedDate = widget.option.initialDate ?? DateTime.now();
-    _hourHeight = widget.option.timeslotHeight ?? 60.0;
+    _timeslotHeight = widget.option.timeslotHeight ?? 60.0;
+    _slotDuration =
+        widget.option.timelotSlotDuration ?? const Duration(minutes: 15);
+    _timeColumnWidth = widget.option.timesCellWidth ?? 80.0;
 
     _scrollController = ScrollController();
+
+    // Add scroll listener
+    _scrollController.addListener(_onScroll);
 
     // Schedule scrolling to current time after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -50,25 +62,35 @@ class _TyxCalendarDayViewSmallState extends State<TyxCalendarDayViewSmall> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    // Update scroll offset when scrolling
+    setState(() {
+      _scrollOffset = _scrollController.offset;
+    });
   }
 
   void _scrollToCurrentTime() {
     final now = DateTime.now();
     if (!isSameDay(now, _selectedDate)) return;
 
-    final dayStartHour = widget.option.timeslotStartTime?.hour ?? 6;
+    final dayStartHour = widget.option.timeslotStartTime?.hour ?? 0;
     final currentHour = now.hour;
-    final currentMinute = now.minute;
 
     if (currentHour >= dayStartHour) {
-      final hourDiff = currentHour - dayStartHour;
-      final minuteFraction = currentMinute / 60.0;
-      final scrollOffset = (hourDiff + minuteFraction) * _hourHeight;
+      // Calculate position
+      final dayStart = DateTime(_selectedDate.year, _selectedDate.month,
+          _selectedDate.day, dayStartHour);
+      final minutesSinceDayStart = now.difference(dayStart).inMinutes;
+      double top =
+          (minutesSinceDayStart / _slotDuration.inMinutes) * _timeslotHeight;
 
       _scrollController.animateTo(
-        scrollOffset - 100, // Scroll to a bit before current time
+        top - 100, // Scroll to a bit before current time
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
@@ -107,29 +129,18 @@ class _TyxCalendarDayViewSmallState extends State<TyxCalendarDayViewSmall> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Today button
-              OutlinedButton(
-                onPressed: () {
-                  final now = DateTime.now();
-                  setState(() {
-                    _selectedDate = now;
-                  });
-                  widget.onDateSelected?.call(now);
-                  _scrollToCurrentTime();
-                },
-                child: const Text('Today'),
-              ),
-              const SizedBox(width: 16),
               // View type selector
-              SegmentedButton<TyxView>(
-                segments: TyxView.values
-                    .map((view) =>
-                        ButtonSegment(value: view, label: Text(view.name)))
-                    .toList(),
-                selected: {widget.view},
-                onSelectionChanged: (Set<TyxView> newSelection) {
-                  widget.onViewChanged?.call(newSelection.first);
-                },
+              Expanded(
+                child: SegmentedButton<TyxView>(
+                  segments: TyxView.values
+                      .map((view) =>
+                          ButtonSegment(value: view, label: Text(view.name)))
+                      .toList(),
+                  selected: {widget.view},
+                  onSelectionChanged: (Set<TyxView> newSelection) {
+                    widget.onViewChanged?.call(newSelection.first);
+                  },
+                ),
               ),
             ],
           ),
@@ -177,44 +188,20 @@ class _TyxCalendarDayViewSmallState extends State<TyxCalendarDayViewSmall> {
     );
   }
 
-  Widget _buildDayView() {
-    final dayStartHour = widget.option.timeslotStartTime?.hour ?? 0;
-    const dayEndHour = 24; // Default end hour at 10:00 PM
-    final hoursToShow =
-        dayEndHour - dayStartHour + 1; // +1 to include the end hour
-    final events = _getEventsForDay(_selectedDate);
+  // Calculate total height of one hour row including all time slots
+  double _getHourRowHeight() {
+    final minutesPerSlot = _slotDuration.inMinutes;
+    final slotsPerHour = 60 ~/ minutesPerSlot;
+    return _timeslotHeight * slotsPerHour;
+  }
 
-    return Stack(
-      children: [
-        // Time grid with lines
-        CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final hour = dayStartHour + index;
-                  return _buildHourRow(hour);
-                },
-                childCount: hoursToShow.toInt(),
-              ),
-            ),
-            // Add extra space at the bottom
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 80),
-            ),
-          ],
-        ),
-
-        // Events overlay
-        Positioned.fill(
-          child: _buildEventsOverlay(events, dayStartHour, dayEndHour),
-        ),
-
-        // Now indicator line
-        if (isSameDay(_selectedDate, DateTime.now()))
-          _buildNowIndicator(dayStartHour),
-      ],
+  Widget _buildTimeGrid(int dayStartHour, int hoursToShow) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(hoursToShow, (index) {
+        final hour = dayStartHour + index;
+        return _buildHourRow(hour);
+      }),
     );
   }
 
@@ -225,200 +212,210 @@ class _TyxCalendarDayViewSmallState extends State<TyxCalendarDayViewSmall> {
     final timeString = DateFormat('h a').format(DateTime(
         _selectedDate.year, _selectedDate.month, _selectedDate.day, hour));
 
-    // Use the timesCellWidth from options if available
-    final timeColumnWidth = widget.option.timesCellWidth ?? 60.0;
+    final minutesPerSlot = _slotDuration.inMinutes;
+    final slotsPerHour = 60 ~/ minutesPerSlot;
 
-    return Container(
-      height: _hourHeight,
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: colorScheme.outlineVariant,
-            width: 0.5,
-          ),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Time indicator
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (int slot = 0; slot < slotsPerHour; slot++)
           Container(
-            width: timeColumnWidth,
-            padding: const EdgeInsets.only(right: 8, top: 8),
-            child: Text(
-              timeString,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.hintColor,
-              ),
-              textAlign: TextAlign.right,
-            ),
-          ),
-          // Main hour area
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  left: BorderSide(
-                    color: colorScheme.outlineVariant,
-                    width: 0.5,
-                  ),
+            height: _timeslotHeight,
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: colorScheme.outlineVariant,
+                  width: slot == slotsPerHour - 1 ? 1 : 0.5,
                 ),
               ),
             ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Time indicator (only show on first slot of the hour)
+                Container(
+                  width: _timeColumnWidth,
+                  padding: const EdgeInsets.only(right: 16, top: 8),
+                  child: slot == 0
+                      ? Text(
+                          timeString,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.hintColor,
+                          ),
+                          textAlign: TextAlign.right,
+                        )
+                      : null,
+                ),
+                // Main hour area
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: colorScheme.outlineVariant,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+      ],
     );
   }
 
   Widget _buildEventsOverlay(
-      List<TyxEvent> events, int dayStartHour, int dayEndHour) {
+      List<TyxEvent> events, int dayStartHour, double containerWidth) {
     // Group overlapping events
     final groupedEvents = _groupOverlappingEvents(events);
+
+    // Calculate available width using the parent container width
+    final availableWidth = containerWidth - _timeColumnWidth;
+    var theme = Theme.of(context);
 
     return Stack(
       children: [
         for (var i = 0; i < groupedEvents.length; i++)
-          _buildEventGroup(groupedEvents[i], dayStartHour),
+          for (var j = 0; j < groupedEvents[i].length; j++) ...[
+            Builder(builder: (context) {
+              final event = groupedEvents[i][j];
+              final position = j;
+              final totalOverlapping = groupedEvents[i].length;
+
+              // Convert to minutes since day start
+              final dayStart = DateTime(_selectedDate.year, _selectedDate.month,
+                  _selectedDate.day, dayStartHour);
+
+              int startMinutes = event.start.difference(dayStart).inMinutes;
+              double top =
+                  (startMinutes / _slotDuration.inMinutes) * _timeslotHeight;
+
+              int eventDurationInMinutes =
+                  event.end.difference(event.start).inMinutes;
+              double height =
+                  (eventDurationInMinutes / _slotDuration.inMinutes) *
+                      _timeslotHeight;
+
+              // Calculate horizontal position based on parent width
+              final width = availableWidth / totalOverlapping;
+              final left = _timeColumnWidth + (position * width);
+
+              // Create an enhanced event
+              final enhancedEvent = TyxEventEnhanced(
+                e: event,
+                position: top,
+                height: height,
+                width: width,
+                offsetX: left,
+                groupSize: totalOverlapping,
+              );
+
+              // Use custom builder or default rendering
+              Widget eventWidget = widget.option.eventBuilder != null
+                  ? widget.option.eventBuilder!(context, enhancedEvent)
+                  : _buildDefaultEventTile(event, enhancedEvent, theme);
+
+              // Position the event widget
+              return Positioned(
+                top: top,
+                left: left,
+                height: height,
+                width: width,
+                child: GestureDetector(
+                  onTap: () => widget.onEventTapped?.call(event),
+                  child: eventWidget,
+                ),
+              );
+            }),
+          ],
       ],
     );
   }
 
-  Widget _buildEventGroup(List<TyxEvent> eventGroup, int dayStartHour) {
-    // Calculate the max number of overlapping events to determine width
-    int maxOverlaps = eventGroup.length;
+  Widget _buildDefaultEventTile(
+      TyxEvent event, TyxEventEnhanced enhancedEvent, ThemeData theme) {
+    final colorScheme = ColorScheme.fromSeed(seedColor: event.color);
 
-    return Stack(
-      children: [
-        for (var i = 0; i < eventGroup.length; i++)
-          _buildEventTile(eventGroup[i], i, maxOverlaps, dayStartHour),
-      ],
-    );
-  }
-
-  Widget _buildEventTile(
-      TyxEvent event, int position, int totalOverlapping, int dayStartHour) {
-    var theme = Theme.of(context);
-    var colorScheme = ColorScheme.fromSeed(seedColor: event.color);
-
-    // Calculate position and size
-    final eventStart = event.start;
-    final eventEnd = event.end;
-
-    // Convert to minutes since day start
-    final dayStart = DateTime(_selectedDate.year, _selectedDate.month,
-        _selectedDate.day, dayStartHour);
-    final startMinutes = max(0, eventStart.difference(dayStart).inMinutes);
-    final endMinutes = max(0, eventEnd.difference(dayStart).inMinutes);
-    final duration =
-        max(30, endMinutes - startMinutes); // Minimum 30 min height
-
-    // Convert to pixels
-    final top = startMinutes * _hourHeight / 60;
-    final height = duration * _hourHeight / 60;
-
-    // Calculate horizontal position (width and left)
-    final timeColumnWidth = widget.option.timesCellWidth ?? 60.0;
-    final width = (MediaQuery.of(context).size.width - timeColumnWidth) /
-        totalOverlapping;
-    final left = timeColumnWidth + (position * width);
-
-    // Check if we have a custom event builder
-    if (widget.option.eventBuilder != null) {
-      // Create an enhanced event for the builder using the existing class structure
-      final enhancedEvent = TyxEventEnhanced(
-        e: event,
-        position: top,
-        height: height,
-        width: width,
-        offsetX: left,
-        groupSize: totalOverlapping,
-      );
-
-      return Positioned(
-        top: top,
-        left: left,
-        height: height,
-        width: width,
-        child: GestureDetector(
-          onTap: () => widget.onEventTapped?.call(event),
-          child: widget.option.eventBuilder!(context, enhancedEvent),
+    return Card(
+      margin: const EdgeInsets.fromLTRB(2, 1, 2, 1),
+      elevation: 2,
+      color: colorScheme.primaryContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(4),
+        side: BorderSide(
+          color: colorScheme.primary.withOpacity(0.3),
+          width: 1,
         ),
-      );
-    }
-
-    // Default event rendering
-    return Positioned(
-      top: top,
-      left: left,
-      height: height,
-      width: width,
-      child: InkWell(
-        onTap: () => widget.onEventTapped?.call(event),
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(2, 1, 2, 1),
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(4),
-            border: Border(
-              left: BorderSide(
-                color: colorScheme.primary,
-                width: 4,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${TimeOfDay.fromDateTime(event.start).format(context)} - ${TimeOfDay.fromDateTime(event.end ?? event.start.add(const Duration(hours: 1))).format(context)}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onPrimaryContainer,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${TimeOfDay.fromDateTime(eventStart).format(context)} - ${TimeOfDay.fromDateTime(eventEnd).format(context)}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onPrimaryContainer,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            const SizedBox(height: 4),
+            Text(
+              event.title ?? 'Untitled Event',
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 2),
-              Text(
-                event.title ?? 'Untitled Event',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onPrimaryContainer,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              if (event.location != null &&
-                  event.location!.isNotEmpty &&
-                  height > 80)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        size: 12,
-                        color: colorScheme.onPrimaryContainer.withOpacity(0.7),
-                      ),
-                      const SizedBox(width: 2),
-                      Expanded(
-                        child: Text(
-                          event.location!,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontSize: 10,
-                            color:
-                                colorScheme.onPrimaryContainer.withOpacity(0.7),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (event.description != null &&
+                event.description!.isNotEmpty &&
+                enhancedEvent.height > 100)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  event.description!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onPrimaryContainer,
                   ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
-            ],
-          ),
+              ),
+            if (event.location != null &&
+                event.location!.isNotEmpty &&
+                enhancedEvent.height > 80)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 12,
+                      color: colorScheme.onPrimaryContainer.withOpacity(0.7),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        event.location!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 10,
+                          color:
+                              colorScheme.onPrimaryContainer.withOpacity(0.7),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -435,20 +432,27 @@ class _TyxCalendarDayViewSmallState extends State<TyxCalendarDayViewSmall> {
     final dayStart = DateTime(_selectedDate.year, _selectedDate.month,
         _selectedDate.day, dayStartHour);
     final minutesSinceDayStart = now.difference(dayStart).inMinutes;
-    final top = minutesSinceDayStart * _hourHeight / 60;
+    double top =
+        (minutesSinceDayStart / _slotDuration.inMinutes) * _timeslotHeight;
 
-    // Use the timesCellWidth from options if available
-    final timeColumnWidth = widget.option.timesCellWidth ?? 60.0;
+    // Calculate indicator position relative to visible viewport
+    final visiblePosition = top - _scrollOffset;
+
+    // Only show indicator if it's in the visible viewport
+    if (visiblePosition < 0 ||
+        visiblePosition > MediaQuery.of(context).size.height) {
+      return const SizedBox.shrink();
+    }
 
     return Positioned(
-      top: top,
+      top: visiblePosition,
       left: 0,
       right: 0,
       child: Row(
         children: [
           // The circle at the start of the line
           Container(
-            margin: EdgeInsets.only(left: timeColumnWidth - 6),
+            margin: EdgeInsets.only(left: _timeColumnWidth - 6),
             width: 12,
             height: 12,
             decoration: BoxDecoration(
@@ -468,7 +472,54 @@ class _TyxCalendarDayViewSmallState extends State<TyxCalendarDayViewSmall> {
     );
   }
 
-  // Helper method to group overlapping events
+  Widget _buildDayView() {
+    final dayStartHour = widget.option.timeslotStartTime?.hour ?? 0;
+    const dayEndHour = 24; // Full day (24 hours)
+    final hoursToShow = dayEndHour - dayStartHour;
+    final events = _getEventsForDay(_selectedDate);
+
+    // Calculate total content height for proper layout
+    final totalHeight = hoursToShow * _getHourRowHeight();
+
+    return LayoutBuilder(builder: (context, constraints) {
+      final availableWidth = constraints.maxWidth;
+
+      return Stack(
+        children: [
+          // Time grid with lines
+          SingleChildScrollView(
+            controller: _scrollController,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
+                minWidth: constraints.maxWidth,
+              ),
+              child: SizedBox(
+                // Ensure adequate height for scrolling
+                height: max(totalHeight, constraints.maxHeight).toDouble(),
+                width: availableWidth,
+                child: Stack(
+                  children: [
+                    // Time grid background
+                    _buildTimeGrid(dayStartHour, hoursToShow.toInt()),
+
+                    // Events overlay - now inside the ScrollView and using parent width
+                    _buildEventsOverlay(events, dayStartHour, availableWidth),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Now indicator line - positioned in the viewport
+          if (isSameDay(_selectedDate, DateTime.now()))
+            _buildNowIndicator(dayStartHour),
+        ],
+      );
+    });
+  }
+
+// Helper method to group overlapping events - improved algorithm
   List<List<TyxEvent>> _groupOverlappingEvents(List<TyxEvent> events) {
     if (events.isEmpty) return [];
 
@@ -476,41 +527,31 @@ class _TyxCalendarDayViewSmallState extends State<TyxCalendarDayViewSmall> {
     final sortedEvents = List<TyxEvent>.from(events);
     sortedEvents.sort((a, b) => a.start.compareTo(b.start));
 
-    List<List<TyxEvent>> result = [];
+    // Create columns for events that overlap
+
+    List<List<TyxEvent>> groups = [];
 
     for (var event in sortedEvents) {
-      bool placed = false;
-
-      // Try to place the event in an existing group where it doesn't overlap
-      for (var group in result) {
-        bool hasOverlap = false;
-        for (var groupEvent in group) {
-          if (_eventsOverlap(event, groupEvent)) {
-            hasOverlap = true;
-            break;
-          }
-        }
-
-        if (!hasOverlap) {
+      bool addedToGroup = false;
+      for (var group in groups) {
+        if (group.any((e) => _eventsOverlap(e, event))) {
           group.add(event);
-          placed = true;
+          addedToGroup = true;
           break;
         }
       }
-
-      // If it couldn't be placed in any existing group, create a new group
-      if (!placed) {
-        result.add([event]);
+      if (!addedToGroup) {
+        groups.add([event]);
       }
     }
 
-    return result;
+    return groups;
   }
 
   // Check if two events overlap in time
   bool _eventsOverlap(TyxEvent a, TyxEvent b) {
-    final aEnd = a.end ?? a.start.add(const Duration(hours: 1));
-    final bEnd = b.end ?? b.start.add(const Duration(hours: 1));
+    final aEnd = a.end;
+    final bEnd = b.end;
 
     return a.start.isBefore(bEnd) && aEnd.isAfter(b.start);
   }
@@ -526,7 +567,7 @@ class _TyxCalendarDayViewSmallState extends State<TyxCalendarDayViewSmall> {
   }
 
   // Helper function to get maximum of two values
-  int max(int a, int b) {
+  num max(num a, num b) {
     return a > b ? a : b;
   }
 }

@@ -33,14 +33,26 @@ class TyxCalendarDayViewLarge extends StatefulWidget {
 class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
   late DateTime _selectedDate;
   late ScrollController _scrollController;
-  late double _hourHeight;
+  late double _timeslotHeight;
+  late Duration _slotDuration;
+
+  // Constants for layout
+  final double _sidebarWidth = 280;
+
+  // Track scroll position to keep events and time grid in sync
+  double _scrollOffset = 0.0;
 
   @override
   void initState() {
     super.initState();
     _selectedDate = widget.initialDate ?? DateTime.now();
-    _hourHeight = widget.option.timeslotHeight ?? 60.0;
+    _timeslotHeight = widget.option.timeslotHeight ?? 60.0;
+    _slotDuration =
+        widget.option.timelotSlotDuration ?? const Duration(minutes: 15);
     _scrollController = ScrollController();
+
+    // Listen to scroll changes to update the event positions
+    _scrollController.addListener(_onScroll);
 
     // Schedule scrolling to current time after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -50,25 +62,34 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    setState(() {
+      _scrollOffset = _scrollController.offset;
+    });
   }
 
   void _scrollToCurrentTime() {
     final now = DateTime.now();
     if (!isSameDay(now, _selectedDate)) return;
 
-    final dayStartHour = widget.option.timeslotStartTime?.hour ?? 6;
+    final dayStartHour = widget.option.timeslotStartTime?.hour ?? 0;
     final currentHour = now.hour;
-    final currentMinute = now.minute;
 
     if (currentHour >= dayStartHour) {
-      final hourDiff = currentHour - dayStartHour;
-      final minuteFraction = currentMinute / 60.0;
-      final scrollOffset = (hourDiff + minuteFraction) * _hourHeight;
+      // Calculate position
+      final dayStart = DateTime(_selectedDate.year, _selectedDate.month,
+          _selectedDate.day, dayStartHour);
+      final minutesSinceDayStart = now.difference(dayStart).inMinutes;
+      double top =
+          (minutesSinceDayStart / _slotDuration.inMinutes) * _timeslotHeight;
 
       _scrollController.animateTo(
-        scrollOffset - 100, // Scroll to a bit before current time
+        top - 100, // Scroll to a bit before current time
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
@@ -102,7 +123,7 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
     final theme = Theme.of(context);
 
     return Container(
-      width: 280,
+      width: _sidebarWidth,
       decoration: BoxDecoration(
         border: Border(
           right: BorderSide(
@@ -549,44 +570,65 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
     );
   }
 
+  // Calculate total height of one hour row including all time slots
+  double _getHourRowHeight() {
+    final minutesPerSlot = _slotDuration.inMinutes;
+    final slotsPerHour = 60 ~/ minutesPerSlot;
+    return _timeslotHeight * slotsPerHour;
+  }
+
   Widget _buildDayView() {
     final dayStartHour = widget.option.timeslotStartTime?.hour ?? 0;
-    const dayEndHour = 24; // Default end hour at 12:00 PM
-    final hoursToShow =
-        dayEndHour - dayStartHour + 1; // +1 to include the end hour
+    const dayEndHour = 24; // Full day (24 hours)
+    final hoursToShow = dayEndHour - dayStartHour;
     final events = _getEventsForDay(_selectedDate);
 
-    return Stack(
-      children: [
-        // Time grid with lines
-        CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final hour = dayStartHour + index;
-                  return _buildHourRow(hour);
-                },
-                childCount: hoursToShow.toInt(),
+    // Calculate total content height
+    final totalHeight = hoursToShow * _getHourRowHeight();
+
+    return LayoutBuilder(builder: (context, constraints) {
+      return Stack(
+        children: [
+          // Time grid with lines and events
+          SingleChildScrollView(
+            controller: _scrollController,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
+                minWidth: constraints.maxWidth,
+              ),
+              child: SizedBox(
+                height: max(totalHeight, constraints.maxHeight).toDouble(),
+                width: constraints.maxWidth,
+                child: Stack(
+                  children: [
+                    // Time grid background
+                    _buildTimeGrid(dayStartHour, hoursToShow.toInt()),
+
+                    // Events overlay - now with parent constraints
+                    _buildEventsOverlay(
+                        events, dayStartHour, constraints.maxWidth),
+                  ],
+                ),
               ),
             ),
-            // Add extra space at the bottom
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 80),
-            ),
-          ],
-        ),
+          ),
 
-        // Events overlay
-        Positioned.fill(
-          child: _buildEventsOverlay(events, dayStartHour),
-        ),
+          // Now indicator line - positioned in the viewport
+          if (isSameDay(_selectedDate, DateTime.now()))
+            _buildNowIndicator(dayStartHour),
+        ],
+      );
+    });
+  }
 
-        // Now indicator line
-        if (isSameDay(_selectedDate, DateTime.now()))
-          _buildNowIndicator(dayStartHour),
-      ],
+  Widget _buildTimeGrid(int dayStartHour, int hoursToShow) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(hoursToShow, (index) {
+        final hour = dayStartHour + index;
+        return _buildHourRow(hour);
+      }),
     );
   }
 
@@ -601,16 +643,15 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
     final timeColumnWidth = widget.option.timesCellWidth ?? 80.0;
 
     // Use the timeslot slot duration if available
-    final slotDuration =
-        widget.option.timelotSlotDuration ?? const Duration(minutes: 60);
-    final minutesPerSlot = slotDuration.inMinutes;
+    final minutesPerSlot = _slotDuration.inMinutes;
     final slotsPerHour = 60 ~/ minutesPerSlot;
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         for (int slot = 0; slot < slotsPerHour; slot++)
           Container(
-            height: _hourHeight / slotsPerHour,
+            height: _timeslotHeight,
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
@@ -656,171 +697,163 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
     );
   }
 
-  Widget _buildEventsOverlay(List<TyxEvent> events, int dayStartHour) {
+  Widget _buildEventsOverlay(
+      List<TyxEvent> events, int dayStartHour, double containerWidth) {
     // Group overlapping events
     final groupedEvents = _groupOverlappingEvents(events);
 
-    return Stack(
-      children: [
-        for (var i = 0; i < groupedEvents.length; i++)
-          _buildEventGroup(groupedEvents[i], dayStartHour),
-      ],
-    );
-  }
-
-  Widget _buildEventGroup(List<TyxEvent> eventGroup, int dayStartHour) {
-    // Calculate the max number of overlapping events to determine width
-    int maxOverlaps = eventGroup.length;
-
-    return Stack(
-      children: [
-        for (var i = 0; i < eventGroup.length; i++)
-          _buildEventTile(eventGroup[i], i, maxOverlaps, dayStartHour),
-      ],
-    );
-  }
-
-  Widget _buildEventTile(
-      TyxEvent event, int position, int totalOverlapping, int dayStartHour) {
-    var theme = Theme.of(context);
-    var colorScheme = ColorScheme.fromSeed(seedColor: event.color);
-
-    // Calculate position and size
-    final eventStart = event.start;
-    final eventEnd = event.end;
-
-    // Convert to minutes since day start
-    final dayStart = DateTime(_selectedDate.year, _selectedDate.month,
-        _selectedDate.day, dayStartHour);
-    final startMinutes = max(0, eventStart.difference(dayStart).inMinutes);
-    final endMinutes = max(0, eventEnd.difference(dayStart).inMinutes);
-    final duration =
-        max(30, endMinutes - startMinutes); // Minimum 30 min height
-
-    // Convert to pixels
-    final top = startMinutes * _hourHeight / 60;
-    final height = duration * _hourHeight / 60;
-
-    // Calculate horizontal position (width and left)
+    // Calculate dimensions for positioning
     final timeColumnWidth = widget.option.timesCellWidth ?? 80.0;
-    final width = (MediaQuery.of(context).size.width - timeColumnWidth - 280) /
-        totalOverlapping;
-    final left = timeColumnWidth + (position * width);
 
-    // Check if we have a custom event builder
-    if (widget.option.eventBuilder != null) {
-      // Create an enhanced event for the builder using the existing class structure
-      final enhancedEvent = TyxEventEnhanced(
-        e: event,
-        position: top,
-        height: height,
-        width: width,
-        offsetX: left,
-        groupSize: totalOverlapping,
-      );
+    // Calculate available width based on parent container width
+    final availableWidth = containerWidth - timeColumnWidth;
+    var theme = Theme.of(context);
 
-      return Positioned(
-        top: top,
-        left: left,
-        height: height,
-        width: width,
-        child: GestureDetector(
-          onTap: () => widget.onEventTapped?.call(event),
-          child: widget.option.eventBuilder!(context, enhancedEvent),
+    return SizedBox(
+      width: containerWidth,
+      child: Stack(
+        fit: StackFit.passthrough,
+        children: [
+          for (var i = 0; i < groupedEvents.length; i++)
+            for (var j = 0; j < groupedEvents[i].length; j++) ...[
+              Builder(builder: (context) {
+                final event = groupedEvents[i][j];
+                final position = j;
+                final totalOverlapping = groupedEvents[i].length;
+
+                // Convert to minutes since day start
+                final dayStart = DateTime(_selectedDate.year,
+                    _selectedDate.month, _selectedDate.day, dayStartHour);
+
+                int startMinutes = event.start.difference(dayStart).inMinutes;
+                double top =
+                    (startMinutes / _slotDuration.inMinutes) * _timeslotHeight;
+
+                int eventDurationInMinutes =
+                    event.end.difference(event.start).inMinutes;
+                double height =
+                    (eventDurationInMinutes / _slotDuration.inMinutes) *
+                        _timeslotHeight;
+
+                // Calculate horizontal position using parent width
+                final width = availableWidth / totalOverlapping;
+                final left = timeColumnWidth + (position * width);
+
+                // Create an enhanced event
+                final enhancedEvent = TyxEventEnhanced(
+                  e: event,
+                  position: top,
+                  height: height,
+                  width: width,
+                  offsetX: left,
+                  groupSize: totalOverlapping,
+                );
+
+                // Use custom builder or default rendering
+                Widget eventWidget = widget.option.eventBuilder != null
+                    ? widget.option.eventBuilder!(context, enhancedEvent)
+                    : _buildDefaultEventTile(event, enhancedEvent, theme);
+
+                // Position the event widget
+                return Positioned(
+                  top: top,
+                  left: left,
+                  height: height,
+                  width: width,
+                  child: GestureDetector(
+                    onTap: () => widget.onEventTapped?.call(event),
+                    child: eventWidget,
+                  ),
+                );
+              }),
+            ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDefaultEventTile(
+      TyxEvent event, TyxEventEnhanced enhancedEvent, ThemeData theme) {
+    final colorScheme = ColorScheme.fromSeed(seedColor: event.color);
+
+    return Card(
+      margin: const EdgeInsets.fromLTRB(2, 1, 2, 1),
+      elevation: 2,
+      color: colorScheme.primaryContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(4),
+        side: BorderSide(
+          color: colorScheme.primary.withOpacity(0.3),
+          width: 1,
         ),
-      );
-    }
-
-    // Default event rendering
-
-    return Positioned(
-      top: top,
-      left: left,
-      height: height,
-      width: width,
-      child: GestureDetector(
-        onTap: () => widget.onEventTapped?.call(event),
-        child: Card(
-          margin: const EdgeInsets.fromLTRB(2, 1, 2, 1),
-          elevation: 2,
-          color: colorScheme.primaryContainer,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-            side: BorderSide(
-              color: colorScheme.primary.withOpacity(0.3),
-              width: 1,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${TimeOfDay.fromDateTime(event.start).format(context)} - ${TimeOfDay.fromDateTime(event.end).format(context)}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onPrimaryContainer,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${TimeOfDay.fromDateTime(eventStart).format(context)} - ${TimeOfDay.fromDateTime(eventEnd).format(context)}',
+            const SizedBox(height: 4),
+            Text(
+              event.title ?? 'Untitled Event',
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (event.description != null &&
+                event.description!.isNotEmpty &&
+                enhancedEvent.height > 100)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  event.description!,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
                     color: colorScheme.onPrimaryContainer,
                   ),
-                  maxLines: 1,
+                  maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  event.title ?? 'Untitled Event',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: colorScheme.onPrimaryContainer,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (event.description != null &&
-                    event.description!.isNotEmpty &&
-                    height > 100)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      event.description!,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onPrimaryContainer,
-                      ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
+              ),
+            if (event.location != null &&
+                event.location!.isNotEmpty &&
+                enhancedEvent.height > 80)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 12,
+                      color: colorScheme.onPrimaryContainer.withOpacity(0.7),
                     ),
-                  ),
-                if (event.location != null &&
-                    event.location!.isNotEmpty &&
-                    height > 80)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          size: 12,
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        event.location!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 10,
                           color:
                               colorScheme.onPrimaryContainer.withOpacity(0.7),
                         ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            event.location!,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontSize: 10,
-                              color: colorScheme.onPrimaryContainer
-                                  .withOpacity(0.7),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-              ],
-            ),
-          ),
+                  ],
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -837,13 +870,23 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
     final dayStart = DateTime(_selectedDate.year, _selectedDate.month,
         _selectedDate.day, dayStartHour);
     final minutesSinceDayStart = now.difference(dayStart).inMinutes;
-    final top = minutesSinceDayStart * _hourHeight / 60;
+    double top =
+        (minutesSinceDayStart / _slotDuration.inMinutes) * _timeslotHeight;
+
+    // Calculate indicator position relative to visible viewport
+    final visiblePosition = top - _scrollOffset;
+
+    // Only show indicator if it's in the visible viewport
+    if (visiblePosition < 0 ||
+        visiblePosition > MediaQuery.of(context).size.height) {
+      return const SizedBox.shrink();
+    }
 
     // Use the timesCellWidth from options if available
     final timeColumnWidth = widget.option.timesCellWidth ?? 80.0;
 
     return Positioned(
-      top: top,
+      top: visiblePosition,
       left: 0,
       right: 0,
       child: Row(
@@ -870,7 +913,7 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
     );
   }
 
-  // Helper method to group overlapping events
+// Helper method to group overlapping events - improved algorithm
   List<List<TyxEvent>> _groupOverlappingEvents(List<TyxEvent> events) {
     if (events.isEmpty) return [];
 
@@ -878,42 +921,36 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
     final sortedEvents = List<TyxEvent>.from(events);
     sortedEvents.sort((a, b) => a.start.compareTo(b.start));
 
-    List<List<TyxEvent>> result = [];
+    // Create columns for events that overlap
+
+    List<List<TyxEvent>> groups = [];
 
     for (var event in sortedEvents) {
-      bool placed = false;
-
-      // Try to place the event in an existing group where it doesn't overlap
-      for (var group in result) {
-        bool hasOverlap = false;
-        for (var groupEvent in group) {
-          if (_eventsOverlap(event, groupEvent)) {
-            hasOverlap = true;
-            break;
-          }
-        }
-
-        if (!hasOverlap) {
+      bool addedToGroup = false;
+      for (var group in groups) {
+        if (group.any((e) => _eventsOverlap(e, event))) {
           group.add(event);
-          placed = true;
+          addedToGroup = true;
           break;
         }
       }
-
-      // If it couldn't be placed in any existing group, create a new group
-      if (!placed) {
-        result.add([event]);
+      if (!addedToGroup) {
+        groups.add([event]);
       }
     }
 
-    return result;
+    return groups;
   }
 
-  // Check if two events overlap in time
+// Check if two events overlap in time - more robust implementation
   bool _eventsOverlap(TyxEvent a, TyxEvent b) {
-    final aEnd = a.end ?? a.start.add(const Duration(hours: 1));
-    final bEnd = b.end ?? b.start.add(const Duration(hours: 1));
+    // Handle null end times by assuming default duration of 1 hour
+    final aEnd = a.end;
+    final bEnd = b.end;
 
+    // Two events overlap if:
+    // 1. a starts before b ends AND
+    // 2. a ends after b starts
     return a.start.isBefore(bEnd) && aEnd.isAfter(b.start);
   }
 
@@ -933,7 +970,7 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
   }
 
   // Helper function to get maximum of two values
-  int max(int a, int b) {
+  num max(num a, num b) {
     return a > b ? a : b;
   }
 }
