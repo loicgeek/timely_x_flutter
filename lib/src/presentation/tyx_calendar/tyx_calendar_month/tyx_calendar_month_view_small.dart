@@ -6,7 +6,7 @@ import 'package:timely_x_flutter/timely_x_flutter.dart';
 class TyxCalendarMonthViewSmall extends StatefulWidget {
   final TyxCalendarOption option;
   final DateTime? initialDate;
-  final Function(DateTime)? onDateSelected;
+
   final Function(TyxEvent)? onEventTapped;
   final Function(DateTime date)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
@@ -16,7 +16,6 @@ class TyxCalendarMonthViewSmall extends StatefulWidget {
     super.key,
     required this.option,
     this.initialDate,
-    this.onDateSelected,
     this.onEventTapped,
     this.onDateChanged,
     this.onViewChanged,
@@ -50,6 +49,8 @@ class _TyxCalendarMonthViewSmallState extends State<TyxCalendarMonthViewSmall> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        _buildDayHeader(),
+        const SizedBox(height: 10),
         _buildWeekdayHeaders(),
         Expanded(
           child: ListView(
@@ -60,6 +61,92 @@ class _TyxCalendarMonthViewSmallState extends State<TyxCalendarMonthViewSmall> {
           ),
         )
       ],
+    );
+  }
+
+  Widget _buildDayHeader() {
+    var theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 2,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Today button
+              OutlinedButton(
+                onPressed: () {
+                  final now = DateTime.now();
+                  setState(() {
+                    _selectedDate = now;
+                  });
+                  widget.onDateChanged?.call(now);
+                },
+                child: const Text('Today'),
+              ),
+              const SizedBox(width: 16),
+              // View type selector
+              SegmentedButton<TyxView>(
+                segments: TyxView.values
+                    .map((view) =>
+                        ButtonSegment(value: view, label: Text(view.name)))
+                    .toList(),
+                selected: {widget.view},
+                onSelectionChanged: (Set<TyxView> newSelection) {
+                  widget.onViewChanged?.call(newSelection.first);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.chevron_left),
+                onPressed: () {
+                  setState(() {
+                    _selectedDate = DateTime(
+                        _selectedDate.year, _selectedDate.month - 1, 1);
+                    widget.onDateChanged?.call(_selectedDate);
+                  });
+                },
+              ),
+              Column(
+                children: [
+                  Text(
+                    DateFormat('MMMM, yyyy').format(_selectedDate),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: const Icon(Icons.chevron_right),
+                onPressed: () {
+                  setState(() {
+                    _selectedDate = DateTime(
+                        _selectedDate.year, _selectedDate.month + 1, 1);
+                    widget.onDateChanged?.call(_selectedDate);
+                  });
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -154,7 +241,7 @@ class _TyxCalendarMonthViewSmallState extends State<TyxCalendarMonthViewSmall> {
         setState(() {
           _selectedDate = day;
         });
-        widget.onDateSelected?.call(day);
+        widget.onDateChanged?.call(day);
       },
       child: Container(
         decoration: BoxDecoration(

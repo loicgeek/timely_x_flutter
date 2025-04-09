@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:timely_x_flutter/src/models/tyx_calendar_option.dart';
 import 'package:timely_x_flutter/src/models/tyx_event.dart';
 import 'package:timely_x_flutter/src/models/tyx_event_enhanced.dart';
@@ -38,6 +39,7 @@ class _TyxCalendarDayViewSmallState extends State<TyxCalendarDayViewSmall> {
     super.initState();
     _selectedDate = widget.option.initialDate ?? DateTime.now();
     _hourHeight = widget.option.timeslotHeight ?? 60.0;
+
     _scrollController = ScrollController();
 
     // Schedule scrolling to current time after build
@@ -100,40 +102,75 @@ class _TyxCalendarDayViewSmallState extends State<TyxCalendarDayViewSmall> {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: () {
-              setState(() {
-                _selectedDate = _selectedDate.subtract(const Duration(days: 1));
-              });
-              widget.onDateSelected?.call(_selectedDate);
-            },
-          ),
-          Column(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                DateFormat('EEEE').format(_selectedDate),
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+              // Today button
+              OutlinedButton(
+                onPressed: () {
+                  final now = DateTime.now();
+                  setState(() {
+                    _selectedDate = now;
+                  });
+                  widget.onDateSelected?.call(now);
+                  _scrollToCurrentTime();
+                },
+                child: const Text('Today'),
               ),
-              Text(
-                DateFormat('MMMM d, yyyy').format(_selectedDate),
-                style: theme.textTheme.bodyMedium,
+              const SizedBox(width: 16),
+              // View type selector
+              SegmentedButton<TyxView>(
+                segments: TyxView.values
+                    .map((view) =>
+                        ButtonSegment(value: view, label: Text(view.name)))
+                    .toList(),
+                selected: {widget.view},
+                onSelectionChanged: (Set<TyxView> newSelection) {
+                  widget.onViewChanged?.call(newSelection.first);
+                },
               ),
             ],
           ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: () {
-              setState(() {
-                _selectedDate = _selectedDate.add(const Duration(days: 1));
-              });
-              widget.onDateSelected?.call(_selectedDate);
-            },
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.chevron_left),
+                onPressed: () {
+                  setState(() {
+                    _selectedDate =
+                        _selectedDate.subtract(const Duration(days: 1));
+                  });
+                  widget.onDateSelected?.call(_selectedDate);
+                },
+              ),
+              Column(
+                children: [
+                  Text(
+                    DateFormat('EEEE').format(_selectedDate),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    DateFormat('MMMM d, yyyy').format(_selectedDate),
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: const Icon(Icons.chevron_right),
+                onPressed: () {
+                  setState(() {
+                    _selectedDate = _selectedDate.add(const Duration(days: 1));
+                  });
+                  widget.onDateSelected?.call(_selectedDate);
+                },
+              ),
+            ],
           ),
         ],
       ),
@@ -141,8 +178,8 @@ class _TyxCalendarDayViewSmallState extends State<TyxCalendarDayViewSmall> {
   }
 
   Widget _buildDayView() {
-    final dayStartHour = widget.option.timeslotStartTime?.hour ?? 6;
-    final dayEndHour = 22; // Default end hour at 10:00 PM
+    final dayStartHour = widget.option.timeslotStartTime?.hour ?? 0;
+    const dayEndHour = 24; // Default end hour at 10:00 PM
     final hoursToShow =
         dayEndHour - dayStartHour + 1; // +1 to include the end hour
     final events = _getEventsForDay(_selectedDate);
@@ -266,7 +303,7 @@ class _TyxCalendarDayViewSmallState extends State<TyxCalendarDayViewSmall> {
 
     // Calculate position and size
     final eventStart = event.start;
-    final eventEnd = event.end ?? eventStart.add(const Duration(hours: 1));
+    final eventEnd = event.end;
 
     // Convert to minutes since day start
     final dayStart = DateTime(_selectedDate.year, _selectedDate.month,
@@ -316,7 +353,7 @@ class _TyxCalendarDayViewSmallState extends State<TyxCalendarDayViewSmall> {
       left: left,
       height: height,
       width: width,
-      child: GestureDetector(
+      child: InkWell(
         onTap: () => widget.onEventTapped?.call(event),
         child: Container(
           margin: const EdgeInsets.fromLTRB(2, 1, 2, 1),

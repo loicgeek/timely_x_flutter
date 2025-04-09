@@ -320,7 +320,6 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
   Widget _buildEventsList() {
     final events = _getEventsForDay(_selectedDate);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -373,7 +372,7 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 0,
-      color: colorScheme.primaryContainer.withOpacity(0.3),
+      color: colorScheme.primaryContainer,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
         side: BorderSide(
@@ -551,7 +550,7 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
   }
 
   Widget _buildDayView() {
-    final dayStartHour = widget.option.timeslotStartTime?.hour ?? 6;
+    final dayStartHour = widget.option.timeslotStartTime?.hour ?? 0;
     const dayEndHour = 24; // Default end hour at 12:00 PM
     final hoursToShow =
         dayEndHour - dayStartHour + 1; // +1 to include the end hour
@@ -688,7 +687,7 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
 
     // Calculate position and size
     final eventStart = event.start;
-    final eventEnd = event.end ?? eventStart.add(const Duration(hours: 1));
+    final eventEnd = event.end;
 
     // Convert to minutes since day start
     final dayStart = DateTime(_selectedDate.year, _selectedDate.month,
@@ -733,6 +732,7 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
     }
 
     // Default event rendering
+
     return Positioned(
       top: top,
       left: left,
@@ -743,11 +743,11 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
         child: Card(
           margin: const EdgeInsets.fromLTRB(2, 1, 2, 1),
           elevation: 2,
-          surfaceTintColor: colorScheme.primaryContainer,
+          color: colorScheme.primaryContainer,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
             side: BorderSide(
-              color: colorScheme.primary,
+              color: colorScheme.primary.withOpacity(0.3),
               width: 1,
             ),
           ),

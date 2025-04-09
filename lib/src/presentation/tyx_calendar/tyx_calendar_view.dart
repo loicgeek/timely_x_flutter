@@ -240,7 +240,12 @@ class _TyxCalendarViewState extends State<TyxCalendarView> {
                   view: _view,
                   initialDate: _currentDate,
                   onViewChanged: _onViewChanged,
-                  onDateChanged: _onDateChanged,
+                  onDateChanged: (date) {
+                    setState(() {
+                      _currentDate = date;
+                      widget.onDateChanged?.call(_currentDate);
+                    });
+                  },
                 ),
             },
           ),

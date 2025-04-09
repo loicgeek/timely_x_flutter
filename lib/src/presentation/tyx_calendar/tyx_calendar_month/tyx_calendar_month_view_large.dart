@@ -72,23 +72,20 @@ class _TyxCalendarMonthViewLargeState extends State<TyxCalendarMonthViewLarge> {
                 icon: const Icon(Icons.chevron_left),
                 onPressed: () {
                   setState(() {
-                    _selectedDate =
-                        _selectedDate.subtract(const Duration(days: 1));
+                    _selectedDate = DateTime(
+                      _selectedDate.year,
+                      _selectedDate.month - 1,
+                      _selectedDate.day,
+                    );
+                    widget.onDateChanged?.call(_selectedDate);
                   });
-                  widget.onDateChanged?.call(_selectedDate);
                 },
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    DateFormat('EEEE').format(_selectedDate),
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    DateFormat('MMMM d, yyyy').format(_selectedDate),
+                    DateFormat('MMM yyyy').format(_selectedDate),
                     style: theme.textTheme.titleMedium,
                   ),
                 ],
@@ -97,9 +94,13 @@ class _TyxCalendarMonthViewLargeState extends State<TyxCalendarMonthViewLarge> {
                 icon: const Icon(Icons.chevron_right),
                 onPressed: () {
                   setState(() {
-                    _selectedDate = _selectedDate.add(const Duration(days: 1));
+                    _selectedDate = DateTime(
+                      _selectedDate.year,
+                      _selectedDate.month + 1,
+                      _selectedDate.day,
+                    );
+                    widget.onDateChanged?.call(_selectedDate);
                   });
-                  widget.onDateChanged?.call(_selectedDate);
                 },
               ),
             ],
