@@ -6,7 +6,7 @@ import 'dart:html' as html show window;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-import 'timely_x_flutter_platform_interface.dart';
+import 'timely_x_platform_interface.dart';
 
 /// A web implementation of the TimelyXFlutterPlatform of the TimelyXFlutter plugin.
 class TimelyXFlutterWeb extends TimelyXFlutterPlatform {

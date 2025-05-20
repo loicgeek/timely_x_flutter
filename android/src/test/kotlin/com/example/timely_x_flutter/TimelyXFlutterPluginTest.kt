@@ -1,4 +1,4 @@
-package com.example.timely_x_flutter
+package com.example.timely_x
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel

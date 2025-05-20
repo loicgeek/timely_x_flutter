@@ -3,11 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:timely_x_flutter/src/models/tyx_calendar_option.dart';
-import 'package:timely_x_flutter/src/models/tyx_view.dart';
-import 'package:timely_x_flutter/src/presentation/tyx_calendar/tyx_calendar_day/tyx_calendar_day_view.dart';
-import 'package:timely_x_flutter/src/presentation/tyx_calendar/tyx_calendar_month/tyx_calendar_month_view.dart';
-import 'package:timely_x_flutter/src/presentation/tyx_calendar/tyx_calendar_week/tyx_calendar_week_view.dart';
+import 'package:timely_x/src/models/tyx_calendar_option.dart';
+import 'package:timely_x/src/models/tyx_view.dart';
+import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_day/tyx_calendar_day_view.dart';
+import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_month/tyx_calendar_month_view.dart';
+import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_week/tyx_calendar_week_view.dart';
 
 class TyxCalendarView extends StatefulWidget {
   const TyxCalendarView({

@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:timely_x_flutter/src/models/tyx_resource_option.dart';
-import 'package:timely_x_flutter/src/presentation/tyx_resource/tyx_resource_view_content.dart';
+import 'package:timely_x/src/models/tyx_resource_option.dart';
+import 'package:timely_x/src/presentation/tyx_resource/tyx_resource_view_content.dart';
 
 class TyxResourceView extends StatefulWidget {
   const TyxResourceView({

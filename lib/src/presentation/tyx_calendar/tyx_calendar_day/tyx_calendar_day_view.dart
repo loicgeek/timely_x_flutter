@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:timely_x_flutter/src/models/tyx_view.dart';
-import 'package:timely_x_flutter/src/presentation/tyx_calendar/tyx_calendar_day/tyx_calendar_day_view_large.dart';
-import 'package:timely_x_flutter/src/presentation/tyx_calendar/tyx_calendar_day/tyx_calendar_day_view_small.dart';
-import 'package:timely_x_flutter/timely_x_flutter.dart';
+import 'package:timely_x/src/models/tyx_view.dart';
+import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_day/tyx_calendar_day_view_large.dart';
+import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_day/tyx_calendar_day_view_small.dart';
+import 'package:timely_x/timely_x.dart';
 
 class TyxCalendarDayView extends StatefulWidget {
   const TyxCalendarDayView({

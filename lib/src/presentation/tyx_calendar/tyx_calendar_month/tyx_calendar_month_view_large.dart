@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:timely_x_flutter/src/models/tyx_view.dart';
-import 'package:timely_x_flutter/timely_x_flutter.dart';
+import 'package:timely_x/src/models/tyx_view.dart';
+import 'package:timely_x/timely_x.dart';
 
 class TyxCalendarMonthViewLarge extends StatefulWidget {
   final TyxCalendarOption option;

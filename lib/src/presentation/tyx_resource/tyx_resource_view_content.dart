@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:timely_x_flutter/src/models/tyx_event_enhanced.dart';
-import 'package:timely_x_flutter/src/models/tyx_resource_enhanced.dart';
-import 'package:timely_x_flutter/src/models/tyx_resource_option.dart';
+import 'package:timely_x/src/models/tyx_event_enhanced.dart';
+import 'package:timely_x/src/models/tyx_resource_enhanced.dart';
+import 'package:timely_x/src/models/tyx_resource_option.dart';
 
 import '../../models/tyx_event.dart';
 

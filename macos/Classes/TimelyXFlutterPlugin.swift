@@ -3,7 +3,7 @@ import FlutterMacOS
 
 public class TimelyXFlutterPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "timely_x_flutter", binaryMessenger: registrar.messenger)
+    let channel = FlutterMethodChannel(name: "timely_x", binaryMessenger: registrar.messenger)
     let instance = TimelyXFlutterPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
   }

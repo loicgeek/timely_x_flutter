@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:timely_x_flutter/src/models/tyx_calendar_option.dart';
-import 'package:timely_x_flutter/src/models/tyx_view.dart';
-import 'package:timely_x_flutter/src/presentation/tyx_calendar/tyx_calendar_month/tyx_calendar_month_view_large.dart';
-import 'package:timely_x_flutter/src/presentation/tyx_calendar/tyx_calendar_month/tyx_calendar_month_view_small.dart';
+import 'package:timely_x/src/models/tyx_calendar_option.dart';
+import 'package:timely_x/src/models/tyx_view.dart';
+import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_month/tyx_calendar_month_view_large.dart';
+import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_month/tyx_calendar_month_view_small.dart';
 
 class TyxCalendarMonthView extends StatefulWidget {
   final TyxCalendarOption option;

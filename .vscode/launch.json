@@ -5,18 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "timely_x_flutter",
+            "name": "timely_x",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "timely_x_flutter (profile mode)",
+            "name": "timely_x (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "timely_x_flutter (release mode)",
+            "name": "timely_x (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

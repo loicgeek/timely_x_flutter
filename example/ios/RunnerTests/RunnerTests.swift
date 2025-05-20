@@ -2,7 +2,7 @@ import Flutter
 import UIKit
 import XCTest
 
-@testable import timely_x_flutter
+@testable import timely_x
 
 // This demonstrates a simple unit test of the Swift portion of this plugin's implementation.
 //

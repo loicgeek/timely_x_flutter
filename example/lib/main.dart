@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:timely_x_flutter_example/home_screen.dart';
+import 'package:timely_x_example/home_screen.dart';
 
 import 'app_theme.dart';
 

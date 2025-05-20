@@ -1,6 +1,6 @@
-# timely_x_flutter_example
+# timely_x_example
 
-Demonstrates how to use the timely_x_flutter plugin.
+Demonstrates how to use the timely_x plugin.
 
 ## Getting Started
 

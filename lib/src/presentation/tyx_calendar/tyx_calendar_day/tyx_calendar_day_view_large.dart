@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:timely_x_flutter/src/models/tyx_calendar_option.dart';
-import 'package:timely_x_flutter/src/models/tyx_event.dart';
-import 'package:timely_x_flutter/src/models/tyx_event_enhanced.dart';
-import 'package:timely_x_flutter/src/models/tyx_view.dart';
+import 'package:timely_x/src/models/tyx_calendar_option.dart';
+import 'package:timely_x/src/models/tyx_event.dart';
+import 'package:timely_x/src/models/tyx_event_enhanced.dart';
+import 'package:timely_x/src/models/tyx_view.dart';
 
 class TyxCalendarDayViewLarge extends StatefulWidget {
   final TyxCalendarOption option;

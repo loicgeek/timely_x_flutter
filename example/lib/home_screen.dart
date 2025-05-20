@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:timely_x_flutter/timely_x_flutter.dart';
+import 'package:timely_x/timely_x.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({

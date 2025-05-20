@@ -2,7 +2,7 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:timely_x_flutter/src/models/tyx_resource.dart';
+import 'package:timely_x/src/models/tyx_resource.dart';
 
 import 'models/tyx_event.dart';
 

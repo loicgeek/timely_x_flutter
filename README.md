@@ -1,4 +1,4 @@
-# timely_x_flutter
+# timely_x
 
 A new Flutter plugin project.
 

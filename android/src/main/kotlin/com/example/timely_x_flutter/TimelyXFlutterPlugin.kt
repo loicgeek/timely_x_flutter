@@ -1,4 +1,4 @@
-package com.example.timely_x_flutter
+package com.example.timely_x
 
 import androidx.annotation.NonNull
 
@@ -17,7 +17,7 @@ class TimelyXFlutterPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var channel : MethodChannel
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "timely_x_flutter")
+    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "timely_x")
     channel.setMethodCallHandler(this)
   }
 

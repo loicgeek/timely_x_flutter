@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:timely_x_flutter/timely_x_flutter.dart';
+import 'package:timely_x/timely_x.dart';
 
 import 'tyx_calendar_week_view_large.dart';
 import 'tyx_calendar_week_view_small.dart';
