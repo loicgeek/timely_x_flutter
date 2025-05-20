@@ -39,6 +39,16 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: 5),
             Text("Tous vos services enregistrées sur la plateforme"),
             SizedBox(height: 10),
+            // Expanded(
+            //   child: TyxResourceView(
+            //     option: TyxResourceOption(
+            //       resources: allResources,
+            //       events: allEvents,
+            //       initialDate: _currentDate,
+            //       timeslotStartTime: TimeOfDay(hour: 8, minute: 0),
+            //     ),
+            //   ),
+            // ),
             Expanded(
               child: TyxCalendarView(
                   option: TyxCalendarOption(

@@ -4,6 +4,7 @@ import 'package:timely_x/src/models/tyx_view.dart';
 import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_day/tyx_calendar_day_view.dart';
 import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_month/tyx_calendar_month_view.dart';
 import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_week/tyx_calendar_week_view.dart';
+import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_customiser.dart';
 
 class TyxCalendarView extends StatefulWidget {
   const TyxCalendarView({
@@ -13,6 +14,7 @@ class TyxCalendarView extends StatefulWidget {
     required this.option,
     this.currentDateFormatter,
     this.onViewChanged,
+    this.customizer,
   });
   final Function(DateTime date)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
@@ -20,6 +22,7 @@ class TyxCalendarView extends StatefulWidget {
   final Future<DateTime?> Function({required BuildContext context})?
       onShowDatePicker;
   final TyxCalendarOption option;
+  final TyxCalendarCustomizer? customizer;
 
   @override
   State<TyxCalendarView> createState() => _TyxCalendarViewState();
