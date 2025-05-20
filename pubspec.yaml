@@ -1,6 +1,6 @@
 name: timely_x
 description: "A new Flutter plugin project."
-version: 0.0.2
+version: 0.0.1
 homepage:
 
 environment:
@@ -41,14 +41,14 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.example.timely_x
-        pluginClass: TimelyXFlutterPlugin
+        package: com.ntech_services.timely_x
+        pluginClass: TimelyXPlugin
       ios:
-        pluginClass: TimelyXFlutterPlugin
+        pluginClass: TimelyXPlugin
       macos:
-        pluginClass: TimelyXFlutterPlugin
+        pluginClass: TimelyXPlugin
       web:
-        pluginClass: TimelyXFlutterWeb
+        pluginClass: TimelyXWeb
         fileName: timely_x_web.dart
 
   # To add assets to your plugin package, add an assets section, like this:

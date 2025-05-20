@@ -20,10 +20,10 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    TimelyXFlutter timelyXFlutterPlugin = TimelyXFlutter();
+    TimelyXFlutter TimelyXPlugin = TimelyXFlutter();
     MockTimelyXFlutterPlatform fakePlatform = MockTimelyXFlutterPlatform();
     TimelyXFlutterPlatform.instance = fakePlatform;
 
-    expect(await timelyXFlutterPlugin.getPlatformVersion(), '42');
+    expect(await TimelyXPlugin.getPlatformVersion(), '42');
   });
 }

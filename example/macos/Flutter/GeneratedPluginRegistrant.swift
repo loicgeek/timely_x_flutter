@@ -8,5 +8,5 @@ import Foundation
 import timely_x
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
-  TimelyXFlutterPlugin.register(with: registry.registrar(forPlugin: "TimelyXFlutterPlugin"))
+  TimelyXPlugin.register(with: registry.registrar(forPlugin: "TimelyXPlugin"))
 }

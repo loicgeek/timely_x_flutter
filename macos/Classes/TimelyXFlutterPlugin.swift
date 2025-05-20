@@ -1,10 +1,10 @@
 import Cocoa
 import FlutterMacOS
 
-public class TimelyXFlutterPlugin: NSObject, FlutterPlugin {
+public class TimelyXPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "timely_x", binaryMessenger: registrar.messenger)
-    let instance = TimelyXFlutterPlugin()
+    let instance = TimelyXPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
   }
 
