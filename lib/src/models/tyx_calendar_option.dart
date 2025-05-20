@@ -11,6 +11,7 @@ class TyxCalendarOption {
   final Duration? timelotSlotDuration;
   final DateTime? initialDate;
   final TimeOfDay? timeslotStartTime;
+  final TimeOfDay? timeslotEndTime;
   final double? cellWidth;
   final double? timesCellWidth;
   final double? resourceHeaderHeight;
@@ -31,6 +32,7 @@ class TyxCalendarOption {
     this.timelotSlotDuration,
     this.initialDate,
     this.timeslotStartTime,
+    this.timeslotEndTime,
     this.cellWidth,
     this.timesCellWidth,
     this.resourceHeaderHeight,

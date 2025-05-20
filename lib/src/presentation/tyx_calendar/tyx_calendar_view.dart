@@ -233,7 +233,20 @@ class _TyxCalendarViewState extends State<TyxCalendarView> {
                   onDateSelected: _onDateChanged,
                   // onEventTapped: widget.onEventTapped,
                 ),
-              TyxView.week => const TyxCalendarWeekView(),
+              TyxView.week => TyxCalendarWeekView(
+                  key: ValueKey(
+                      "${_currentDate.year}-${_currentDate.month}-${_currentDate.day}"),
+                  option: widget.option,
+                  view: _view,
+                  initialDate: _currentDate,
+                  onViewChanged: _onViewChanged,
+                  onDateChanged: (date) {
+                    setState(() {
+                      _currentDate = date;
+                      widget.onDateChanged?.call(_currentDate);
+                    });
+                  },
+                ),
               TyxView.month => TyxCalendarMonthView(
                   key: ValueKey("${_currentDate.year}-${_currentDate.month}"),
                   option: widget.option,
