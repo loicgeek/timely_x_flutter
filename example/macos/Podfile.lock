@@ -1,21 +1,15 @@
 PODS:
   - FlutterMacOS (1.0.0)
-  - timely_x (0.0.1):
-    - FlutterMacOS
 
 DEPENDENCIES:
   - FlutterMacOS (from `Flutter/ephemeral`)
-  - timely_x (from `Flutter/ephemeral/.symlinks/plugins/timely_x/macos`)
 
 EXTERNAL SOURCES:
   FlutterMacOS:
     :path: Flutter/ephemeral
-  timely_x:
-    :path: Flutter/ephemeral/.symlinks/plugins/timely_x/macos
 
 SPEC CHECKSUMS:
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  timely_x: c773dea21affef09e6114b03149de717fa2d4187
 
 PODFILE CHECKSUM: 236401fc2c932af29a9fcf0e97baeeb2d750d367
 
