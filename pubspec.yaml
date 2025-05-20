@@ -1,7 +1,8 @@
 name: timely_x
-description: "A new Flutter plugin project."
+description: "Timely X, a calendar plugin for Flutter."
 version: 0.0.1
-homepage:
+homepage: https://github.com/loicgeek/timely_x_flutter
+
 
 environment:
   sdk: '>=3.3.1 <4.0.0'
