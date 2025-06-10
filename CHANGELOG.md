@@ -1,4 +1,9 @@
 
+## 0.0.4
+
+* Added padding to day header
+* Fixed onBorderChanged callback
+
 ## 0.0.3
 
 * Added onBorderChanged callback
