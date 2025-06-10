@@ -51,6 +51,10 @@ class _HomeScreenState extends State<HomeScreen> {
             // ),
             Expanded(
               child: TyxCalendarView(
+                  onBorderChanged: (border) {
+                    print(border.start);
+                    print(border.end);
+                  },
                   option: TyxCalendarOption(
                       initialView: TyxView.day,
                       events:

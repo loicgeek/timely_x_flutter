@@ -122,22 +122,22 @@ class _TyxCalendarMonthViewSmallState extends State<TyxCalendarMonthViewSmall> {
                 icon: const Icon(Icons.chevron_left),
                 onPressed: () {
                   setState(() {
+                    final newDate = DateTime(
+                        _currentMonth.year, _currentMonth.month - 1, 1);
+                    _currentMonth = newDate;
                     widget.onBorderChanged?.call(TyxCalendarBorder(
-                      start: DateTime(
-                          _selectedDate.year, _selectedDate.month - 1, 1),
-                      end: DateTime(_selectedDate.year, _selectedDate.month, 1,
-                          23, 59, 59),
+                      start: DateTime(newDate.year, newDate.month,
+                          1), // First day of the month
+                      end: DateTime(newDate.year, newDate.month + 1, 0, 23, 59,
+                          59), // Last day of the month
                     ));
-                    _selectedDate = DateTime(
-                        _selectedDate.year, _selectedDate.month - 1, 1);
-                    widget.onDateChanged?.call(_selectedDate);
                   });
                 },
               ),
               Column(
                 children: [
                   Text(
-                    DateFormat('MMMM, yyyy').format(_selectedDate),
+                    DateFormat('MMMM, yyyy').format(_currentMonth),
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -148,15 +148,16 @@ class _TyxCalendarMonthViewSmallState extends State<TyxCalendarMonthViewSmall> {
                 icon: const Icon(Icons.chevron_right),
                 onPressed: () {
                   setState(() {
+                    final newDate = DateTime(
+                        _currentMonth.year, _currentMonth.month + 1, 1);
+                    _currentMonth = newDate;
+
                     widget.onBorderChanged?.call(TyxCalendarBorder(
-                      start: DateTime(
-                          _selectedDate.year, _selectedDate.month + 1, 1),
-                      end: DateTime(_selectedDate.year, _selectedDate.month + 1,
-                          1, 23, 59, 59),
+                      start: DateTime(newDate.year, newDate.month,
+                          1), // First day of the month
+                      end: DateTime(newDate.year, newDate.month + 1, 0, 23, 59,
+                          59), // Last day of the month
                     ));
-                    _selectedDate = DateTime(
-                        _selectedDate.year, _selectedDate.month + 1, 1);
-                    widget.onDateChanged?.call(_selectedDate);
                   });
                 },
               ),

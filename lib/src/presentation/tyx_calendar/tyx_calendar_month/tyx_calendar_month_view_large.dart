@@ -52,7 +52,6 @@ class _TyxCalendarMonthViewLargeState extends State<TyxCalendarMonthViewLarge> {
 
   Widget _buildMonthHeader() {
     var theme = Theme.of(context);
-    var colorScheme = theme.colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -75,27 +74,15 @@ class _TyxCalendarMonthViewLargeState extends State<TyxCalendarMonthViewLarge> {
                 icon: const Icon(Icons.chevron_left),
                 onPressed: () {
                   setState(() {
-                    _selectedDate = DateTime(
-                      _selectedDate.year,
-                      _selectedDate.month - 1,
-                      _selectedDate.day,
-                    );
-
-                    var startOfMonth = DateTime(
-                      _selectedDate.year,
-                      _selectedDate.month - 1,
-                      1,
-                    );
-
-                    var endOfMonth = DateTime(_selectedDate.year,
-                        _selectedDate.month - 1, 1, 23, 59, 59);
-
+                    final newDate = DateTime(
+                        _currentMonth.year, _currentMonth.month - 1, 1);
+                    _currentMonth = newDate;
                     widget.onBorderChanged?.call(TyxCalendarBorder(
-                      start: startOfMonth,
-                      end: endOfMonth,
+                      start: DateTime(newDate.year, newDate.month,
+                          1), // First day of the month
+                      end: DateTime(newDate.year, newDate.month + 1, 0, 23, 59,
+                          59), // Last day of the month
                     ));
-
-                    widget.onDateChanged?.call(_selectedDate);
                   });
                 },
               ),
@@ -103,7 +90,7 @@ class _TyxCalendarMonthViewLargeState extends State<TyxCalendarMonthViewLarge> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    DateFormat('MMM yyyy').format(_selectedDate),
+                    DateFormat('MMM yyyy').format(_currentMonth),
                     style: theme.textTheme.titleMedium,
                   ),
                 ],
@@ -112,27 +99,16 @@ class _TyxCalendarMonthViewLargeState extends State<TyxCalendarMonthViewLarge> {
                 icon: const Icon(Icons.chevron_right),
                 onPressed: () {
                   setState(() {
-                    _selectedDate = DateTime(
-                      _selectedDate.year,
-                      _selectedDate.month + 1,
-                      _selectedDate.day,
-                    );
-
-                    var startOfMonth = DateTime(
-                      _selectedDate.year,
-                      _selectedDate.month,
-                      1,
-                    );
-
-                    var endOfMonth = DateTime(
-                        _selectedDate.year, _selectedDate.month, 1, 23, 59, 59);
+                    final newDate = DateTime(
+                        _currentMonth.year, _currentMonth.month + 1, 1);
+                    _currentMonth = newDate;
 
                     widget.onBorderChanged?.call(TyxCalendarBorder(
-                      start: startOfMonth,
-                      end: endOfMonth,
+                      start: DateTime(newDate.year, newDate.month,
+                          1), // First day of the month
+                      end: DateTime(newDate.year, newDate.month + 1, 0, 23, 59,
+                          59), // Last day of the month
                     ));
-
-                    widget.onDateChanged?.call(_selectedDate);
                   });
                 },
               ),

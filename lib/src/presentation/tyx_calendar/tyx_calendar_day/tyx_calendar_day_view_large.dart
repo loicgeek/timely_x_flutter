@@ -482,10 +482,9 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
 
   Widget _buildDayHeader() {
     var theme = Theme.of(context);
-    var colorScheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         boxShadow: [

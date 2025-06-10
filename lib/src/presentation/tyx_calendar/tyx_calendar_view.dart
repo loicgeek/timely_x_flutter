@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:timely_x/src/models/tyx_calendar_border.dart';
 import 'package:timely_x/src/models/tyx_calendar_option.dart';
 import 'package:timely_x/src/models/tyx_view.dart';
@@ -51,6 +52,34 @@ class _TyxCalendarViewState extends State<TyxCalendarView> {
     setState(() {
       _view = view;
       widget.onViewChanged?.call(_view);
+      if (view == TyxView.day) {
+        _currentDate =
+            DateTime(_currentDate.year, _currentDate.month, _currentDate.day);
+        widget.onBorderChanged?.call(TyxCalendarBorder(
+          start: _currentDate,
+          end: DateTime(_currentDate.year, _currentDate.month, _currentDate.day,
+              23, 59, 59), // Last day of the day
+        ));
+      }
+      if (view == TyxView.week) {
+        DateTime firstDayOfTheWeek =
+            Jiffy.parseFromDateTime(_currentDate).startOf(Unit.week).dateTime;
+        _currentDate = firstDayOfTheWeek;
+        widget.onBorderChanged?.call(TyxCalendarBorder(
+          start: firstDayOfTheWeek,
+          end: DateTime(firstDayOfTheWeek.year, firstDayOfTheWeek.month,
+              firstDayOfTheWeek.day + 6, 23, 59, 59), // Last day of the month
+        ));
+      } else if (view == TyxView.month) {
+        DateTime firstDayOfTheMonth =
+            Jiffy.parseFromDateTime(_currentDate).startOf(Unit.month).dateTime;
+        _currentDate = firstDayOfTheMonth;
+        widget.onBorderChanged?.call(TyxCalendarBorder(
+          start: firstDayOfTheMonth,
+          end: DateTime(firstDayOfTheMonth.year, firstDayOfTheMonth.month + 1,
+              0, 23, 59, 59), // Last day of the month
+        ));
+      }
     });
   }
 
