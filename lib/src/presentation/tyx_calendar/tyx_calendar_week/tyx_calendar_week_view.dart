@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timely_x/src/models/tyx_calendar_border.dart';
 
 import 'package:timely_x/timely_x.dart';
 
@@ -12,6 +13,7 @@ class TyxCalendarWeekView extends StatefulWidget {
   final Function(TyxView view)? onViewChanged;
   final Function(TyxEvent)? onEventTapped;
   final TyxView view;
+  final Function(TyxCalendarBorder border)? onBorderChanged;
 
   const TyxCalendarWeekView({
     super.key,
@@ -21,6 +23,7 @@ class TyxCalendarWeekView extends StatefulWidget {
     this.onViewChanged,
     this.onEventTapped,
     required this.view,
+    this.onBorderChanged,
   });
 
   @override
@@ -40,24 +43,8 @@ class _TyxCalendarWeekViewState extends State<TyxCalendarWeekView> {
           onViewChanged: widget.onViewChanged,
           onEventTapped: widget.onEventTapped,
           view: widget.view,
+          onBorderChanged: widget.onBorderChanged,
         );
-        // return isLargeScreen
-        //     ? TyxCalendarWeekViewLarge(
-        //         option: widget.option,
-        //         initialDate: widget.initialDate,
-        //         onDateChanged: widget.onDateChanged,
-        //         onViewChanged: widget.onViewChanged,
-        //         onEventTapped: widget.onEventTapped,
-        //         view: widget.view,
-        //       )
-        //     : TyxCalendarWeekViewSmall(
-        //         option: widget.option,
-        //         initialDate: widget.initialDate,
-        //         onDateChanged: widget.onDateChanged,
-        //         onViewChanged: widget.onViewChanged,
-        //         onEventTapped: widget.onEventTapped,
-        //         view: widget.view,
-        //       );
       },
     );
   }
