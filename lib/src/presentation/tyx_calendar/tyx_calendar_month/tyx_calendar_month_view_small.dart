@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:timely_x/src/models/tyx_calendar_border.dart';
 import 'package:timely_x/src/models/tyx_view.dart';
 import 'package:timely_x/timely_x.dart';
 
@@ -10,6 +11,7 @@ class TyxCalendarMonthViewSmall extends StatefulWidget {
   final Function(TyxEvent)? onEventTapped;
   final Function(DateTime date)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
+  final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
 
   const TyxCalendarMonthViewSmall({
@@ -19,6 +21,7 @@ class TyxCalendarMonthViewSmall extends StatefulWidget {
     this.onEventTapped,
     this.onDateChanged,
     this.onViewChanged,
+    this.onBorderChanged,
     required this.view,
   });
 
@@ -119,6 +122,12 @@ class _TyxCalendarMonthViewSmallState extends State<TyxCalendarMonthViewSmall> {
                 icon: const Icon(Icons.chevron_left),
                 onPressed: () {
                   setState(() {
+                    widget.onBorderChanged?.call(TyxCalendarBorder(
+                      start: DateTime(
+                          _selectedDate.year, _selectedDate.month - 1, 1),
+                      end: DateTime(_selectedDate.year, _selectedDate.month, 1,
+                          23, 59, 59),
+                    ));
                     _selectedDate = DateTime(
                         _selectedDate.year, _selectedDate.month - 1, 1);
                     widget.onDateChanged?.call(_selectedDate);
@@ -139,6 +148,12 @@ class _TyxCalendarMonthViewSmallState extends State<TyxCalendarMonthViewSmall> {
                 icon: const Icon(Icons.chevron_right),
                 onPressed: () {
                   setState(() {
+                    widget.onBorderChanged?.call(TyxCalendarBorder(
+                      start: DateTime(
+                          _selectedDate.year, _selectedDate.month + 1, 1),
+                      end: DateTime(_selectedDate.year, _selectedDate.month + 1,
+                          1, 23, 59, 59),
+                    ));
                     _selectedDate = DateTime(
                         _selectedDate.year, _selectedDate.month + 1, 1);
                     widget.onDateChanged?.call(_selectedDate);

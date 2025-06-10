@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:timely_x/src/models/tyx_calendar_border.dart';
 import 'package:timely_x/src/models/tyx_view.dart';
 import 'package:timely_x/timely_x.dart';
 
@@ -9,12 +10,14 @@ class TyxCalendarMonthViewLarge extends StatefulWidget {
   final Function(DateTime date)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
   final TyxView view;
+  final Function(TyxCalendarBorder border)? onBorderChanged;
   const TyxCalendarMonthViewLarge({
     super.key,
     required this.option,
     this.initialDate,
     this.onDateChanged,
     this.onViewChanged,
+    this.onBorderChanged,
     required this.view,
   });
 
@@ -77,6 +80,21 @@ class _TyxCalendarMonthViewLargeState extends State<TyxCalendarMonthViewLarge> {
                       _selectedDate.month - 1,
                       _selectedDate.day,
                     );
+
+                    var startOfMonth = DateTime(
+                      _selectedDate.year,
+                      _selectedDate.month - 1,
+                      1,
+                    );
+
+                    var endOfMonth = DateTime(_selectedDate.year,
+                        _selectedDate.month - 1, 1, 23, 59, 59);
+
+                    widget.onBorderChanged?.call(TyxCalendarBorder(
+                      start: startOfMonth,
+                      end: endOfMonth,
+                    ));
+
                     widget.onDateChanged?.call(_selectedDate);
                   });
                 },
@@ -99,6 +117,21 @@ class _TyxCalendarMonthViewLargeState extends State<TyxCalendarMonthViewLarge> {
                       _selectedDate.month + 1,
                       _selectedDate.day,
                     );
+
+                    var startOfMonth = DateTime(
+                      _selectedDate.year,
+                      _selectedDate.month,
+                      1,
+                    );
+
+                    var endOfMonth = DateTime(
+                        _selectedDate.year, _selectedDate.month, 1, 23, 59, 59);
+
+                    widget.onBorderChanged?.call(TyxCalendarBorder(
+                      start: startOfMonth,
+                      end: endOfMonth,
+                    ));
+
                     widget.onDateChanged?.call(_selectedDate);
                   });
                 },

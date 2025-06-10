@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:timely_x/src/models/tyx_calendar_border.dart';
 import 'package:timely_x/timely_x.dart';
 
 class TyxCalendarWeekViewLarge extends StatefulWidget {
@@ -8,6 +9,7 @@ class TyxCalendarWeekViewLarge extends StatefulWidget {
   final Function(DateTime date)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
   final Function(TyxEvent)? onEventTapped;
+  final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
 
   const TyxCalendarWeekViewLarge({
@@ -17,6 +19,7 @@ class TyxCalendarWeekViewLarge extends StatefulWidget {
     this.onDateChanged,
     this.onViewChanged,
     this.onEventTapped,
+    this.onBorderChanged,
     required this.view,
   });
 
@@ -48,15 +51,18 @@ class _TyxCalendarWeekViewLargeState extends State<TyxCalendarWeekViewLarge> {
     super.dispose();
   }
 
-  List<DateTime> _getWeekDays(DateTime date) {
+  DateTime _getStartOfWeek(DateTime date) {
     // Get the start day of week from options, default to Monday if not specified
     final startWeekDay =
         widget.option.startWeekDay ?? 1; // 1 = Monday, 7 = Sunday
+    return date.subtract(Duration(days: (date.weekday - startWeekDay) % 7));
+  }
+
+  List<DateTime> _getWeekDays(DateTime date) {
+    // Get the start day of week from options, default to Monday if not specified
 
     // Find the first day of the week containing the given date
-    final firstDayOfWeek = date.subtract(
-      Duration(days: (date.weekday - startWeekDay) % 7),
-    );
+    final firstDayOfWeek = _getStartOfWeek(date);
 
     // Generate 7 days starting from the first day of the week
     return List.generate(
@@ -68,6 +74,18 @@ class _TyxCalendarWeekViewLargeState extends State<TyxCalendarWeekViewLarge> {
   void _previousWeek() {
     setState(() {
       _selectedDate = _selectedDate.subtract(const Duration(days: 7));
+      final startOfWeek = _getStartOfWeek(_selectedDate);
+
+      // End of week (Sunday at 23:59:59)
+      final endOfWeek = startOfWeek.add(const Duration(days: 6));
+      final endOfWeekWithTime =
+          DateTime(endOfWeek.year, endOfWeek.month, endOfWeek.day, 23, 59, 59);
+
+      widget.onBorderChanged?.call(TyxCalendarBorder(
+        start: startOfWeek,
+        end: endOfWeekWithTime,
+      ));
+
       _weekDays = _getWeekDays(_selectedDate);
       widget.onDateChanged?.call(_selectedDate);
     });
@@ -76,6 +94,17 @@ class _TyxCalendarWeekViewLargeState extends State<TyxCalendarWeekViewLarge> {
   void _nextWeek() {
     setState(() {
       _selectedDate = _selectedDate.add(const Duration(days: 7));
+      final startOfWeek = _getStartOfWeek(_selectedDate);
+
+      // End of week (Sunday at 23:59:59)
+      final endOfWeek = startOfWeek.add(const Duration(days: 6));
+      final endOfWeekWithTime =
+          DateTime(endOfWeek.year, endOfWeek.month, endOfWeek.day, 23, 59, 59);
+
+      widget.onBorderChanged?.call(TyxCalendarBorder(
+        start: startOfWeek,
+        end: endOfWeekWithTime,
+      ));
       _weekDays = _getWeekDays(_selectedDate);
       widget.onDateChanged?.call(_selectedDate);
     });

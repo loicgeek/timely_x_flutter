@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timely_x/src/models/tyx_calendar_border.dart';
 import 'package:timely_x/src/models/tyx_calendar_option.dart';
 import 'package:timely_x/src/models/tyx_view.dart';
 import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_month/tyx_calendar_month_view_large.dart';
@@ -9,6 +10,7 @@ class TyxCalendarMonthView extends StatefulWidget {
   final DateTime? initialDate;
   final Function(DateTime date)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
+  final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
   const TyxCalendarMonthView({
     super.key,
@@ -16,6 +18,7 @@ class TyxCalendarMonthView extends StatefulWidget {
     this.initialDate,
     this.onDateChanged,
     this.onViewChanged,
+    this.onBorderChanged,
     required this.view,
   });
 
@@ -35,6 +38,7 @@ class _TyxCalendarMonthViewState extends State<TyxCalendarMonthView> {
                 initialDate: widget.initialDate,
                 onDateChanged: widget.onDateChanged,
                 onViewChanged: widget.onViewChanged,
+                onBorderChanged: widget.onBorderChanged,
                 view: widget.view,
               )
             : TyxCalendarMonthViewSmall(
@@ -42,6 +46,7 @@ class _TyxCalendarMonthViewState extends State<TyxCalendarMonthView> {
                 initialDate: widget.initialDate,
                 onDateChanged: widget.onDateChanged,
                 onViewChanged: widget.onViewChanged,
+                onBorderChanged: widget.onBorderChanged,
                 view: widget.view,
               );
       },
