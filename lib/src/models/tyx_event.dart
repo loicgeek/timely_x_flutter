@@ -5,6 +5,7 @@ class TyxEvent {
   DateTime end;
   Color color;
   String? resourceId;
+  String? id;
   String? title;
   String? description;
   String? location;
@@ -14,6 +15,7 @@ class TyxEvent {
     required this.end,
     required this.color,
     this.resourceId,
+    this.id,
     this.title,
     this.description,
     this.location,
@@ -26,6 +28,7 @@ class TyxEvent {
     return other.start == start &&
         other.end == end &&
         other.color == color &&
+        other.id == id &&
         other.title == title &&
         other.description == description &&
         other.location == location &&
@@ -38,6 +41,7 @@ class TyxEvent {
       end.hashCode ^
       color.hashCode ^
       resourceId.hashCode ^
+      id.hashCode ^
       title.hashCode ^
       location.hashCode ^
       description.hashCode;

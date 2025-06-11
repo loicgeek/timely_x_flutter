@@ -10,3 +10,5 @@ export './src/helpers.dart';
 
 export './src/presentation/tyx_calendar/tyx_calendar_view.dart';
 export './src/models/tyx_calendar_option.dart';
+
+export './src/presentation/tyx_datepicker/tyx_datepicker.dart';

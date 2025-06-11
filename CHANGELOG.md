@@ -1,4 +1,8 @@
 
+## 0.0.5
+
+* Added id to TyxEvent
+
 ## 0.0.4
 
 * Added padding to day header
