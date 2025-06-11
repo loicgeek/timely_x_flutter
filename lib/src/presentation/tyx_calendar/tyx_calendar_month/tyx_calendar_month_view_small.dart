@@ -9,7 +9,7 @@ class TyxCalendarMonthViewSmall extends StatefulWidget {
   final DateTime? initialDate;
 
   final Function(TyxEvent)? onEventTapped;
-  final Function(DateTime date)? onDateChanged;
+  final void Function(DateTime date, List<TyxEvent> events)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
@@ -259,7 +259,7 @@ class _TyxCalendarMonthViewSmallState extends State<TyxCalendarMonthViewSmall> {
         setState(() {
           _selectedDate = day;
         });
-        widget.onDateChanged?.call(day);
+        widget.onDateChanged?.call(day, events);
       },
       child: Container(
         decoration: BoxDecoration(

@@ -6,7 +6,7 @@ import 'package:timely_x/timely_x.dart';
 class TyxCalendarWeekViewLarge extends StatefulWidget {
   final TyxCalendarOption option;
   final DateTime? initialDate;
-  final Function(DateTime date)? onDateChanged;
+  final Function(DateTime date, List<TyxEvent> events)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
   final Function(TyxEvent)? onEventTapped;
   final Function(TyxCalendarBorder border)? onBorderChanged;
@@ -87,7 +87,7 @@ class _TyxCalendarWeekViewLargeState extends State<TyxCalendarWeekViewLarge> {
       ));
 
       _weekDays = _getWeekDays(_selectedDate);
-      widget.onDateChanged?.call(_selectedDate);
+      widget.onDateChanged?.call(_selectedDate, []);
     });
   }
 
@@ -106,7 +106,7 @@ class _TyxCalendarWeekViewLargeState extends State<TyxCalendarWeekViewLarge> {
         end: endOfWeekWithTime,
       ));
       _weekDays = _getWeekDays(_selectedDate);
-      widget.onDateChanged?.call(_selectedDate);
+      widget.onDateChanged?.call(_selectedDate, []);
     });
   }
 
@@ -202,7 +202,7 @@ class _TyxCalendarWeekViewLargeState extends State<TyxCalendarWeekViewLarge> {
                         _selectedDate = now;
                         _weekDays = _getWeekDays(_selectedDate);
                       });
-                      widget.onDateChanged?.call(now);
+                      widget.onDateChanged?.call(now, []);
                     },
                     child: const Text('Today'),
                   ),

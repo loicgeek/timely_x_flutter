@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timely_x/src/models/tyx_calendar_border.dart';
-import 'package:timely_x/src/models/tyx_view.dart';
+
 import 'package:timely_x/timely_x.dart';
 
 class TyxCalendarMonthViewLarge extends StatefulWidget {
   final TyxCalendarOption option;
   final DateTime? initialDate;
-  final Function(DateTime date)? onDateChanged;
+  final Function(DateTime date, List<TyxEvent> events)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
   final TyxView view;
   final Function(TyxCalendarBorder border)? onBorderChanged;
+  final Function(TyxEvent)? onEventTapped;
   const TyxCalendarMonthViewLarge({
     super.key,
     required this.option,
@@ -19,6 +20,7 @@ class TyxCalendarMonthViewLarge extends StatefulWidget {
     this.onViewChanged,
     this.onBorderChanged,
     required this.view,
+    this.onEventTapped,
   });
 
   @override
@@ -123,7 +125,7 @@ class _TyxCalendarMonthViewLargeState extends State<TyxCalendarMonthViewLarge> {
                   setState(() {
                     _selectedDate = now;
                   });
-                  widget.onDateChanged?.call(now);
+                  widget.onDateChanged?.call(now, _getEventsForDay(now));
                 },
                 child: const Text('Today'),
               ),
@@ -285,9 +287,7 @@ class _TyxCalendarMonthViewLargeState extends State<TyxCalendarMonthViewLarge> {
     var colorScheme = ColorScheme.fromSeed(seedColor: event.color);
     return GestureDetector(
       onTap: () {
-        // if (widget.onEventTapped != null) {
-        //   widget.onEventTapped!(event);
-        // }
+        widget.onEventTapped?.call(event);
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 2),

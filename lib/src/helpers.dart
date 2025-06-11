@@ -92,3 +92,12 @@ List<TyxEvent> generateEventsForMonth(
 
   return events;
 }
+
+bool isSameDay(DateTime a, DateTime b) {
+  return a.year == b.year && a.month == b.month && a.day == b.day;
+}
+
+bool isTodayMethod(DateTime date) {
+  final now = DateTime.now();
+  return isSameDay(date, now);
+}

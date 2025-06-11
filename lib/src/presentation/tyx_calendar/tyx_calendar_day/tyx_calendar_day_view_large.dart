@@ -4,6 +4,7 @@ import 'package:timely_x/src/models/tyx_calendar_option.dart';
 import 'package:timely_x/src/models/tyx_event.dart';
 import 'package:timely_x/src/models/tyx_event_enhanced.dart';
 import 'package:timely_x/src/models/tyx_view.dart';
+import 'package:timely_x/timely_x.dart';
 
 class TyxCalendarDayViewLarge extends StatefulWidget {
   final TyxCalendarOption option;
@@ -280,7 +281,7 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
                           adjustedIndex - daysInMonth + 1));
 
               // Check if this is today or the selected date
-              final isToday = _isToday(date);
+              final isToday = isTodayMethod(date);
               final isSelected = isSameDay(date, _selectedDate);
 
               // Check if there are events on this day
@@ -957,15 +958,6 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
     return (widget.option.events ?? [])
         .where((event) => isSameDay(event.start, day))
         .toList();
-  }
-
-  bool isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
-
-  bool _isToday(DateTime date) {
-    final now = DateTime.now();
-    return isSameDay(date, now);
   }
 
   // Helper function to get maximum of two values
