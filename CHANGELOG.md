@@ -1,3 +1,10 @@
+## 0.0.7
+
+* Added support for customising the calendar
+
+## 0.0.6
+
+* Added padding to day header
 
 ## 0.0.5
 
