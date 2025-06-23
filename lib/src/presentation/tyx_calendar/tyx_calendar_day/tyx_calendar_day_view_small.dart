@@ -390,8 +390,8 @@ class _TyxCalendarDayViewSmallState<T extends TyxEvent>
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-            if (event.location != null &&
-                event.location!.isNotEmpty &&
+            if (event.locationAddress != null &&
+                event.locationAddress!.isNotEmpty &&
                 enhancedEvent.height > 80)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
@@ -405,7 +405,7 @@ class _TyxCalendarDayViewSmallState<T extends TyxEvent>
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        event.location!,
+                        event.locationAddress!,
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: 10,
                           color:

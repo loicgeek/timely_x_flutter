@@ -403,8 +403,8 @@ class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
                             '${TimeOfDay.fromDateTime(event.start).format(context)} - ${TimeOfDay.fromDateTime(event.end).format(context)}',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
-                          if (event.location != null &&
-                              event.location!.isNotEmpty)
+                          if (event.locationAddress != null &&
+                              event.locationAddress!.isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(top: 4),
                               child: Row(
@@ -417,7 +417,7 @@ class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
                                   const SizedBox(width: 4),
                                   Expanded(
                                     child: Text(
-                                      event.location!,
+                                      event.locationAddress!,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall

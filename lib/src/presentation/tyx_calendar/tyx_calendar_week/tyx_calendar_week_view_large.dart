@@ -557,10 +557,10 @@ class _TyxCalendarWeekViewLargeState extends State<TyxCalendarWeekViewLarge> {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   if (height > 60 &&
-                                      event.location != null &&
-                                      event.location!.isNotEmpty)
+                                      event.locationAddress != null &&
+                                      event.locationAddress!.isNotEmpty)
                                     Text(
-                                      event.location!,
+                                      event.locationAddress!,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall

@@ -495,8 +495,8 @@ class _TyxCalendarWeekViewSmallState extends State<TyxCalendarWeekViewSmall> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         if (height > 60 &&
-                            event.location != null &&
-                            event.location!.isNotEmpty)
+                            event.locationAddress != null &&
+                            event.locationAddress!.isNotEmpty)
                           Row(
                             children: [
                               Icon(
@@ -508,7 +508,7 @@ class _TyxCalendarWeekViewSmallState extends State<TyxCalendarWeekViewSmall> {
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
-                                  event.location!,
+                                  event.locationAddress!,
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodySmall

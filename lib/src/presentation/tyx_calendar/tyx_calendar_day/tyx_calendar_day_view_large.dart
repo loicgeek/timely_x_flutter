@@ -452,7 +452,8 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    if (event.location != null && event.location!.isNotEmpty)
+                    if (event.locationAddress != null &&
+                        event.locationAddress!.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: Row(
@@ -466,7 +467,7 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                event.location!,
+                                event.locationAddress!,
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: colorScheme.onPrimaryContainer
                                       .withOpacity(0.7),
@@ -831,8 +832,8 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-            if (event.location != null &&
-                event.location!.isNotEmpty &&
+            if (event.locationAddress != null &&
+                event.locationAddress!.isNotEmpty &&
                 enhancedEvent.height > 80)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
@@ -846,7 +847,7 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        event.location!,
+                        event.locationAddress!,
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: 10,
                           color:
