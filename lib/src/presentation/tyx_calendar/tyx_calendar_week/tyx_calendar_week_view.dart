@@ -6,12 +6,12 @@ import 'package:timely_x/timely_x.dart';
 import 'tyx_calendar_week_view_large.dart';
 import 'tyx_calendar_week_view_small.dart';
 
-class TyxCalendarWeekView extends StatefulWidget {
+class TyxCalendarWeekView<T extends TyxEvent> extends StatefulWidget {
   final TyxCalendarOption option;
   final DateTime? initialDate;
-  final Function(DateTime date, List<TyxEvent> events)? onDateChanged;
+  final Function(DateTime date, List<T> events)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
-  final Function(TyxEvent)? onEventTapped;
+  final Function(T)? onEventTapped;
   final TyxView view;
   final Function(TyxCalendarBorder border)? onBorderChanged;
 

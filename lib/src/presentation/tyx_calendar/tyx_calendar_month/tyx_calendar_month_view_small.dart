@@ -4,12 +4,12 @@ import 'package:timely_x/src/models/tyx_calendar_border.dart';
 import 'package:timely_x/src/models/tyx_view.dart';
 import 'package:timely_x/timely_x.dart';
 
-class TyxCalendarMonthViewSmall extends StatefulWidget {
-  final TyxCalendarOption option;
+class TyxCalendarMonthViewSmall<T extends TyxEvent> extends StatefulWidget {
+  final TyxCalendarOption<T> option;
   final DateTime? initialDate;
 
-  final Function(TyxEvent)? onEventTapped;
-  final void Function(DateTime date, List<TyxEvent> events)? onDateChanged;
+  final Function(T)? onEventTapped;
+  final void Function(DateTime date, List<T> events)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
@@ -26,11 +26,12 @@ class TyxCalendarMonthViewSmall extends StatefulWidget {
   });
 
   @override
-  State<TyxCalendarMonthViewSmall> createState() =>
-      _TyxCalendarMonthViewSmallState();
+  State<TyxCalendarMonthViewSmall<T>> createState() =>
+      _TyxCalendarMonthViewSmallState<T>();
 }
 
-class _TyxCalendarMonthViewSmallState extends State<TyxCalendarMonthViewSmall> {
+class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
+    extends State<TyxCalendarMonthViewSmall<T>> {
   late DateTime _currentMonth;
   late DateTime _selectedDate;
   final ScrollController _eventsScrollController = ScrollController();
@@ -356,7 +357,7 @@ class _TyxCalendarMonthViewSmallState extends State<TyxCalendarMonthViewSmall> {
     );
   }
 
-  Widget _buildEventCard(TyxEvent event) {
+  Widget _buildEventCard(T event) {
     var colorScheme = ColorScheme.fromSeed(seedColor: event.color);
 
     return InkWell(
@@ -470,8 +471,8 @@ class _TyxCalendarMonthViewSmallState extends State<TyxCalendarMonthViewSmall> {
         date.day == now.day;
   }
 
-  List<TyxEvent> _getEventsForDay(DateTime day) {
-    return (widget.option.events ?? [])
+  List<T> _getEventsForDay(DateTime day) {
+    return (widget.option.events ?? List<T>.from([]))
         .where((event) => isSameDay(event.start, day))
         .toList();
   }

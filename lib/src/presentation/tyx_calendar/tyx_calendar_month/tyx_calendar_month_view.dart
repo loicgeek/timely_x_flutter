@@ -5,14 +5,14 @@ import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_month/tyx_ca
 import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_month/tyx_calendar_month_view_small.dart';
 import 'package:timely_x/timely_x.dart';
 
-class TyxCalendarMonthView extends StatefulWidget {
-  final TyxCalendarOption option;
+class TyxCalendarMonthView<T extends TyxEvent> extends StatefulWidget {
+  final TyxCalendarOption<T> option;
   final DateTime? initialDate;
-  final Function(DateTime date, List<TyxEvent> events)? onDateChanged;
+  final Function(DateTime date, List<T> events)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
-  final Function(TyxEvent)? onEventTapped;
+  final Function(T)? onEventTapped;
   const TyxCalendarMonthView({
     super.key,
     required this.option,
@@ -25,17 +25,19 @@ class TyxCalendarMonthView extends StatefulWidget {
   });
 
   @override
-  State<TyxCalendarMonthView> createState() => _TyxCalendarMonthViewState();
+  State<TyxCalendarMonthView<T>> createState() =>
+      _TyxCalendarMonthViewState<T>();
 }
 
-class _TyxCalendarMonthViewState extends State<TyxCalendarMonthView> {
+class _TyxCalendarMonthViewState<T extends TyxEvent>
+    extends State<TyxCalendarMonthView<T>> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         bool isLargeScreen = constraints.maxWidth > 600;
         return isLargeScreen
-            ? TyxCalendarMonthViewLarge(
+            ? TyxCalendarMonthViewLarge<T>(
                 option: widget.option,
                 initialDate: widget.initialDate,
                 onDateChanged: widget.onDateChanged,
@@ -44,7 +46,7 @@ class _TyxCalendarMonthViewState extends State<TyxCalendarMonthView> {
                 view: widget.view,
                 onEventTapped: widget.onEventTapped,
               )
-            : TyxCalendarMonthViewSmall(
+            : TyxCalendarMonthViewSmall<T>(
                 option: widget.option,
                 initialDate: widget.initialDate,
                 onDateChanged: widget.onDateChanged,

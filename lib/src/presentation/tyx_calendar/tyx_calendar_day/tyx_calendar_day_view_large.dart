@@ -6,10 +6,10 @@ import 'package:timely_x/src/models/tyx_event_enhanced.dart';
 import 'package:timely_x/src/models/tyx_view.dart';
 import 'package:timely_x/timely_x.dart';
 
-class TyxCalendarDayViewLarge extends StatefulWidget {
-  final TyxCalendarOption option;
+class TyxCalendarDayViewLarge<T extends TyxEvent> extends StatefulWidget {
+  final TyxCalendarOption<T> option;
   final Function(DateTime)? onDateSelected;
-  final Function(TyxEvent)? onEventTapped;
+  final Function(T)? onEventTapped;
   final Function(DateTime date)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
   final TyxView view;
@@ -28,10 +28,11 @@ class TyxCalendarDayViewLarge extends StatefulWidget {
 
   @override
   State<TyxCalendarDayViewLarge> createState() =>
-      _TyxCalendarDayViewLargeState();
+      _TyxCalendarDayViewLargeState<T>();
 }
 
-class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
+class _TyxCalendarDayViewLargeState<T extends TyxEvent>
+    extends State<TyxCalendarDayViewLarge<T>> {
   late DateTime _selectedDate;
   late ScrollController _scrollController;
   late double _timeslotHeight;
@@ -387,7 +388,7 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
     );
   }
 
-  Widget _buildEventListItem(TyxEvent event) {
+  Widget _buildEventListItem(T event) {
     final theme = Theme.of(context);
     final colorScheme = ColorScheme.fromSeed(seedColor: event.color);
 
@@ -701,7 +702,7 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
   }
 
   Widget _buildEventsOverlay(
-      List<TyxEvent> events, int dayStartHour, double containerWidth) {
+      List<T> events, int dayStartHour, double containerWidth) {
     // Group overlapping events
     final groupedEvents = _groupOverlappingEvents(events);
 
@@ -919,16 +920,16 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
   }
 
 // Helper method to group overlapping events - improved algorithm
-  List<List<TyxEvent>> _groupOverlappingEvents(List<TyxEvent> events) {
+  List<List<T>> _groupOverlappingEvents(List<T> events) {
     if (events.isEmpty) return [];
 
     // Sort events by start time
-    final sortedEvents = List<TyxEvent>.from(events);
+    final sortedEvents = List<T>.from(events);
     sortedEvents.sort((a, b) => a.start.compareTo(b.start));
 
     // Create columns for events that overlap
 
-    List<List<TyxEvent>> groups = [];
+    List<List<T>> groups = [];
 
     for (var event in sortedEvents) {
       bool addedToGroup = false;
@@ -948,7 +949,7 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
   }
 
 // Check if two events overlap in time - more robust implementation
-  bool _eventsOverlap(TyxEvent a, TyxEvent b) {
+  bool _eventsOverlap(T a, T b) {
     // Handle null end times by assuming default duration of 1 hour
     final aEnd = a.end;
     final bEnd = b.end;
@@ -959,7 +960,7 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
     return a.start.isBefore(bEnd) && aEnd.isAfter(b.start);
   }
 
-  List<TyxEvent> _getEventsForDay(DateTime day) {
+  List<T> _getEventsForDay(DateTime day) {
     return (widget.option.events ?? [])
         .where((event) => isSameDay(event.start, day))
         .toList();

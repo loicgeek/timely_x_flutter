@@ -4,14 +4,14 @@ import 'package:timely_x/src/models/tyx_calendar_border.dart';
 
 import 'package:timely_x/timely_x.dart';
 
-class TyxCalendarMonthViewLarge extends StatefulWidget {
-  final TyxCalendarOption option;
+class TyxCalendarMonthViewLarge<T extends TyxEvent> extends StatefulWidget {
+  final TyxCalendarOption<T> option;
   final DateTime? initialDate;
-  final Function(DateTime date, List<TyxEvent> events)? onDateChanged;
+  final Function(DateTime date, List<T> events)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
   final TyxView view;
   final Function(TyxCalendarBorder border)? onBorderChanged;
-  final Function(TyxEvent)? onEventTapped;
+  final Function(T)? onEventTapped;
   const TyxCalendarMonthViewLarge({
     super.key,
     required this.option,
@@ -24,11 +24,12 @@ class TyxCalendarMonthViewLarge extends StatefulWidget {
   });
 
   @override
-  State<TyxCalendarMonthViewLarge> createState() =>
-      _TyxCalendarMonthViewLargeState();
+  State<TyxCalendarMonthViewLarge<T>> createState() =>
+      _TyxCalendarMonthViewLargeState<T>();
 }
 
-class _TyxCalendarMonthViewLargeState extends State<TyxCalendarMonthViewLarge> {
+class _TyxCalendarMonthViewLargeState<T extends TyxEvent>
+    extends State<TyxCalendarMonthViewLarge<T>> {
   late DateTime _currentMonth;
   late DateTime _selectedDate;
 
@@ -283,7 +284,7 @@ class _TyxCalendarMonthViewLargeState extends State<TyxCalendarMonthViewLarge> {
     );
   }
 
-  Widget _buildEventIndicator(TyxEvent event) {
+  Widget _buildEventIndicator(T event) {
     var colorScheme = ColorScheme.fromSeed(seedColor: event.color);
     return GestureDetector(
       onTap: () {
@@ -343,7 +344,7 @@ class _TyxCalendarMonthViewLargeState extends State<TyxCalendarMonthViewLarge> {
         date.day == now.day;
   }
 
-  List<TyxEvent> _getEventsForDay(DateTime day) {
+  List<T> _getEventsForDay(DateTime day) {
     return (widget.option.events ?? [])
         .where((event) => isSameDay(event.start, day))
         .toList();

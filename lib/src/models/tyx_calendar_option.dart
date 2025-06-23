@@ -6,7 +6,7 @@ import 'package:timely_x/src/models/tyx_view.dart';
 import 'tyx_resource.dart';
 import 'tyx_resource_enhanced.dart';
 
-class TyxCalendarOption {
+class TyxCalendarOption<T> {
   final double? timeslotHeight;
   final Duration? timelotSlotDuration;
   final DateTime? initialDate;
@@ -17,7 +17,7 @@ class TyxCalendarOption {
   final double? resourceHeaderHeight;
 
   final List<TyxResource>? resources;
-  final List<TyxEvent>? events;
+  final List<T>? events;
   final TyxView initialView;
 
   // Whether to show trailing days
