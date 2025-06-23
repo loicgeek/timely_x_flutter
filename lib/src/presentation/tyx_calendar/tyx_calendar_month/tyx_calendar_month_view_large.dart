@@ -289,26 +289,28 @@ class _TyxCalendarMonthViewLargeState extends State<TyxCalendarMonthViewLarge> {
       onTap: () {
         widget.onEventTapped?.call(event);
       },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 2),
-        decoration: BoxDecoration(
-            color: colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(4),
-            border: Border(
-                left: BorderSide(
-              color: colorScheme.primary,
-              width: 5,
-            ))),
-        child: Text(
-          "${TimeOfDay.fromDateTime(event.start).format(context)} ${event.title ?? ''}",
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colorScheme.onPrimaryContainer,
+      child: widget.option.monthOption?.eventIndicatorBuilder != null
+          ? widget.option.monthOption!.eventIndicatorBuilder!(context, event)
+          : Container(
+              margin: const EdgeInsets.only(bottom: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 2),
+              decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border(
+                      left: BorderSide(
+                    color: colorScheme.primary,
+                    width: 5,
+                  ))),
+              child: Text(
+                "${TimeOfDay.fromDateTime(event.start).format(context)} ${event.title ?? ''}",
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onPrimaryContainer,
+                    ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
+            ),
     );
   }
 

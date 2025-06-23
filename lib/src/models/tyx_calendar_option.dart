@@ -24,7 +24,10 @@ class TyxCalendarOption {
   final bool showTrailingDays;
   final int? startWeekDay;
 
-  Widget Function(BuildContext context, TyxEventEnhanced item)? eventBuilder;
+  final TyxCalendarMonthOption? monthOption;
+  final TyxCalendarWeekOption? weekOption;
+  final TyxCalendarDayOption? dayOption;
+
   Widget Function(BuildContext context, TyxResourceEnhanced item)?
       resourceBuilder;
   TyxCalendarOption({
@@ -38,10 +41,27 @@ class TyxCalendarOption {
     this.resourceHeaderHeight,
     this.resources,
     this.events,
-    this.eventBuilder,
     this.resourceBuilder,
     this.showTrailingDays = false,
     this.startWeekDay = 7,
     this.initialView = TyxView.month,
+    this.monthOption,
+    this.weekOption,
+    this.dayOption,
   });
+}
+
+class TyxCalendarMonthOption {
+  Widget Function(BuildContext context, TyxEvent item)? eventListTileBuilder;
+  Widget Function(BuildContext context, TyxEvent item)? eventIndicatorBuilder;
+}
+
+class TyxCalendarWeekOption {
+  Widget Function(BuildContext context, TyxEvent item)? eventIndicatorBuilder;
+}
+
+class TyxCalendarDayOption {
+  Widget Function(BuildContext context, TyxEventEnhanced item)?
+      eventIndicatorBuilder;
+  Widget Function(BuildContext context, TyxEvent item)? eventListTileBuilder;
 }

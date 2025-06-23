@@ -521,56 +521,60 @@ class _TyxCalendarWeekViewLargeState extends State<TyxCalendarWeekViewLarge> {
                     height: height,
                     child: GestureDetector(
                       onTap: () => widget.onEventTapped?.call(event),
-                      child: Card(
-                        margin: EdgeInsets.zero,
-                        color: colorScheme.primaryContainer,
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                event.title ?? 'Untitled Event',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: colorScheme.onPrimaryContainer,
+                      child: widget.option.weekOption?.eventIndicatorBuilder
+                              ?.call(context, event) ??
+                          Card(
+                            margin: EdgeInsets.zero,
+                            color: colorScheme.primaryContainer,
+                            child: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    event.title ?? 'Untitled Event',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: colorScheme.onPrimaryContainer,
+                                        ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  if (height > 40)
+                                    Text(
+                                      '${TimeOfDay.fromDateTime(event.start).format(context)} - ${TimeOfDay.fromDateTime(event.end).format(context)}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color:
+                                                colorScheme.onPrimaryContainer,
+                                          ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                  if (height > 60 &&
+                                      event.location != null &&
+                                      event.location!.isNotEmpty)
+                                    Text(
+                                      event.location!,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color:
+                                                colorScheme.onPrimaryContainer,
+                                          ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                ],
                               ),
-                              if (height > 40)
-                                Text(
-                                  '${TimeOfDay.fromDateTime(event.start).format(context)} - ${TimeOfDay.fromDateTime(event.end).format(context)}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: colorScheme.onPrimaryContainer,
-                                      ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              if (height > 60 &&
-                                  event.location != null &&
-                                  event.location!.isNotEmpty)
-                                Text(
-                                  event.location!,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: colorScheme.onPrimaryContainer,
-                                      ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
                     ),
                   );
                 }).toList(),

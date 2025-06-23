@@ -313,9 +313,11 @@ class _TyxCalendarDayViewSmallState extends State<TyxCalendarDayViewSmall> {
               );
 
               // Use custom builder or default rendering
-              Widget eventWidget = widget.option.eventBuilder != null
-                  ? widget.option.eventBuilder!(context, enhancedEvent)
-                  : _buildDefaultEventTile(event, enhancedEvent, theme);
+              Widget eventWidget =
+                  widget.option.dayOption?.eventIndicatorBuilder != null
+                      ? widget.option.dayOption!.eventIndicatorBuilder!(
+                          context, enhancedEvent)
+                      : _buildDefaultEventTile(event, enhancedEvent, theme);
 
               // Position the event widget
               return Positioned(

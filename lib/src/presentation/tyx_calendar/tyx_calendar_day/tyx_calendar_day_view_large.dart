@@ -391,93 +391,96 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
     final theme = Theme.of(context);
     final colorScheme = ColorScheme.fromSeed(seedColor: event.color);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      elevation: 0,
-      color: colorScheme.primaryContainer,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color: colorScheme.primary.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: InkWell(
-        onTap: () => widget.onEventTapped?.call(event),
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${TimeOfDay.fromDateTime(event.start).format(context)} - ${TimeOfDay.fromDateTime(event.end ?? event.start.add(const Duration(hours: 1))).format(context)}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                event.title ?? 'Untitled Event',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onPrimaryContainer,
+    return InkWell(
+      onTap: () => widget.onEventTapped?.call(event),
+      child: widget.option.dayOption?.eventListTileBuilder != null
+          ? widget.option.dayOption!.eventListTileBuilder!(context, event)
+          : Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              elevation: 0,
+              color: colorScheme.primaryContainer,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(
+                  color: colorScheme.primary.withOpacity(0.3),
+                  width: 1,
                 ),
               ),
-              if (event.description != null && event.description!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    event.description!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onPrimaryContainer,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              if (event.location != null && event.location!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        size: 14,
-                        color: colorScheme.onPrimaryContainer.withOpacity(0.7),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          event.location!,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color:
-                                colorScheme.onPrimaryContainer.withOpacity(0.7),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary,
+                            shape: BoxShape.circle,
                           ),
-                          maxLines: 1,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${TimeOfDay.fromDateTime(event.start).format(context)} - ${TimeOfDay.fromDateTime(event.end ?? event.start.add(const Duration(hours: 1))).format(context)}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      event.title ?? 'Untitled Event',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                    if (event.description != null &&
+                        event.description!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          event.description!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ],
-                  ),
+                    if (event.location != null && event.location!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.location_on_outlined,
+                              size: 14,
+                              color: colorScheme.onPrimaryContainer
+                                  .withOpacity(0.7),
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                event.location!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.onPrimaryContainer
+                                      .withOpacity(0.7),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                 ),
-            ],
-          ),
-        ),
-      ),
+              ),
+            ),
     );
   }
 
@@ -750,9 +753,11 @@ class _TyxCalendarDayViewLargeState extends State<TyxCalendarDayViewLarge> {
                 );
 
                 // Use custom builder or default rendering
-                Widget eventWidget = widget.option.eventBuilder != null
-                    ? widget.option.eventBuilder!(context, enhancedEvent)
-                    : _buildDefaultEventTile(event, enhancedEvent, theme);
+                Widget eventWidget =
+                    widget.option.dayOption?.eventIndicatorBuilder != null
+                        ? widget.option.dayOption!.eventIndicatorBuilder!(
+                            context, enhancedEvent)
+                        : _buildDefaultEventTile(event, enhancedEvent, theme);
 
                 // Position the event widget
                 return Positioned(
