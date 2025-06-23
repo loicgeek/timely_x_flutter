@@ -1,3 +1,5 @@
+## 0.0.9
+* Added event builder for each calendar view
 ## 0.0.7
 
 * Added support for customising the calendar

@@ -54,14 +54,26 @@ class TyxCalendarOption {
 class TyxCalendarMonthOption {
   Widget Function(BuildContext context, TyxEvent item)? eventListTileBuilder;
   Widget Function(BuildContext context, TyxEvent item)? eventIndicatorBuilder;
+
+  TyxCalendarMonthOption({
+    this.eventListTileBuilder,
+    this.eventIndicatorBuilder,
+  });
 }
 
 class TyxCalendarWeekOption {
   Widget Function(BuildContext context, TyxEvent item)? eventIndicatorBuilder;
+  TyxCalendarWeekOption({
+    this.eventIndicatorBuilder,
+  });
 }
 
 class TyxCalendarDayOption {
   Widget Function(BuildContext context, TyxEventEnhanced item)?
       eventIndicatorBuilder;
   Widget Function(BuildContext context, TyxEvent item)? eventListTileBuilder;
+  TyxCalendarDayOption({
+    this.eventIndicatorBuilder,
+    this.eventListTileBuilder,
+  });
 }
