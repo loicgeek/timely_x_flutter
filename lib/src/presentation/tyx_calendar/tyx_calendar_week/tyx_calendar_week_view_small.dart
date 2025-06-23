@@ -3,12 +3,12 @@ import 'package:intl/intl.dart';
 import 'package:timely_x/src/models/tyx_calendar_border.dart';
 import 'package:timely_x/timely_x.dart';
 
-class TyxCalendarWeekViewSmall extends StatefulWidget {
-  final TyxCalendarOption option;
+class TyxCalendarWeekViewSmall<T extends TyxEvent> extends StatefulWidget {
+  final TyxCalendarOption<T> option;
   final DateTime? initialDate;
   final Function(DateTime date)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
-  final Function(TyxEvent)? onEventTapped;
+  final Function(T)? onEventTapped;
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
 
@@ -24,11 +24,12 @@ class TyxCalendarWeekViewSmall extends StatefulWidget {
   });
 
   @override
-  State<TyxCalendarWeekViewSmall> createState() =>
-      _TyxCalendarWeekViewSmallState();
+  State<TyxCalendarWeekViewSmall<T>> createState() =>
+      _TyxCalendarWeekViewSmallState<T>();
 }
 
-class _TyxCalendarWeekViewSmallState extends State<TyxCalendarWeekViewSmall> {
+class _TyxCalendarWeekViewSmallState<T extends TyxEvent>
+    extends State<TyxCalendarWeekViewSmall<T>> {
   late DateTime _selectedDate;
   late List<DateTime> _weekDays;
   final ScrollController _eventsScrollController = ScrollController();
@@ -418,7 +419,7 @@ class _TyxCalendarWeekViewSmallState extends State<TyxCalendarWeekViewSmall> {
 
   Widget _buildEventsOverlay() {
     // Only show events for the selected date
-    List<TyxEvent> selectedDayEvents = [];
+    List<T> selectedDayEvents = [];
 
     for (var event in widget.option.events ?? []) {
       if (_isSameDay(event.start, _selectedDate)) {

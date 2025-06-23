@@ -3,12 +3,12 @@ import 'package:intl/intl.dart';
 import 'package:timely_x/src/models/tyx_calendar_border.dart';
 import 'package:timely_x/timely_x.dart';
 
-class TyxCalendarWeekViewLarge extends StatefulWidget {
-  final TyxCalendarOption option;
+class TyxCalendarWeekViewLarge<T extends TyxEvent> extends StatefulWidget {
+  final TyxCalendarOption<T> option;
   final DateTime? initialDate;
-  final Function(DateTime date, List<TyxEvent> events)? onDateChanged;
+  final Function(DateTime date, List<T> events)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
-  final Function(TyxEvent)? onEventTapped;
+  final Function(T)? onEventTapped;
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
 
@@ -24,11 +24,12 @@ class TyxCalendarWeekViewLarge extends StatefulWidget {
   });
 
   @override
-  State<TyxCalendarWeekViewLarge> createState() =>
-      _TyxCalendarWeekViewLargeState();
+  State<TyxCalendarWeekViewLarge<T>> createState() =>
+      _TyxCalendarWeekViewLargeState<T>();
 }
 
-class _TyxCalendarWeekViewLargeState extends State<TyxCalendarWeekViewLarge> {
+class _TyxCalendarWeekViewLargeState<T extends TyxEvent>
+    extends State<TyxCalendarWeekViewLarge<T>> {
   late DateTime _selectedDate;
   late List<DateTime> _weekDays;
   final ScrollController _scrollController = ScrollController();
@@ -463,7 +464,7 @@ class _TyxCalendarWeekViewLargeState extends State<TyxCalendarWeekViewLarge> {
 
   Widget _buildEventsOverlay() {
     // Group events by day
-    Map<int, List<TyxEvent>> eventsByDay = {};
+    Map<int, List<T>> eventsByDay = {};
 
     for (var event in widget.option.events ?? []) {
       for (int i = 0; i < _weekDays.length; i++) {
@@ -488,7 +489,7 @@ class _TyxCalendarWeekViewLargeState extends State<TyxCalendarWeekViewLarge> {
           const SizedBox(width: 60),
           // Day columns with events
           ...List.generate(7, (dayIndex) {
-            List<TyxEvent> dayEvents = eventsByDay[dayIndex] ?? [];
+            List<T> dayEvents = eventsByDay[dayIndex] ?? [];
 
             return Expanded(
               child: Stack(
