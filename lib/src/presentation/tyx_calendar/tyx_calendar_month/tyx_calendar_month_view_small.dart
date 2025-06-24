@@ -252,6 +252,8 @@ class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
       return const SizedBox.shrink();
     }
 
+    var maxtIndicators = widget.option.monthOption?.maxIndicatorsPerDay ?? 4;
+
     var theme = Theme.of(context);
     var colorScheme = theme.colorScheme;
 
@@ -301,7 +303,7 @@ class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  for (final event in events) ...[
+                  for (final event in events.take(maxtIndicators)) ...[
                     Container(
                       width: 6,
                       height: 6,
@@ -311,8 +313,18 @@ class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
                             .primary,
                         shape: BoxShape.circle,
                       ),
-                    )
+                    ),
                   ],
+                  if (events.length > maxtIndicators)
+                    FittedBox(
+                      child: Text(
+                        "(+${events.length - maxtIndicators})",
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.disabledColor,
+                          fontSize: 8,
+                        ),
+                      ),
+                    ),
                 ],
               )
           ],

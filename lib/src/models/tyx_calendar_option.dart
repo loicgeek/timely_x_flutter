@@ -54,10 +54,12 @@ class TyxCalendarOption<T extends TyxEvent> {
 class TyxCalendarMonthOption<T> {
   Widget Function(BuildContext context, T item)? eventListTileBuilder;
   Widget Function(BuildContext context, T item)? eventIndicatorBuilder;
+  final int maxIndicatorsPerDay;
 
   TyxCalendarMonthOption({
     this.eventListTileBuilder,
     this.eventIndicatorBuilder,
+    this.maxIndicatorsPerDay = 4,
   });
 }
 
