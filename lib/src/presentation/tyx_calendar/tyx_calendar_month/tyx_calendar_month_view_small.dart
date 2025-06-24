@@ -317,11 +317,13 @@ class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
                   ],
                   if (events.length > maxtIndicators)
                     FittedBox(
-                      child: Text(
-                        "(+${events.length - maxtIndicators})",
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.disabledColor,
-                          fontSize: 8,
+                      child: Center(
+                        child: Text(
+                          "+${events.length - maxtIndicators}",
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurface,
+                            fontSize: 8,
+                          ),
                         ),
                       ),
                     ),
