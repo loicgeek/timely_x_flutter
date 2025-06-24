@@ -1,3 +1,5 @@
+## 0.0.11
+* Fixed large view for calendar
 ## 0.0.9
 * Added event builder for each calendar view
 ## 0.0.7
