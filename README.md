@@ -91,35 +91,138 @@ class CalendarScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: TyxCalendarView(
-        option: TyxCalendarOption(
-          initialView: TyxView.week,
-          initialDate: DateTime.now(),
-          events: events,
-          timeslotStartTime: TimeOfDay(hour: 8, minute: 0),
-          timeslotEndTime: TimeOfDay(hour: 20, minute: 0),
-        ),
-        onDateChanged: (date) {
-          // Handle date selection
-          print('Selected date: $date');
-        },
-        onEventTapped: (event) {
-          // Handle event tap
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text(event.title ?? 'Event'),
-              content: Text('Event details here'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Close'),
+      body:   Expanded(
+              child: TyxCalendarView<AppointmentModel>(
+                onViewChanged: (view) {
+                  //  _activeView = view;
+                },
+                onDateChanged: (view, events) {},
+                onBorderChanged: (border) {
+                  _filter = (_filter ?? AppointmentFilter())
+                      .copyWith(startDate: border.start, endDate: border.end);
+                  _loadAppointments();
+                },
+                option: TyxCalendarOption<AppointmentModel>(
+                  timesCellWidth: 60,
+                  initialView: TyxView.day,
+                  events: allEvents,
+                  monthOption: TyxCalendarMonthOption<AppointmentModel>(
+                    eventListTileBuilder: (context, event) {
+                      var colorScheme = ColorScheme.fromSeed(
+                        seedColor: event.provider!.appointmentColor != null
+                            ? ColorsUtils.hexToColor(
+                                event.provider!.appointmentColor!)
+                            : event.color,
+                      );
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        elevation: 0.2,
+                        surfaceTintColor: colorScheme.primaryContainer,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 4,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 4, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: colorScheme.primaryContainer,
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                          child: SelectableText(
+                                            event.code ?? 'N/A',
+                                            style: TextStyle(
+                                              color: colorScheme
+                                                  .onPrimaryContainer,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            AppointmentUtils
+                                                .getAppointmentTitle(event),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleSmall
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${TimeOfDay.fromDateTime(event.start).format(context)} - ${TimeOfDay.fromDateTime(event.end).format(context)}',
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                    if (event.store != null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.location_on_outlined,
+                                              size: 14,
+                                              color: Theme.of(context)
+                                                  .disabledColor,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                event.store!.name!,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall
+                                                    ?.copyWith(
+                                                      color: Theme.of(context)
+                                                          .disabledColor,
+                                                    ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ],
-            ),
-          );
-        },
-      ),
+                onEventTapped: (event) {
+                  context.router.push(AppointmentDetailsRoute(id: event.id));
+                },
+              ),
+            ),,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Add new event

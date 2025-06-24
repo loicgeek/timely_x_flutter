@@ -4,7 +4,6 @@ import 'package:timely_x/src/models/tyx_calendar_border.dart';
 import 'package:timely_x/timely_x.dart';
 
 import 'tyx_calendar_week_view_large.dart';
-import 'tyx_calendar_week_view_small.dart';
 
 class TyxCalendarWeekView<T extends TyxEvent> extends StatefulWidget {
   final TyxCalendarOption<T> option;
@@ -27,16 +26,17 @@ class TyxCalendarWeekView<T extends TyxEvent> extends StatefulWidget {
   });
 
   @override
-  State<TyxCalendarWeekView> createState() => _TyxCalendarWeekViewState();
+  State<TyxCalendarWeekView<T>> createState() => _TyxCalendarWeekViewState<T>();
 }
 
-class _TyxCalendarWeekViewState extends State<TyxCalendarWeekView> {
+class _TyxCalendarWeekViewState<T extends TyxEvent>
+    extends State<TyxCalendarWeekView<T>> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         // bool isLargeScreen = constraints.maxWidth > 600;
-        return TyxCalendarWeekViewLarge(
+        return TyxCalendarWeekViewLarge<T>(
           option: widget.option,
           initialDate: widget.initialDate,
           onDateChanged: widget.onDateChanged,

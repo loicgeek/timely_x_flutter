@@ -6,7 +6,7 @@ import 'package:timely_x/src/models/tyx_view.dart';
 import 'tyx_resource.dart';
 import 'tyx_resource_enhanced.dart';
 
-class TyxCalendarOption<T> {
+class TyxCalendarOption<T extends TyxEvent> {
   final double? timeslotHeight;
   final Duration? timelotSlotDuration;
   final DateTime? initialDate;
@@ -61,14 +61,14 @@ class TyxCalendarMonthOption<T> {
   });
 }
 
-class TyxCalendarWeekOption<T> {
+class TyxCalendarWeekOption<T extends TyxEvent> {
   Widget Function(BuildContext context, T item)? eventIndicatorBuilder;
   TyxCalendarWeekOption({
     this.eventIndicatorBuilder,
   });
 }
 
-class TyxCalendarDayOption<T> {
+class TyxCalendarDayOption<T extends TyxEvent> {
   Widget Function(BuildContext context, TyxEventEnhanced item)?
       eventIndicatorBuilder;
   Widget Function(BuildContext context, T item)? eventListTileBuilder;
