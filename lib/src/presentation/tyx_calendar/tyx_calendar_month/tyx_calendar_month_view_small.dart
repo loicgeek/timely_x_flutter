@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timely_x/src/models/tyx_calendar_border.dart';
-import 'package:timely_x/src/models/tyx_view.dart';
+
 import 'package:timely_x/timely_x.dart';
 
 class TyxCalendarMonthViewSmall<T extends TyxEvent> extends StatefulWidget {
   final TyxCalendarOption<T> option;
-  final DateTime? initialDate;
 
   final Function(T)? onEventTapped;
   final void Function(DateTime date, List<T> events)? onDateChanged;
@@ -17,7 +16,6 @@ class TyxCalendarMonthViewSmall<T extends TyxEvent> extends StatefulWidget {
   const TyxCalendarMonthViewSmall({
     super.key,
     required this.option,
-    this.initialDate,
     this.onEventTapped,
     this.onDateChanged,
     this.onViewChanged,
@@ -39,7 +37,7 @@ class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
   @override
   void initState() {
     super.initState();
-    _selectedDate = widget.initialDate ?? DateTime.now();
+    _selectedDate = widget.option.initialDate ?? DateTime.now();
     _currentMonth = DateTime(_selectedDate.year, _selectedDate.month, 1);
   }
 

@@ -6,7 +6,7 @@ import 'package:timely_x/timely_x.dart';
 
 class TyxCalendarMonthViewLarge<T extends TyxEvent> extends StatefulWidget {
   final TyxCalendarOption<T> option;
-  final DateTime? initialDate;
+
   final Function(DateTime date, List<T> events)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
   final TyxView view;
@@ -15,7 +15,6 @@ class TyxCalendarMonthViewLarge<T extends TyxEvent> extends StatefulWidget {
   const TyxCalendarMonthViewLarge({
     super.key,
     required this.option,
-    this.initialDate,
     this.onDateChanged,
     this.onViewChanged,
     this.onBorderChanged,
@@ -36,7 +35,7 @@ class _TyxCalendarMonthViewLargeState<T extends TyxEvent>
   @override
   void initState() {
     super.initState();
-    _selectedDate = widget.initialDate ?? DateTime.now();
+    _selectedDate = widget.option.initialDate ?? DateTime.now();
     _currentMonth = DateTime(_selectedDate.year, _selectedDate.month, 1);
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:jiffy/jiffy.dart';
+
+import 'package:timely_x/src/models/tyx_calendar_border.dart';
 import 'package:timely_x/src/models/tyx_calendar_option.dart';
 import 'package:timely_x/src/models/tyx_event.dart';
 import 'package:timely_x/src/models/tyx_event_enhanced.dart';
@@ -8,19 +9,20 @@ import 'package:timely_x/src/models/tyx_view.dart';
 
 class TyxCalendarDayViewSmall<T extends TyxEvent> extends StatefulWidget {
   final TyxCalendarOption<T> option;
-  final Function(DateTime)? onDateSelected;
+
   final Function(T)? onEventTapped;
   final Function(DateTime date)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
+  final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
 
   const TyxCalendarDayViewSmall({
     super.key,
     required this.option,
-    this.onDateSelected,
     this.onEventTapped,
     this.onDateChanged,
     this.onViewChanged,
+    this.onBorderChanged,
     required this.view,
   });
 
@@ -155,8 +157,13 @@ class _TyxCalendarDayViewSmallState<T extends TyxEvent>
                   setState(() {
                     _selectedDate =
                         _selectedDate.subtract(const Duration(days: 1));
+                    widget.onBorderChanged?.call(TyxCalendarBorder(
+                      start: _selectedDate,
+                      end: DateTime(_selectedDate.year, _selectedDate.month,
+                          _selectedDate.day, 23, 59, 59),
+                    ));
                   });
-                  widget.onDateSelected?.call(_selectedDate);
+                  widget.onDateChanged?.call(_selectedDate);
                 },
               ),
               Column(
@@ -178,8 +185,13 @@ class _TyxCalendarDayViewSmallState<T extends TyxEvent>
                 onPressed: () {
                   setState(() {
                     _selectedDate = _selectedDate.add(const Duration(days: 1));
+                    widget.onBorderChanged?.call(TyxCalendarBorder(
+                      start: _selectedDate,
+                      end: DateTime(_selectedDate.year, _selectedDate.month,
+                          _selectedDate.day, 23, 59, 59),
+                    ));
                   });
-                  widget.onDateSelected?.call(_selectedDate);
+                  widget.onDateChanged?.call(_selectedDate);
                 },
               ),
             ],

@@ -105,10 +105,11 @@ class _TyxCalendarViewState<T extends TyxEvent>
                   key: ValueKey(
                       "${_currentDate.year}-${_currentDate.month}-${_currentDate.day}"),
                   option: widget.option as TyxCalendarOption<T>,
-                  initialDate: _currentDate,
+
                   onViewChanged: _onViewChanged,
                   view: _view,
-                  onDateSelected: _onDateChanged,
+                  onDateChanged: _onDateChanged,
+                  onBorderChanged: widget.onBorderChanged,
 
                   // onEventTapped: widget.onEventTapped,
                 ),
@@ -118,7 +119,6 @@ class _TyxCalendarViewState<T extends TyxEvent>
                       "${_currentDate.year}-${_currentDate.month}-${_currentDate.day}"),
                   option: widget.option as TyxCalendarOption<T>,
                   view: _view,
-                  initialDate: _currentDate,
                   onViewChanged: _onViewChanged,
                   onDateChanged: (date, events) {
                     setState(() {
@@ -133,7 +133,6 @@ class _TyxCalendarViewState<T extends TyxEvent>
                   key: ValueKey("${_currentDate.year}-${_currentDate.month}"),
                   option: widget.option as TyxCalendarOption<T>,
                   view: _view,
-                  initialDate: _currentDate,
                   onViewChanged: _onViewChanged,
                   onDateChanged: (date, events) {
                     setState(() {

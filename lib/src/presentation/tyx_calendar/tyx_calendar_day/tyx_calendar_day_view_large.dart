@@ -1,29 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:timely_x/src/models/tyx_calendar_option.dart';
-import 'package:timely_x/src/models/tyx_event.dart';
-import 'package:timely_x/src/models/tyx_event_enhanced.dart';
-import 'package:timely_x/src/models/tyx_view.dart';
+import 'package:timely_x/src/models/tyx_calendar_border.dart';
 import 'package:timely_x/timely_x.dart';
 
 class TyxCalendarDayViewLarge<T extends TyxEvent> extends StatefulWidget {
   final TyxCalendarOption<T> option;
-  final Function(DateTime)? onDateSelected;
+
   final Function(T)? onEventTapped;
   final Function(DateTime date)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
+  final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
-  final DateTime? initialDate;
 
   const TyxCalendarDayViewLarge({
     super.key,
     required this.option,
-    this.onDateSelected,
     this.onEventTapped,
     this.onDateChanged,
     this.onViewChanged,
+    this.onBorderChanged,
     required this.view,
-    this.initialDate,
   });
 
   @override
@@ -47,7 +43,7 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
   @override
   void initState() {
     super.initState();
-    _selectedDate = widget.initialDate ?? DateTime.now();
+    _selectedDate = widget.option.initialDate ?? DateTime.now();
     _timeslotHeight = widget.option.timeslotHeight ?? 60.0;
     _slotDuration =
         widget.option.timelotSlotDuration ?? const Duration(minutes: 15);
@@ -96,6 +92,13 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
         curve: Curves.easeOut,
       );
     }
+  }
+
+  void _onDateChanged(DateTime date) {
+    setState(() {
+      _selectedDate = date;
+      widget.onDateChanged?.call(date);
+    });
   }
 
   @override
@@ -191,14 +194,17 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                     onPressed: () {
-                      setState(() {
-                        _selectedDate = DateTime(
-                          _selectedDate.year,
-                          _selectedDate.month - 1,
-                          _selectedDate.day,
-                        );
-                        widget.onDateChanged?.call(_selectedDate);
-                      });
+                      var newDate = DateTime(
+                        _selectedDate.year,
+                        _selectedDate.month - 1,
+                        _selectedDate.day,
+                      );
+                      widget.onBorderChanged?.call(TyxCalendarBorder(
+                        start: newDate,
+                        end: DateTime(newDate.year, newDate.month, newDate.day,
+                            23, 59, 59),
+                      ));
+                      _onDateChanged(newDate);
                     },
                   ),
                   const SizedBox(width: 8),
@@ -207,14 +213,17 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                     onPressed: () {
-                      setState(() {
-                        _selectedDate = DateTime(
-                          _selectedDate.year,
-                          _selectedDate.month + 1,
-                          _selectedDate.day,
-                        );
-                        widget.onDateChanged?.call(_selectedDate);
-                      });
+                      var newDate = DateTime(
+                        _selectedDate.year,
+                        _selectedDate.month + 1,
+                        _selectedDate.day,
+                      );
+                      widget.onBorderChanged?.call(TyxCalendarBorder(
+                        start: newDate,
+                        end: DateTime(newDate.year, newDate.month, newDate.day,
+                            23, 59, 59),
+                      ));
+                      _onDateChanged(newDate);
                     },
                   ),
                 ],
@@ -290,10 +299,7 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
 
               return InkWell(
                 onTap: () {
-                  setState(() {
-                    _selectedDate = date;
-                    widget.onDateSelected?.call(date);
-                  });
+                  _onDateChanged(date);
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -509,11 +515,17 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
               IconButton(
                 icon: const Icon(Icons.chevron_left),
                 onPressed: () {
-                  setState(() {
-                    _selectedDate =
-                        _selectedDate.subtract(const Duration(days: 1));
-                  });
-                  widget.onDateSelected?.call(_selectedDate);
+                  var newDate = DateTime(
+                    _selectedDate.year,
+                    _selectedDate.month,
+                    _selectedDate.day - 1,
+                  );
+                  widget.onBorderChanged?.call(TyxCalendarBorder(
+                    start: newDate,
+                    end: DateTime(
+                        newDate.year, newDate.month, newDate.day, 23, 59, 59),
+                  ));
+                  _onDateChanged(newDate);
                 },
               ),
               Column(
@@ -534,10 +546,17 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
               IconButton(
                 icon: const Icon(Icons.chevron_right),
                 onPressed: () {
-                  setState(() {
-                    _selectedDate = _selectedDate.add(const Duration(days: 1));
-                  });
-                  widget.onDateSelected?.call(_selectedDate);
+                  var newDate = DateTime(
+                    _selectedDate.year,
+                    _selectedDate.month,
+                    _selectedDate.day + 1,
+                  );
+                  widget.onBorderChanged?.call(TyxCalendarBorder(
+                    start: newDate,
+                    end: DateTime(
+                        newDate.year, newDate.month, newDate.day, 23, 59, 59),
+                  ));
+                  _onDateChanged(newDate);
                 },
               ),
             ],
@@ -548,10 +567,12 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
               OutlinedButton(
                 onPressed: () {
                   final now = DateTime.now();
-                  setState(() {
-                    _selectedDate = now;
-                  });
-                  widget.onDateSelected?.call(now);
+                  widget.onBorderChanged?.call(TyxCalendarBorder(
+                    start: now,
+                    end: DateTime(now.year, now.month, now.day, 23, 59, 59),
+                  ));
+
+                  _onDateChanged(now);
                   _scrollToCurrentTime();
                 },
                 child: const Text('Today'),
