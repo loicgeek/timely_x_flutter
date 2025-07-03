@@ -1,3 +1,6 @@
+
+## 0.0.12
+* Added border changed callback for day view
 ## 0.0.11
 * Fixed large view for calendar
 ## 0.0.9

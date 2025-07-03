@@ -71,7 +71,7 @@ class TyxCalendarWeekOption<T extends TyxEvent> {
 }
 
 class TyxCalendarDayOption<T extends TyxEvent> {
-  Widget Function(BuildContext context, TyxEventEnhanced item)?
+  Widget Function(BuildContext context, TyxEventEnhanced<T> item)?
       eventIndicatorBuilder;
   Widget Function(BuildContext context, T item)? eventListTileBuilder;
   TyxCalendarDayOption({

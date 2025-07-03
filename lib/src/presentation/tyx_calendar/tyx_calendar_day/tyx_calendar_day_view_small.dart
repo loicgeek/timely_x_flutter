@@ -350,7 +350,7 @@ class _TyxCalendarDayViewSmallState<T extends TyxEvent>
   }
 
   Widget _buildDefaultEventTile(
-      T event, TyxEventEnhanced enhancedEvent, ThemeData theme) {
+      T event, TyxEventEnhanced<T> enhancedEvent, ThemeData theme) {
     final colorScheme = ColorScheme.fromSeed(seedColor: event.color);
 
     return Card(

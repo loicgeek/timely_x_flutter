@@ -1,8 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'tyx_event.dart';
 
-class TyxEventEnhanced {
-  TyxEvent e;
+class TyxEventEnhanced<T> {
+  T e;
   double position;
   double height;
   double width;
