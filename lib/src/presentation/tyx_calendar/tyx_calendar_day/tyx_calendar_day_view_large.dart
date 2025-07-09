@@ -39,10 +39,12 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
 
   // Track scroll position to keep events and time grid in sync
   double _scrollOffset = 0.0;
+  List<T> _events = [];
 
   @override
   void initState() {
     super.initState();
+    _events = widget.option.events ?? [];
     _selectedDate = widget.option.initialDate ?? DateTime.now();
     _timeslotHeight = widget.option.timeslotHeight ?? 60.0;
     _slotDuration =
@@ -56,6 +58,14 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToCurrentTime();
     });
+  }
+
+  _monthHasChanged() async {
+    _events = await widget.option.eventsRetriever(TyxCalendarBorder(
+      start: DateTime(_selectedDate.year, _selectedDate.month, 1),
+      end: DateTime(_selectedDate.year, _selectedDate.month + 1, 0),
+    ));
+    setState(() {});
   }
 
   @override
@@ -199,6 +209,9 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
                         _selectedDate.month - 1,
                         _selectedDate.day,
                       );
+                      if (_selectedDate.month != newDate.month) {
+                        _monthHasChanged();
+                      }
                       widget.onBorderChanged?.call(TyxCalendarBorder(
                         start: newDate,
                         end: DateTime(newDate.year, newDate.month, newDate.day,
@@ -218,6 +231,9 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
                         _selectedDate.month + 1,
                         _selectedDate.day,
                       );
+                      if (_selectedDate.month != newDate.month) {
+                        _monthHasChanged();
+                      }
                       widget.onBorderChanged?.call(TyxCalendarBorder(
                         start: newDate,
                         end: DateTime(newDate.year, newDate.month, newDate.day,
@@ -520,6 +536,9 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
                     _selectedDate.month,
                     _selectedDate.day - 1,
                   );
+                  if (_selectedDate.month != newDate.month) {
+                    _monthHasChanged();
+                  }
                   widget.onBorderChanged?.call(TyxCalendarBorder(
                     start: newDate,
                     end: DateTime(
@@ -551,6 +570,9 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
                     _selectedDate.month,
                     _selectedDate.day + 1,
                   );
+                  if (_selectedDate.month != newDate.month) {
+                    _monthHasChanged();
+                  }
                   widget.onBorderChanged?.call(TyxCalendarBorder(
                     start: newDate,
                     end: DateTime(
@@ -983,9 +1005,7 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
   }
 
   List<T> _getEventsForDay(DateTime day) {
-    return (widget.option.events ?? [])
-        .where((event) => isSameDay(event.start, day))
-        .toList();
+    return _events.where((event) => isSameDay(event.start, day)).toList();
   }
 
   // Helper function to get maximum of two values

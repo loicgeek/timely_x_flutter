@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:timely_x/src/models/tyx_calendar_border.dart';
 import 'package:timely_x/src/models/tyx_event.dart';
 import 'package:timely_x/src/models/tyx_event_enhanced.dart';
 import 'package:timely_x/src/models/tyx_view.dart';
@@ -27,6 +30,7 @@ class TyxCalendarOption<T extends TyxEvent> {
   final TyxCalendarMonthOption<T>? monthOption;
   final TyxCalendarWeekOption<T>? weekOption;
   final TyxCalendarDayOption<T>? dayOption;
+  final FutureOr<List<T>> Function(TyxCalendarBorder border) eventsRetriever;
 
   Widget Function(BuildContext context, TyxResourceEnhanced item)?
       resourceBuilder;
@@ -48,6 +52,7 @@ class TyxCalendarOption<T extends TyxEvent> {
     this.monthOption,
     this.weekOption,
     this.dayOption,
+    required this.eventsRetriever,
   });
 }
 
