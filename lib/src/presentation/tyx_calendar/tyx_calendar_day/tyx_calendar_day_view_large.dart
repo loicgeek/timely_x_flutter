@@ -61,10 +61,6 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
   }
 
   _monthHasChanged() async {
-    _events = await widget.option.eventsRetriever(TyxCalendarBorder(
-      start: DateTime(_selectedDate.year, _selectedDate.month, 1),
-      end: DateTime(_selectedDate.year, _selectedDate.month + 1, 0),
-    ));
     setState(() {});
   }
 
