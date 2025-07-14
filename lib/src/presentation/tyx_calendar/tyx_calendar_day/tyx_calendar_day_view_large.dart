@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timely_x/src/models/tyx_calendar_border.dart';
@@ -11,6 +14,7 @@ class TyxCalendarDayViewLarge<T extends TyxEvent> extends StatefulWidget {
   final Function(TyxView view)? onViewChanged;
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
+  final OnRightClick? onRightClick;
 
   const TyxCalendarDayViewLarge({
     super.key,
@@ -20,6 +24,7 @@ class TyxCalendarDayViewLarge<T extends TyxEvent> extends StatefulWidget {
     this.onViewChanged,
     this.onBorderChanged,
     required this.view,
+    this.onRightClick,
   });
 
   @override
@@ -621,6 +626,18 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
     return _timeslotHeight * slotsPerHour;
   }
 
+  _callRightClick({
+    required Offset position,
+    DateTime? date,
+    required List<T>? events,
+  }) {
+    widget.onRightClick?.call(
+      position,
+      date,
+      events,
+    );
+  }
+
   Widget _buildDayView() {
     final dayStartHour = widget.option.timeslotStartTime?.hour ?? 0;
     const dayEndHour = 24; // Full day (24 hours)
@@ -755,65 +772,128 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
 
     return SizedBox(
       width: containerWidth,
-      child: Stack(
-        fit: StackFit.passthrough,
-        children: [
-          for (var i = 0; i < groupedEvents.length; i++)
-            for (var j = 0; j < groupedEvents[i].length; j++) ...[
-              Builder(builder: (context) {
-                final event = groupedEvents[i][j];
-                final position = j;
-                final totalOverlapping = groupedEvents[i].length;
+      child: GestureDetector(
+        onLongPressStart: (details) {
+          final localDy = details.localPosition.dy.clamp(0.0, double.infinity);
+          final hourDecimal =
+              localDy / _timeslotHeight * _slotDuration.inMinutes / 60 +
+                  dayStartHour;
 
-                // Convert to minutes since day start
-                final dayStart = DateTime(_selectedDate.year,
-                    _selectedDate.month, _selectedDate.day, dayStartHour);
+          final hour = hourDecimal.floor();
+          final minute = ((hourDecimal - hour) * 60).round();
 
-                int startMinutes = event.start.difference(dayStart).inMinutes;
-                double top =
-                    (startMinutes / _slotDuration.inMinutes) * _timeslotHeight;
+          final tappedDate = DateTime(
+            _selectedDate.year,
+            _selectedDate.month,
+            _selectedDate.day,
+            hour,
+            minute,
+          );
 
-                int eventDurationInMinutes =
-                    event.end.difference(event.start).inMinutes;
-                double height =
-                    (eventDurationInMinutes / _slotDuration.inMinutes) *
-                        _timeslotHeight;
+          _callRightClick(
+            position: details.globalPosition,
+            date: tappedDate,
+            events: [],
+          );
+        },
+        child: Listener(
+          onPointerDown: (eventGesture) {
+            if (eventGesture.kind == PointerDeviceKind.mouse &&
+                eventGesture.buttons == kSecondaryMouseButton) {
+              final localDy =
+                  eventGesture.localPosition.dy.clamp(0.0, double.infinity);
+              final hourDecimal =
+                  localDy / _timeslotHeight * _slotDuration.inMinutes / 60 +
+                      dayStartHour;
 
-                // Calculate horizontal position using parent width
-                final width = availableWidth / totalOverlapping;
-                final left = timeColumnWidth + (position * width);
+              final hour = hourDecimal.floor();
+              final minute = ((hourDecimal - hour) * 60).round();
 
-                // Create an enhanced event
-                final enhancedEvent = TyxEventEnhanced(
-                  e: event,
-                  position: top,
-                  height: height,
-                  width: width,
-                  offsetX: left,
-                  groupSize: totalOverlapping,
-                );
+              final clickedDate = DateTime(
+                _selectedDate.year,
+                _selectedDate.month,
+                _selectedDate.day,
+                hour,
+                minute,
+              );
 
-                // Use custom builder or default rendering
-                Widget eventWidget =
-                    widget.option.dayOption?.eventIndicatorBuilder != null
-                        ? widget.option.dayOption!.eventIndicatorBuilder!(
-                            context, enhancedEvent)
-                        : _buildDefaultEventTile(event, enhancedEvent, theme);
+              _callRightClick(
+                position: eventGesture.position,
+                date: clickedDate,
+                events: [],
+              );
+            }
+          },
+          child: Stack(
+            fit: StackFit.passthrough,
+            children: [
+              Positioned.fill(
+                child: Container(
+                  color: Colors.transparent,
+                ),
+              ),
+              for (var i = 0; i < groupedEvents.length; i++)
+                for (var j = 0; j < groupedEvents[i].length; j++) ...[
+                  Builder(
+                    builder: (context) {
+                      final event = groupedEvents[i][j];
+                      final position = j;
+                      final totalOverlapping = groupedEvents[i].length;
 
-                // Position the event widget
-                return Positioned(
-                  top: top,
-                  left: left,
-                  height: height,
-                  width: width,
-                  child: GestureDetector(
-                    onTap: () => widget.onEventTapped?.call(event),
-                    child: eventWidget,
+                      // Convert to minutes since day start
+                      final dayStart = DateTime(_selectedDate.year,
+                          _selectedDate.month, _selectedDate.day, dayStartHour);
+
+                      int startMinutes =
+                          event.start.difference(dayStart).inMinutes;
+                      double top = (startMinutes / _slotDuration.inMinutes) *
+                          _timeslotHeight;
+
+                      int eventDurationInMinutes =
+                          event.end.difference(event.start).inMinutes;
+                      double height =
+                          (eventDurationInMinutes / _slotDuration.inMinutes) *
+                              _timeslotHeight;
+
+                      // Calculate horizontal position using parent width
+                      final width = availableWidth / totalOverlapping;
+                      final left = timeColumnWidth + (position * width);
+
+                      // Create an enhanced event
+                      final enhancedEvent = TyxEventEnhanced(
+                        e: event,
+                        position: top,
+                        height: height,
+                        width: width,
+                        offsetX: left,
+                        groupSize: totalOverlapping,
+                      );
+
+                      // Use custom builder or default rendering
+                      Widget eventWidget = widget
+                                  .option.dayOption?.eventIndicatorBuilder !=
+                              null
+                          ? widget.option.dayOption!.eventIndicatorBuilder!(
+                              context, enhancedEvent)
+                          : _buildDefaultEventTile(event, enhancedEvent, theme);
+
+                      // Position the event widget
+                      return Positioned(
+                        top: top,
+                        left: left,
+                        height: height,
+                        width: width,
+                        child: GestureDetector(
+                          onTap: () => widget.onEventTapped?.call(event),
+                          child: eventWidget,
+                        ),
+                      );
+                    },
                   ),
-                );
-              }),
+                ],
             ],
-        ],
+          ),
+        ),
       ),
     );
   }

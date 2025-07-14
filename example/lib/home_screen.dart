@@ -23,6 +23,69 @@ class _HomeScreenState extends State<HomeScreen> {
     allEvents = generateEventsForDay(allResources, _currentDate);
   }
 
+  OverlayEntry? _contextMenu;
+
+  void _showContextMenu(BuildContext context, Offset position) {
+    _contextMenu?.remove();
+
+    _contextMenu = OverlayEntry(
+      builder: (context) => Stack(
+        children: [
+          // Transparent area to detect outside taps
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () {
+                _removeContextMenu();
+              },
+              behavior: HitTestBehavior.translucent,
+              child: Container(),
+            ),
+          ),
+
+          // Actual context menu
+          Positioned(
+            left: position.dx,
+            top: position.dy,
+            child: Material(
+              elevation: 4,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 200),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.add),
+                      title: const Text("New Event"),
+                      onTap: () {
+                        _removeContextMenu();
+                        print("Create new event at $position");
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.info),
+                      title: const Text("Details"),
+                      onTap: () {
+                        _removeContextMenu();
+                        print("Details clicked");
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    Overlay.of(context).insert(_contextMenu!);
+  }
+
+  void _removeContextMenu() {
+    _contextMenu?.remove();
+    _contextMenu = null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,12 +95,12 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               "Reservations",
               style: TextStyle(fontSize: 22),
             ),
-            SizedBox(height: 5),
-            Text("Tous vos services enregistrées sur la plateforme"),
+            const SizedBox(height: 5),
+            const Text("Tous vos services enregistrées sur la plateforme"),
             SizedBox(height: 10),
             // Expanded(
             //   child: TyxResourceView(
@@ -55,7 +118,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     print(border.start);
                     print(border.end);
                   },
+                  onRightClick: (position, date, events) {
+                    _showContextMenu(context, position);
+                    print(position);
+                    print(date);
+                    print(events);
+                  },
                   option: TyxCalendarOption(
+
                       // eventsRetriever: (border) async {
                       //   return generateEventsForMonth(
                       //       allResources, _currentDate);

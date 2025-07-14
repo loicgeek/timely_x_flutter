@@ -13,6 +13,7 @@ class TyxCalendarMonthView<T extends TyxEvent> extends StatefulWidget {
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
   final Function(T)? onEventTapped;
+  final OnRightClick? onRightClick;
   const TyxCalendarMonthView({
     super.key,
     required this.option,
@@ -21,6 +22,7 @@ class TyxCalendarMonthView<T extends TyxEvent> extends StatefulWidget {
     this.onBorderChanged,
     required this.view,
     this.onEventTapped,
+    this.onRightClick,
   });
 
   @override
@@ -43,6 +45,7 @@ class _TyxCalendarMonthViewState<T extends TyxEvent>
                 onBorderChanged: widget.onBorderChanged,
                 view: widget.view,
                 onEventTapped: widget.onEventTapped,
+                onRightClick: widget.onRightClick,
               )
             : TyxCalendarMonthViewSmall<T>(
                 option: widget.option,
@@ -51,6 +54,7 @@ class _TyxCalendarMonthViewState<T extends TyxEvent>
                 onBorderChanged: widget.onBorderChanged,
                 view: widget.view,
                 onEventTapped: widget.onEventTapped,
+                onRightClick: widget.onRightClick,
               );
       },
     );

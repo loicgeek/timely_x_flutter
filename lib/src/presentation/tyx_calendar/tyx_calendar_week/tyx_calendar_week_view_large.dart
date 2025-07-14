@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timely_x/src/models/tyx_calendar_border.dart';
@@ -11,6 +14,7 @@ class TyxCalendarWeekViewLarge<T extends TyxEvent> extends StatefulWidget {
   final Function(T)? onEventTapped;
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
+  final OnRightClick? onRightClick;
 
   const TyxCalendarWeekViewLarge({
     super.key,
@@ -21,6 +25,7 @@ class TyxCalendarWeekViewLarge<T extends TyxEvent> extends StatefulWidget {
     this.onEventTapped,
     this.onBorderChanged,
     required this.view,
+    this.onRightClick,
   });
 
   @override
@@ -462,6 +467,19 @@ class _TyxCalendarWeekViewLargeState<T extends TyxEvent>
     );
   }
 
+  _callRightClick({
+    required Offset position,
+    DateTime? date,
+    required List<T>? events,
+  }) {
+    print("ddd");
+    widget.onRightClick?.call(
+      position,
+      date,
+      events,
+    );
+  }
+
   Widget _buildEventsOverlay() {
     // Group events by day
     Map<int, List<T>> eventsByDay = {};
@@ -489,96 +507,172 @@ class _TyxCalendarWeekViewLargeState<T extends TyxEvent>
           const SizedBox(width: 60),
           // Day columns with events
           ...List.generate(7, (dayIndex) {
+            DateTime day = _weekDays[dayIndex];
             List<T> dayEvents = eventsByDay[dayIndex] ?? [];
 
             return Expanded(
-              child: Stack(
-                children: dayEvents.map((event) {
-                  // Calculate position and height for the event
-                  final startHour = event.start.hour + event.start.minute / 60;
-                  final endHour = event.end.hour + event.end.minute / 60;
+              child: Builder(
+                builder: (context) {
+                  return GestureDetector(
+                    onLongPressStart: (eventGesture) {
+                      final localDy = (eventGesture.localPosition.dy)
+                          .clamp(0, totalHeight); // ensure within bounds
+                      final hourDecimal = localDy / _hourHeight + _startHour;
 
-                  // Skip events outside our time range
-                  if (endHour < _startHour || startHour > _endHour) {
-                    return const SizedBox.shrink();
-                  }
+                      final int hour = hourDecimal.floor();
+                      final int minute = ((hourDecimal - hour) * 60).round();
 
-                  final clampedStartHour = startHour.clamp(
-                      _startHour.toDouble(), _endHour.toDouble());
-                  final clampedEndHour =
-                      endHour.clamp(_startHour.toDouble(), _endHour + 1.0);
+                      final dateTimeWithTime = DateTime(
+                        day.year,
+                        day.month,
+                        day.day,
+                        hour,
+                        minute,
+                      );
 
-                  final top = (clampedStartHour - _startHour) * _hourHeight;
-                  final height =
-                      (clampedEndHour - clampedStartHour) * _hourHeight;
+                      _callRightClick(
+                        position: eventGesture.globalPosition,
+                        date: dateTimeWithTime,
+                        events: [],
+                      );
+                    },
+                    child: Listener(
+                      onPointerDown: (eventGesture) {
+                        if (eventGesture.kind == PointerDeviceKind.mouse &&
+                            eventGesture.buttons == kSecondaryMouseButton) {
+                          final localDy = (eventGesture.localPosition.dy)
+                              .clamp(0, totalHeight); // ensure within bounds
+                          final hourDecimal =
+                              localDy / _hourHeight + _startHour;
 
-                  var colorScheme =
-                      ColorScheme.fromSeed(seedColor: event.color);
+                          final int hour = hourDecimal.floor();
+                          final int minute =
+                              ((hourDecimal - hour) * 60).round();
 
-                  return Positioned(
-                    top: top,
-                    left: 2,
-                    right: 2,
-                    height: height,
-                    child: GestureDetector(
-                      onTap: () => widget.onEventTapped?.call(event),
-                      child: widget.option.weekOption?.eventIndicatorBuilder
-                              ?.call(context, event) ??
-                          Card(
-                            margin: EdgeInsets.zero,
-                            color: colorScheme.primaryContainer,
-                            child: Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    event.title ?? 'Untitled Event',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: colorScheme.onPrimaryContainer,
+                          final dateTimeWithTime = DateTime(
+                            day.year,
+                            day.month,
+                            day.day,
+                            hour,
+                            minute,
+                          );
+
+                          _callRightClick(
+                            position: eventGesture.position,
+                            date: dateTimeWithTime,
+                            events: [],
+                          );
+                        }
+                      },
+                      child: Container(
+                        // Ensure full height to capture gestures
+                        height: totalHeight,
+                        width: double.infinity,
+                        color:
+                            Colors.transparent, // Important for hit detection
+                        child: Stack(
+                          children: dayEvents.map((event) {
+                            // Calculate position and height for the event
+                            final startHour =
+                                event.start.hour + event.start.minute / 60;
+                            final endHour =
+                                event.end.hour + event.end.minute / 60;
+
+                            // Skip events outside our time range
+                            if (endHour < _startHour || startHour > _endHour) {
+                              return const SizedBox.shrink();
+                            }
+
+                            final clampedStartHour = startHour.clamp(
+                                _startHour.toDouble(), _endHour.toDouble());
+                            final clampedEndHour = endHour.clamp(
+                                _startHour.toDouble(), _endHour + 1.0);
+
+                            final top =
+                                (clampedStartHour - _startHour) * _hourHeight;
+                            final height = (clampedEndHour - clampedStartHour) *
+                                _hourHeight;
+
+                            var colorScheme =
+                                ColorScheme.fromSeed(seedColor: event.color);
+
+                            return Positioned(
+                              top: top,
+                              left: 2,
+                              right: 2,
+                              height: height,
+                              child: widget
+                                      .option.weekOption?.eventIndicatorBuilder
+                                      ?.call(context, event) ??
+                                  GestureDetector(
+                                    onTap: () =>
+                                        widget.onEventTapped?.call(event),
+                                    child: Card(
+                                      margin: EdgeInsets.zero,
+                                      color: colorScheme.primaryContainer,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(4.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                event.title ?? 'Untitled Event',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall
+                                                    ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: colorScheme
+                                                          .onPrimaryContainer,
+                                                    ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            if (height > 40)
+                                              Text(
+                                                '${TimeOfDay.fromDateTime(event.start).format(context)} - ${TimeOfDay.fromDateTime(event.end).format(context)}',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall
+                                                    ?.copyWith(
+                                                      color: colorScheme
+                                                          .onPrimaryContainer,
+                                                    ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            if (height > 60 &&
+                                                event.locationAddress != null &&
+                                                event.locationAddress!
+                                                    .isNotEmpty)
+                                              Text(
+                                                event.locationAddress!,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall
+                                                    ?.copyWith(
+                                                      color: colorScheme
+                                                          .onPrimaryContainer,
+                                                    ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                          ],
                                         ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
                                   ),
-                                  if (height > 40)
-                                    Text(
-                                      '${TimeOfDay.fromDateTime(event.start).format(context)} - ${TimeOfDay.fromDateTime(event.end).format(context)}',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                            color:
-                                                colorScheme.onPrimaryContainer,
-                                          ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  if (height > 60 &&
-                                      event.locationAddress != null &&
-                                      event.locationAddress!.isNotEmpty)
-                                    Text(
-                                      event.locationAddress!,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                            color:
-                                                colorScheme.onPrimaryContainer,
-                                          ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
                     ),
                   );
-                }).toList(),
+                },
               ),
             );
           }),

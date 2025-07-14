@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timely_x/src/models/tyx_calendar_border.dart';
@@ -11,6 +14,7 @@ class TyxCalendarMonthViewLarge<T extends TyxEvent> extends StatefulWidget {
   final Function(TyxView view)? onViewChanged;
   final TyxView view;
   final Function(TyxCalendarBorder border)? onBorderChanged;
+  final OnRightClick? onRightClick;
   final Function(T)? onEventTapped;
   const TyxCalendarMonthViewLarge({
     super.key,
@@ -18,6 +22,7 @@ class TyxCalendarMonthViewLarge<T extends TyxEvent> extends StatefulWidget {
     this.onDateChanged,
     this.onViewChanged,
     this.onBorderChanged,
+    this.onRightClick,
     required this.view,
     this.onEventTapped,
   });
@@ -227,82 +232,135 @@ class _TyxCalendarMonthViewLargeState<T extends TyxEvent>
     var theme = Theme.of(context);
     var colorScheme = theme.colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: isToday ? colorScheme.secondary : colorScheme.outlineVariant,
-          width: isToday ? 1 : .5,
+    return GestureDetector(
+      onLongPressStart: (details) {
+        _callRightClick(
+            position: details.globalPosition,
+            date: DateTime(day.year, day.month, day.day),
+            events: dayEvents);
+      },
+      child: Listener(
+        onPointerDown: (eventGesture) {
+          if (eventGesture.kind == PointerDeviceKind.mouse &&
+              eventGesture.buttons == kSecondaryMouseButton) {
+            _callRightClick(
+              position: eventGesture.position,
+              date: DateTime(day.year, day.month, day.day),
+              events: dayEvents,
+            );
+          }
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color:
+                  isToday ? colorScheme.secondary : colorScheme.outlineVariant,
+              width: isToday ? 1 : .5,
+            ),
+          ),
+          child: Column(
+            children: [
+              // Day number
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                decoration: BoxDecoration(
+                  borderRadius: isToday
+                      ? const BorderRadius.vertical(top: Radius.circular(0))
+                      : null,
+                ),
+                child: Text(
+                  day.day.toString(),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                    color: !isCurrentMonth ? theme.disabledColor : null,
+                  ),
+                ),
+              ),
+
+              // Events for the day
+              Expanded(
+                child: dayEvents.isEmpty
+                    ? const SizedBox() // Empty placeholder
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 2, horizontal: 4),
+                        itemCount: dayEvents.length,
+                        itemBuilder: (context, index) {
+                          final event = dayEvents[index];
+                          return _buildEventIndicator(event);
+                        },
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
-      child: Column(
-        children: [
-          // Day number
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            decoration: BoxDecoration(
-              borderRadius: isToday
-                  ? const BorderRadius.vertical(top: Radius.circular(0))
-                  : null,
-            ),
-            child: Text(
-              day.day.toString(),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                color: !isCurrentMonth ? theme.disabledColor : null,
-              ),
-            ),
-          ),
+    );
+  }
 
-          // Events for the day
-          Expanded(
-            child: dayEvents.isEmpty
-                ? const SizedBox() // Empty placeholder
-                : ListView.builder(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
-                    itemCount: dayEvents.length,
-                    itemBuilder: (context, index) {
-                      final event = dayEvents[index];
-                      return _buildEventIndicator(event);
-                    },
-                  ),
-          ),
-        ],
-      ),
+  _callRightClick({
+    required Offset position,
+    DateTime? date,
+    required List<T>? events,
+  }) {
+    widget.onRightClick?.call(
+      position,
+      date,
+      events,
     );
   }
 
   Widget _buildEventIndicator(T event) {
     var colorScheme = ColorScheme.fromSeed(seedColor: event.color);
-    return GestureDetector(
-      onTap: () {
-        widget.onEventTapped?.call(event);
-      },
-      child: widget.option.monthOption?.eventIndicatorBuilder != null
-          ? widget.option.monthOption!.eventIndicatorBuilder!(context, event)
-          : Container(
-              margin: const EdgeInsets.only(bottom: 2),
-              padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 2),
-              decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border(
-                      left: BorderSide(
-                    color: colorScheme.primary,
-                    width: 5,
-                  ))),
-              child: Text(
-                "${TimeOfDay.fromDateTime(event.start).format(context)} ${event.title ?? ''}",
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onPrimaryContainer,
-                    ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+    return widget.option.monthOption?.eventIndicatorBuilder != null
+        ? widget.option.monthOption!.eventIndicatorBuilder!(context, event)
+        : GestureDetector(
+            onTap: () {
+              widget.onEventTapped?.call(event);
+            },
+            onLongPressStart: (details) {
+              _callRightClick(
+                  position: details.globalPosition,
+                  date: DateTime(
+                      event.start.year, event.start.month, event.start.day),
+                  events: [event]);
+            },
+            child: Listener(
+              onPointerDown: (eventGesture) {
+                if (eventGesture.kind == PointerDeviceKind.mouse &&
+                    eventGesture.buttons == kSecondaryMouseButton) {
+                  _callRightClick(
+                    position: eventGesture.position,
+                    date: DateTime(
+                        event.start.year, event.start.month, event.start.day),
+                    events: [event],
+                  );
+                }
+              },
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 2),
+                decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border(
+                        left: BorderSide(
+                      color: colorScheme.primary,
+                      width: 5,
+                    ))),
+                child: Text(
+                  "${TimeOfDay.fromDateTime(event.start).format(context)} ${event.title ?? ''}",
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onPrimaryContainer,
+                      ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
-    );
+          );
   }
 
   List<DateTime> _getDaysInMonth() {

@@ -1,4 +1,8 @@
 
+
+## 0.0.13
+* Added right click callback for calendar
+
 ## 0.0.12
 * Added border changed callback for day view
 ## 0.0.11

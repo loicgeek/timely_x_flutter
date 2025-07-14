@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timely_x/src/models/tyx_calendar_border.dart';
@@ -12,6 +15,7 @@ class TyxCalendarMonthViewSmall<T extends TyxEvent> extends StatefulWidget {
   final Function(TyxView view)? onViewChanged;
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
+  final OnRightClick? onRightClick;
 
   const TyxCalendarMonthViewSmall({
     super.key,
@@ -21,6 +25,7 @@ class TyxCalendarMonthViewSmall<T extends TyxEvent> extends StatefulWidget {
     this.onViewChanged,
     this.onBorderChanged,
     required this.view,
+    this.onRightClick,
   });
 
   @override
@@ -240,6 +245,18 @@ class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
     );
   }
 
+  _callRightClick({
+    required Offset position,
+    DateTime? date,
+    required List<T>? events,
+  }) {
+    widget.onRightClick?.call(
+      position,
+      date,
+      events,
+    );
+  }
+
   Widget _buildDayCell(DateTime day) {
     final isToday = _isToday(day);
     final isSelected = isSameDay(day, _selectedDate);
@@ -255,79 +272,96 @@ class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
     var theme = Theme.of(context);
     var colorScheme = theme.colorScheme;
 
-    return InkWell(
+    return GestureDetector(
       onTap: () {
         setState(() {
           _selectedDate = day;
         });
         widget.onDateChanged?.call(day, events);
       },
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: isToday
-                ? colorScheme.primary
-                : isSelected
-                    ? colorScheme.secondary
-                    : colorScheme.outlineVariant,
-            width: (isToday || isSelected) ? 1.5 : 0.5,
-          ),
-          borderRadius: BorderRadius.circular(4),
-          color: isSelected
-              ? colorScheme.secondaryContainer.withOpacity(0.3)
-              : null,
-        ),
-        margin: const EdgeInsets.all(1),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Day number
-            Text(
-              day.day.toString(),
-              style: TextStyle(
-                fontWeight:
-                    isToday || isSelected ? FontWeight.bold : FontWeight.normal,
-                color: !isCurrentMonth
-                    ? theme.disabledColor
-                    : isSelected
-                        ? colorScheme.onSecondaryContainer
-                        : null,
-                fontSize: 14,
-              ),
+      onLongPressStart: (details) {
+        _callRightClick(
+            position: details.globalPosition, date: day, events: events);
+      },
+      child: Listener(
+        onPointerDown: (eventGesture) {
+          if (eventGesture.kind == PointerDeviceKind.mouse &&
+              eventGesture.buttons == kSecondaryMouseButton) {
+            _callRightClick(
+              position: eventGesture.position,
+              date: day,
+              events: events,
+            );
+          }
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: isToday
+                  ? colorScheme.primary
+                  : isSelected
+                      ? colorScheme.secondary
+                      : colorScheme.outlineVariant,
+              width: (isToday || isSelected) ? 1.5 : 0.5,
             ),
+            borderRadius: BorderRadius.circular(4),
+            color: isSelected
+                ? colorScheme.secondaryContainer.withOpacity(0.3)
+                : null,
+          ),
+          margin: const EdgeInsets.all(1),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Day number
+              Text(
+                day.day.toString(),
+                style: TextStyle(
+                  fontWeight: isToday || isSelected
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  color: !isCurrentMonth
+                      ? theme.disabledColor
+                      : isSelected
+                          ? colorScheme.onSecondaryContainer
+                          : null,
+                  fontSize: 14,
+                ),
+              ),
 
-            // Event indicator
-            if (events.isNotEmpty)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  for (final event in events.take(maxtIndicators)) ...[
-                    Container(
-                      width: 6,
-                      height: 6,
-                      margin: const EdgeInsets.only(top: 2),
-                      decoration: BoxDecoration(
-                        color: ColorScheme.fromSeed(seedColor: event.color)
-                            .primary,
-                        shape: BoxShape.circle,
+              // Event indicator
+              if (events.isNotEmpty)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (final event in events.take(maxtIndicators)) ...[
+                      Container(
+                        width: 6,
+                        height: 6,
+                        margin: const EdgeInsets.only(top: 2),
+                        decoration: BoxDecoration(
+                          color: ColorScheme.fromSeed(seedColor: event.color)
+                              .primary,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
-                  ],
-                  if (events.length > maxtIndicators)
-                    FittedBox(
-                      child: Center(
-                        child: Text(
-                          "+${events.length - maxtIndicators}",
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontSize: 8,
+                    ],
+                    if (events.length > maxtIndicators)
+                      FittedBox(
+                        child: Center(
+                          child: Text(
+                            "+${events.length - maxtIndicators}",
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurface,
+                              fontSize: 8,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                ],
-              )
-          ],
+                  ],
+                )
+            ],
+          ),
         ),
       ),
     );

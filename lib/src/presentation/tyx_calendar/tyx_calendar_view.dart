@@ -20,6 +20,7 @@ class TyxCalendarView<T extends TyxEvent> extends StatefulWidget {
     this.customizer,
     this.onBorderChanged,
     this.onEventTapped,
+    this.onRightClick,
   });
   final Function(DateTime date, List<T> events)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
@@ -30,6 +31,7 @@ class TyxCalendarView<T extends TyxEvent> extends StatefulWidget {
   final TyxCalendarCustomizer? customizer;
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final Function(T)? onEventTapped;
+  final OnRightClick? onRightClick;
 
   @override
   State<TyxCalendarView<T>> createState() => _TyxCalendarViewState<T>();
@@ -110,6 +112,7 @@ class _TyxCalendarViewState<T extends TyxEvent>
                   view: _view,
                   onDateChanged: _onDateChanged,
                   onBorderChanged: widget.onBorderChanged,
+                  onRightClick: widget.onRightClick,
 
                   // onEventTapped: widget.onEventTapped,
                 ),
@@ -127,6 +130,7 @@ class _TyxCalendarViewState<T extends TyxEvent>
                     });
                   },
                   onBorderChanged: widget.onBorderChanged,
+                  onRightClick: widget.onRightClick,
                 ),
               TyxView.month => TyxCalendarMonthView<T>(
                   onEventTapped: widget.onEventTapped,
@@ -141,6 +145,7 @@ class _TyxCalendarViewState<T extends TyxEvent>
                     });
                   },
                   onBorderChanged: widget.onBorderChanged,
+                  onRightClick: widget.onRightClick,
                 ),
             },
           ),

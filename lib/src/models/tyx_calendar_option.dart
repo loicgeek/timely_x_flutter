@@ -1,13 +1,17 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:timely_x/src/models/tyx_calendar_border.dart';
+
 import 'package:timely_x/src/models/tyx_event.dart';
 import 'package:timely_x/src/models/tyx_event_enhanced.dart';
 import 'package:timely_x/src/models/tyx_view.dart';
 
 import 'tyx_resource.dart';
 import 'tyx_resource_enhanced.dart';
+
+typedef OnRightClick = void Function(
+  Offset offset,
+  DateTime? date,
+  List<TyxEvent>? events,
+);
 
 class TyxCalendarOption<T extends TyxEvent> {
   final double? timeslotHeight;
