@@ -121,17 +121,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: TyxCalendarView(
                         onBorderChanged: (border) {
-                          print(border.start);
-                          print(border.end);
+                          setState(() {
+                            allEvents = generateEventsForMonth(
+                                allResources, border.start!);
+                          });
                         },
                         onRightClick: (position, date, events) {
                           _showContextMenu(context, position);
-                          print(position);
-                          print(date);
-                          print(events);
                         },
-                        events:
-                            generateEventsForMonth(allResources, _currentDate),
+                        events: allEvents,
                         option: TyxCalendarOption(
                           // eventsRetriever: (border) async {
                           //   return generateEventsForMonth(

@@ -18,7 +18,7 @@ class TyxCalendarDayView<T extends TyxEvent> extends StatefulWidget {
     this.events,
   });
   final TyxCalendarOption<T> option;
-  final List<TyxEvent>? events;
+  final List<T>? events;
 
   final Function(T)? onEventTapped;
   final Function(DateTime date)? onDateChanged;
@@ -47,6 +47,7 @@ class _TyxCalendarDayViewState<T extends TyxEvent>
                 view: widget.view,
                 onBorderChanged: widget.onBorderChanged,
                 onRightClick: widget.onRightClick,
+                events: widget.events,
               )
             : TyxCalendarDayViewSmall(
                 option: widget.option,
@@ -56,6 +57,7 @@ class _TyxCalendarDayViewState<T extends TyxEvent>
                 view: widget.view,
                 onBorderChanged: widget.onBorderChanged,
                 onRightClick: widget.onRightClick,
+                events: widget.events,
               );
       },
     );

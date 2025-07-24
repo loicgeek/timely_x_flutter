@@ -31,7 +31,7 @@ class TyxCalendarView<T extends TyxEvent> extends StatefulWidget {
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final Function(T)? onEventTapped;
   final OnRightClick? onRightClick;
-  final List<TyxEvent>? events;
+  final List<T>? events;
 
   @override
   State<TyxCalendarView<T>> createState() => _TyxCalendarViewState<T>();
@@ -42,7 +42,7 @@ class _TyxCalendarViewState<T extends TyxEvent>
   TyxView _view = TyxView.month;
 
   late DateTime _currentDate;
-  List<TyxEvent>? _events;
+  List<T>? _events;
   @override
   void initState() {
     super.initState();

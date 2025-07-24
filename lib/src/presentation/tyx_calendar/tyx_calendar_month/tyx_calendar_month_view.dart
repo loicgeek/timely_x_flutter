@@ -14,7 +14,7 @@ class TyxCalendarMonthView<T extends TyxEvent> extends StatefulWidget {
   final TyxView view;
   final Function(T)? onEventTapped;
   final OnRightClick? onRightClick;
-  final List<TyxEvent>? events;
+  final List<T>? events;
 
   const TyxCalendarMonthView({
     super.key,
@@ -49,6 +49,7 @@ class _TyxCalendarMonthViewState<T extends TyxEvent>
                 view: widget.view,
                 onEventTapped: widget.onEventTapped,
                 onRightClick: widget.onRightClick,
+                events: widget.events,
               )
             : TyxCalendarMonthViewSmall<T>(
                 option: widget.option,
@@ -58,6 +59,7 @@ class _TyxCalendarMonthViewState<T extends TyxEvent>
                 view: widget.view,
                 onEventTapped: widget.onEventTapped,
                 onRightClick: widget.onRightClick,
+                events: widget.events,
               );
       },
     );

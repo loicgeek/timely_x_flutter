@@ -14,7 +14,7 @@ class TyxCalendarWeekView<T extends TyxEvent> extends StatefulWidget {
   final TyxView view;
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final OnRightClick? onRightClick;
-  final List<TyxEvent>? events;
+  final List<T>? events;
 
   const TyxCalendarWeekView({
     super.key,
@@ -49,6 +49,7 @@ class _TyxCalendarWeekViewState<T extends TyxEvent>
           view: widget.view,
           onBorderChanged: widget.onBorderChanged,
           onRightClick: widget.onRightClick,
+          events: widget.events,
         );
       },
     );
