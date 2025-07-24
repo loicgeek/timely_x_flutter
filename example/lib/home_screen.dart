@@ -113,26 +113,35 @@ class _HomeScreenState extends State<HomeScreen> {
             //   ),
             // ),
             Expanded(
-              child: TyxCalendarView(
-                  onBorderChanged: (border) {
-                    print(border.start);
-                    print(border.end);
-                  },
-                  onRightClick: (position, date, events) {
-                    _showContextMenu(context, position);
-                    print(position);
-                    print(date);
-                    print(events);
-                  },
-                  option: TyxCalendarOption(
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 200,
+                  ),
+                  Expanded(
+                    child: TyxCalendarView(
+                        onBorderChanged: (border) {
+                          print(border.start);
+                          print(border.end);
+                        },
+                        onRightClick: (position, date, events) {
+                          _showContextMenu(context, position);
+                          print(position);
+                          print(date);
+                          print(events);
+                        },
+                        option: TyxCalendarOption(
 
-                      // eventsRetriever: (border) async {
-                      //   return generateEventsForMonth(
-                      //       allResources, _currentDate);
-                      // },
-                      initialView: TyxView.day,
-                      events:
-                          generateEventsForMonth(allResources, _currentDate))),
+                            // eventsRetriever: (border) async {
+                            //   return generateEventsForMonth(
+                            //       allResources, _currentDate);
+                            // },
+                            initialView: TyxView.day,
+                            events: generateEventsForMonth(
+                                allResources, _currentDate))),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

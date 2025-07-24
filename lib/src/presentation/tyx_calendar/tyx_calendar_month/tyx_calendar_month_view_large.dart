@@ -123,18 +123,6 @@ class _TyxCalendarMonthViewLargeState<T extends TyxEvent>
           ),
           Row(
             children: [
-              // Today button
-              OutlinedButton(
-                onPressed: () {
-                  final now = DateTime.now();
-                  setState(() {
-                    _selectedDate = now;
-                  });
-                  widget.onDateChanged?.call(now, _getEventsForDay(now));
-                },
-                child: const Text('Today'),
-              ),
-              const SizedBox(width: 16),
               // View type selector
               SegmentedButton<TyxView>(
                 segments: TyxView.values
