@@ -130,15 +130,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           print(date);
                           print(events);
                         },
+                        events:
+                            generateEventsForMonth(allResources, _currentDate),
                         option: TyxCalendarOption(
-
-                            // eventsRetriever: (border) async {
-                            //   return generateEventsForMonth(
-                            //       allResources, _currentDate);
-                            // },
-                            initialView: TyxView.day,
-                            events: generateEventsForMonth(
-                                allResources, _currentDate))),
+                          // eventsRetriever: (border) async {
+                          //   return generateEventsForMonth(
+                          //       allResources, _currentDate);
+                          // },
+                          initialView: TyxView.day,
+                        )),
                   ),
                 ],
               ),

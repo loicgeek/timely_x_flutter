@@ -11,6 +11,7 @@ class TyxCalendarWeekViewSmall<T extends TyxEvent> extends StatefulWidget {
   final Function(T)? onEventTapped;
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
+  final List<T>? events;
 
   const TyxCalendarWeekViewSmall({
     super.key,
@@ -21,6 +22,7 @@ class TyxCalendarWeekViewSmall<T extends TyxEvent> extends StatefulWidget {
     this.onEventTapped,
     this.onBorderChanged,
     required this.view,
+    this.events,
   });
 
   @override
@@ -421,7 +423,7 @@ class _TyxCalendarWeekViewSmallState<T extends TyxEvent>
     // Only show events for the selected date
     List<T> selectedDayEvents = [];
 
-    for (var event in widget.option.events ?? []) {
+    for (var event in widget.events ?? []) {
       if (_isSameDay(event.start, _selectedDate)) {
         selectedDayEvents.add(event);
       }

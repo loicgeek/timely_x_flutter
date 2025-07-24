@@ -14,6 +14,8 @@ class TyxCalendarMonthView<T extends TyxEvent> extends StatefulWidget {
   final TyxView view;
   final Function(T)? onEventTapped;
   final OnRightClick? onRightClick;
+  final List<TyxEvent>? events;
+
   const TyxCalendarMonthView({
     super.key,
     required this.option,
@@ -23,6 +25,7 @@ class TyxCalendarMonthView<T extends TyxEvent> extends StatefulWidget {
     required this.view,
     this.onEventTapped,
     this.onRightClick,
+    this.events,
   });
 
   @override

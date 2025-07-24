@@ -24,7 +24,6 @@ class TyxCalendarOption<T extends TyxEvent> {
   final double? resourceHeaderHeight;
 
   final List<TyxResource>? resources;
-  final List<T>? events;
   final TyxView initialView;
 
   // Whether to show trailing days
@@ -47,7 +46,6 @@ class TyxCalendarOption<T extends TyxEvent> {
     this.timesCellWidth,
     this.resourceHeaderHeight,
     this.resources,
-    this.events,
     this.resourceBuilder,
     this.showTrailingDays = false,
     this.startWeekDay = 7,

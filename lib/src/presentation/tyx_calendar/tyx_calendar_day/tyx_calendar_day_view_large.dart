@@ -15,6 +15,7 @@ class TyxCalendarDayViewLarge<T extends TyxEvent> extends StatefulWidget {
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
   final OnRightClick? onRightClick;
+  final List<T>? events;
 
   const TyxCalendarDayViewLarge({
     super.key,
@@ -25,6 +26,7 @@ class TyxCalendarDayViewLarge<T extends TyxEvent> extends StatefulWidget {
     this.onBorderChanged,
     required this.view,
     this.onRightClick,
+    this.events,
   });
 
   @override
@@ -49,7 +51,7 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
   @override
   void initState() {
     super.initState();
-    _events = widget.option.events ?? [];
+    _events = widget.events ?? [];
     _selectedDate = widget.option.initialDate ?? DateTime.now();
     _timeslotHeight = widget.option.timeslotHeight ?? 60.0;
     _slotDuration =

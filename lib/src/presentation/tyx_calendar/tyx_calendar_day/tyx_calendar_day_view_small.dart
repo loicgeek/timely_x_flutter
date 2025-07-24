@@ -19,6 +19,7 @@ class TyxCalendarDayViewSmall<T extends TyxEvent> extends StatefulWidget {
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
   final OnRightClick? onRightClick;
+  final List<T>? events;
 
   const TyxCalendarDayViewSmall({
     super.key,
@@ -29,6 +30,7 @@ class TyxCalendarDayViewSmall<T extends TyxEvent> extends StatefulWidget {
     this.onBorderChanged,
     required this.view,
     this.onRightClick,
+    this.events,
   });
 
   @override
@@ -653,7 +655,7 @@ class _TyxCalendarDayViewSmallState<T extends TyxEvent>
   }
 
   List<T> _getEventsForDay(DateTime day) {
-    return (widget.option.events ?? [])
+    return (widget.events ?? [])
         .where((event) => isSameDay(event.start, day))
         .toList();
   }

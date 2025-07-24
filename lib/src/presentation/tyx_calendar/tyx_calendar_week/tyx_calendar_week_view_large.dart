@@ -15,6 +15,7 @@ class TyxCalendarWeekViewLarge<T extends TyxEvent> extends StatefulWidget {
   final Function(TyxCalendarBorder border)? onBorderChanged;
   final TyxView view;
   final OnRightClick? onRightClick;
+  final List<T>? events;
 
   const TyxCalendarWeekViewLarge({
     super.key,
@@ -26,6 +27,7 @@ class TyxCalendarWeekViewLarge<T extends TyxEvent> extends StatefulWidget {
     this.onBorderChanged,
     required this.view,
     this.onRightClick,
+    this.events,
   });
 
   @override
@@ -484,7 +486,7 @@ class _TyxCalendarWeekViewLargeState<T extends TyxEvent>
     // Group events by day
     Map<int, List<T>> eventsByDay = {};
 
-    for (var event in widget.option.events ?? []) {
+    for (var event in widget.events ?? []) {
       for (int i = 0; i < _weekDays.length; i++) {
         if (_isSameDay(event.start, _weekDays[i])) {
           if (!eventsByDay.containsKey(i)) {

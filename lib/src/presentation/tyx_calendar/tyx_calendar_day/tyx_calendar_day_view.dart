@@ -15,8 +15,10 @@ class TyxCalendarDayView<T extends TyxEvent> extends StatefulWidget {
     required this.view,
     this.onBorderChanged,
     this.onRightClick,
+    this.events,
   });
   final TyxCalendarOption<T> option;
+  final List<TyxEvent>? events;
 
   final Function(T)? onEventTapped;
   final Function(DateTime date)? onDateChanged;
