@@ -1,5 +1,9 @@
 
 
+## 0.0.14
+[BREAKING CHANGE]
+* Added events to calendar view
+
 ## 0.0.13
 * Added right click callback for calendar
 
