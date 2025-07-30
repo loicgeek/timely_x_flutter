@@ -67,11 +67,6 @@ class TyxCalendarViewState<T extends TyxEvent>
 
     if (widget.option.initialDate != oldWidget.option.initialDate) {
       _currentDate = widget.option.initialDate ?? DateTime.now();
-      if (widget.option.initialDate?.month !=
-              oldWidget.option.initialDate?.month &&
-          widget.option.initialView == TyxView.month) {
-        _onViewChanged(TyxView.month);
-      }
     }
 
     if (widget.option.initialView != oldWidget.option.initialView) {
@@ -127,6 +122,7 @@ class TyxCalendarViewState<T extends TyxEvent>
     _border = border;
     widget.onBorderChanged?.call(border);
     setState(() {});
+    debugPrint("border changed: ${border.start}-${border.end}");
   }
 
   _onViewChanged(TyxView view) {
