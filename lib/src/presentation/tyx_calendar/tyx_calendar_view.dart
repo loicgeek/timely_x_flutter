@@ -20,6 +20,7 @@ class TyxCalendarView<T extends TyxEvent> extends StatefulWidget {
     this.onEventTapped,
     this.onRightClick,
     this.events,
+    this.getEvents,
   });
   final Function(DateTime date, List<T> events)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
@@ -29,6 +30,7 @@ class TyxCalendarView<T extends TyxEvent> extends StatefulWidget {
   final TyxCalendarOption<T> option;
   final TyxCalendarCustomizer? customizer;
   final Function(TyxCalendarBorder border)? onBorderChanged;
+  final Function(TyxCalendarBorder border)? getEvents;
   final Function(T)? onEventTapped;
   final OnRightClick? onRightClick;
   final List<T>? events;
@@ -118,11 +120,13 @@ class TyxCalendarViewState<T extends TyxEvent>
     }
   }
 
-  _onBorderChanged(TyxCalendarBorder border) {
+  _onBorderChanged(TyxCalendarBorder border) async {
     _border = border;
-    widget.onBorderChanged?.call(border);
-    setState(() {});
+
+    // widget.onBorderChanged?.call(border);
+    _events = await widget.getEvents?.call(border);
     debugPrint("border changed: ${border.start}-${border.end}");
+    setState(() {});
   }
 
   _onViewChanged(TyxView view) {
