@@ -30,7 +30,7 @@ class TyxCalendarView<T extends TyxEvent> extends StatefulWidget {
   final TyxCalendarOption<T> option;
   final TyxCalendarCustomizer? customizer;
   final Function(TyxCalendarBorder border)? onBorderChanged;
-  final Function(TyxCalendarBorder border)? getEvents;
+  final Future<List<T>> Function(TyxCalendarBorder border)? getEvents;
   final Function(T)? onEventTapped;
   final OnRightClick? onRightClick;
   final List<T>? events;
