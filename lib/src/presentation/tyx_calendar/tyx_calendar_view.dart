@@ -34,21 +34,23 @@ class TyxCalendarView<T extends TyxEvent> extends StatefulWidget {
   final List<T>? events;
 
   @override
-  State<TyxCalendarView<T>> createState() => _TyxCalendarViewState<T>();
+  State<TyxCalendarView<T>> createState() => TyxCalendarViewState<T>();
 }
 
-class _TyxCalendarViewState<T extends TyxEvent>
+class TyxCalendarViewState<T extends TyxEvent>
     extends State<TyxCalendarView<T>> {
   TyxView _view = TyxView.month;
 
   late DateTime _currentDate;
   List<T>? _events;
+  late TyxCalendarBorder _border;
   @override
   void initState() {
     super.initState();
     _currentDate = widget.option.initialDate ?? DateTime.now();
     _view = widget.option.initialView;
     _events = widget.events;
+    _border = _getBorder(_currentDate, _view);
   }
 
   @override
@@ -85,6 +87,48 @@ class _TyxCalendarViewState<T extends TyxEvent>
     widget.onDateChanged?.call(_currentDate, []);
   }
 
+  navigateToDate(DateTime date) {
+    var newBorder = _getBorder(date, _view);
+    bool borderHasChanged = newBorder != _border;
+    _onDateChanged(date);
+    if (borderHasChanged) {
+      _onBorderChanged(newBorder);
+    }
+  }
+
+  TyxCalendarBorder _getBorder(DateTime date, TyxView view) {
+    switch (view) {
+      case TyxView.day:
+        return TyxCalendarBorder(
+          start: date,
+          end: DateTime(date.year, date.month, date.day, 23, 59,
+              59), // Last day of the day
+        );
+      case TyxView.week:
+        DateTime firstDayOfTheWeek =
+            Jiffy.parseFromDateTime(date).startOf(Unit.week).dateTime;
+        return TyxCalendarBorder(
+          start: firstDayOfTheWeek,
+          end: DateTime(firstDayOfTheWeek.year, firstDayOfTheWeek.month,
+              firstDayOfTheWeek.day + 6, 23, 59, 59), // Last day of the month
+        );
+      case TyxView.month:
+        DateTime firstDayOfTheMonth =
+            Jiffy.parseFromDateTime(date).startOf(Unit.month).dateTime;
+        return TyxCalendarBorder(
+          start: firstDayOfTheMonth,
+          end: DateTime(firstDayOfTheMonth.year, firstDayOfTheMonth.month + 1,
+              0, 23, 59, 59), // Last day of the month
+        );
+    }
+  }
+
+  _onBorderChanged(TyxCalendarBorder border) {
+    _border = border;
+    widget.onBorderChanged?.call(border);
+    setState(() {});
+  }
+
   _onViewChanged(TyxView view) {
     setState(() {
       _view = view;
@@ -92,30 +136,21 @@ class _TyxCalendarViewState<T extends TyxEvent>
       if (view == TyxView.day) {
         _currentDate =
             DateTime(_currentDate.year, _currentDate.month, _currentDate.day);
-        widget.onBorderChanged?.call(TyxCalendarBorder(
-          start: _currentDate,
-          end: DateTime(_currentDate.year, _currentDate.month, _currentDate.day,
-              23, 59, 59), // Last day of the day
-        ));
+        _border = _getBorder(_currentDate, view);
+        _onBorderChanged(_border);
       }
       if (view == TyxView.week) {
         DateTime firstDayOfTheWeek =
             Jiffy.parseFromDateTime(_currentDate).startOf(Unit.week).dateTime;
         _currentDate = firstDayOfTheWeek;
-        widget.onBorderChanged?.call(TyxCalendarBorder(
-          start: firstDayOfTheWeek,
-          end: DateTime(firstDayOfTheWeek.year, firstDayOfTheWeek.month,
-              firstDayOfTheWeek.day + 6, 23, 59, 59), // Last day of the month
-        ));
+        _border = _getBorder(_currentDate, view);
+        _onBorderChanged(_border);
       } else if (view == TyxView.month) {
         DateTime firstDayOfTheMonth =
             Jiffy.parseFromDateTime(_currentDate).startOf(Unit.month).dateTime;
         _currentDate = firstDayOfTheMonth;
-        widget.onBorderChanged?.call(TyxCalendarBorder(
-          start: firstDayOfTheMonth,
-          end: DateTime(firstDayOfTheMonth.year, firstDayOfTheMonth.month + 1,
-              0, 23, 59, 59), // Last day of the month
-        ));
+        _border = _getBorder(_currentDate, view);
+        _onBorderChanged(_border);
       }
     });
   }
@@ -123,6 +158,7 @@ class _TyxCalendarViewState<T extends TyxEvent>
   @override
   Widget build(BuildContext context) {
     var colorScheme = Theme.of(context).colorScheme;
+    debugPrint("built calendar");
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -132,6 +168,7 @@ class _TyxCalendarViewState<T extends TyxEvent>
       child: Column(
         children: [
           Expanded(
+            key: ValueKey("${_border.start}-${_border.end}"),
             child: switch (_view) {
               TyxView.day => TyxCalendarDayView<T>(
                   onEventTapped: widget.onEventTapped,
@@ -142,7 +179,7 @@ class _TyxCalendarViewState<T extends TyxEvent>
                   onViewChanged: _onViewChanged,
                   view: _view,
                   onDateChanged: _onDateChanged,
-                  onBorderChanged: widget.onBorderChanged,
+                  onBorderChanged: _onBorderChanged,
                   onRightClick: widget.onRightClick,
 
                   // onEventTapped: widget.onEventTapped,
@@ -161,7 +198,7 @@ class _TyxCalendarViewState<T extends TyxEvent>
                     });
                   },
                   events: _events,
-                  onBorderChanged: widget.onBorderChanged,
+                  onBorderChanged: _onBorderChanged,
                   onRightClick: widget.onRightClick,
                 ),
               TyxView.month => TyxCalendarMonthView<T>(
@@ -177,7 +214,7 @@ class _TyxCalendarViewState<T extends TyxEvent>
                       widget.onDateChanged?.call(_currentDate, events);
                     });
                   },
-                  onBorderChanged: widget.onBorderChanged,
+                  onBorderChanged: _onBorderChanged,
                   onRightClick: widget.onRightClick,
                 ),
             },

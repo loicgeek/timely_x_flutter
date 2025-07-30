@@ -86,6 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _contextMenu = null;
   }
 
+  GlobalKey<TyxCalendarViewState<TyxEvent>> _calendarKey =
+      GlobalKey<TyxCalendarViewState<TyxEvent>>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,6 +104,15 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 5),
             const Text("Tous vos services enregistrées sur la plateforme"),
+            Row(
+              children: [
+                IconButton(
+                    onPressed: () {
+                      _calendarKey.currentState?.navigateToDate(DateTime.now());
+                    },
+                    icon: const Icon(Icons.today))
+              ],
+            ),
             SizedBox(height: 10),
             // Expanded(
             //   child: TyxResourceView(
@@ -115,11 +127,12 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: Row(
                 children: [
-                  SizedBox(
-                    width: 200,
-                  ),
+                  // SizedBox(
+                  //   width: 200,
+                  // ),
                   Expanded(
                     child: TyxCalendarView(
+                        key: _calendarKey,
                         onBorderChanged: (border) {
                           setState(() {
                             allEvents = generateEventsForMonth(
