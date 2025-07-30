@@ -138,6 +138,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             allEvents = generateEventsForMonth(
                                 allResources, border.start!);
                           });
+                          debugPrint(
+                              "events changed: ${allEvents.map((r) => "${r.start}-${r.end}").join(",")}");
                         },
                         onRightClick: (position, date, events) {
                           _showContextMenu(context, position);

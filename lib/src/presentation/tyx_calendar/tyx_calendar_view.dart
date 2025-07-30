@@ -46,9 +46,11 @@ class TyxCalendarViewState<T extends TyxEvent>
   late DateTime _currentDate;
   List<T>? _events;
   late TyxCalendarBorder _border;
+  late TyxCalendarOption<T> _option;
   @override
   void initState() {
     super.initState();
+    _option = widget.option;
     _currentDate = widget.option.initialDate ?? DateTime.now();
     _view = widget.option.initialView;
     _events = widget.events;
@@ -58,20 +60,24 @@ class TyxCalendarViewState<T extends TyxEvent>
   @override
   void didUpdateWidget(covariant TyxCalendarView<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    debugPrint("widget updated");
     bool hasChanged = widget.events != oldWidget.events ||
         widget.option.initialDate != oldWidget.option.initialDate ||
         widget.option.initialView != oldWidget.option.initialView;
 
     // Compare the references or perform a deeper equality check
     if (widget.events != oldWidget.events) {
+      debugPrint("events changed");
       _events = widget.events;
     }
 
     if (widget.option.initialDate != oldWidget.option.initialDate) {
+      debugPrint("initial date changed");
       _currentDate = widget.option.initialDate ?? DateTime.now();
     }
 
     if (widget.option.initialView != oldWidget.option.initialView) {
+      debugPrint("initial view changed");
       _view = widget.option.initialView;
     }
     if (hasChanged) {
@@ -81,6 +87,7 @@ class TyxCalendarViewState<T extends TyxEvent>
 
   _onDateChanged(DateTime date) {
     _currentDate = date;
+    _option.initialDate = date;
     widget.onDateChanged?.call(_currentDate, []);
   }
 
@@ -89,7 +96,7 @@ class TyxCalendarViewState<T extends TyxEvent>
     bool borderHasChanged = newBorder != _border;
     _onDateChanged(date);
     if (borderHasChanged) {
-      _onBorderChanged(newBorder);
+      _onBorderChanged(newBorder, initialDate: date);
     }
   }
 
@@ -120,13 +127,12 @@ class TyxCalendarViewState<T extends TyxEvent>
     }
   }
 
-  _onBorderChanged(TyxCalendarBorder border) async {
-    _border = border;
+  _onBorderChanged(TyxCalendarBorder border, {DateTime? initialDate}) async {
+    //_border = border;
 
-    // widget.onBorderChanged?.call(border);
-    _events = await widget.getEvents?.call(border);
     debugPrint("border changed: ${border.start}-${border.end}");
-    setState(() {});
+    _option.initialDate = initialDate ?? border.start;
+    widget.onBorderChanged?.call(border);
   }
 
   _onViewChanged(TyxView view) {
@@ -136,21 +142,20 @@ class TyxCalendarViewState<T extends TyxEvent>
       if (view == TyxView.day) {
         _currentDate =
             DateTime(_currentDate.year, _currentDate.month, _currentDate.day);
-        _border = _getBorder(_currentDate, view);
-        _onBorderChanged(_border);
+
+        _onBorderChanged(_getBorder(_currentDate, view));
       }
       if (view == TyxView.week) {
         DateTime firstDayOfTheWeek =
             Jiffy.parseFromDateTime(_currentDate).startOf(Unit.week).dateTime;
         _currentDate = firstDayOfTheWeek;
-        _border = _getBorder(_currentDate, view);
-        _onBorderChanged(_border);
+
+        _onBorderChanged(_getBorder(_currentDate, view));
       } else if (view == TyxView.month) {
         DateTime firstDayOfTheMonth =
             Jiffy.parseFromDateTime(_currentDate).startOf(Unit.month).dateTime;
         _currentDate = firstDayOfTheMonth;
-        _border = _getBorder(_currentDate, view);
-        _onBorderChanged(_border);
+        _onBorderChanged(_getBorder(_currentDate, view));
       }
     });
   }
@@ -168,13 +173,13 @@ class TyxCalendarViewState<T extends TyxEvent>
       child: Column(
         children: [
           Expanded(
-            key: ValueKey("${_border.start}-${_border.end}"),
+            key: ValueKey("${_events}"),
             child: switch (_view) {
               TyxView.day => TyxCalendarDayView<T>(
                   onEventTapped: widget.onEventTapped,
                   key: ValueKey(
                       "${_currentDate.year}-${_currentDate.month}-${_currentDate.day}"),
-                  option: widget.option,
+                  option: _option,
                   events: _events,
                   onViewChanged: _onViewChanged,
                   view: _view,
@@ -188,7 +193,7 @@ class TyxCalendarViewState<T extends TyxEvent>
                   onEventTapped: widget.onEventTapped,
                   key: ValueKey(
                       "${_currentDate.year}-${_currentDate.month}-${_currentDate.day}"),
-                  option: widget.option,
+                  option: _option,
                   view: _view,
                   onViewChanged: _onViewChanged,
                   onDateChanged: (date, events) {
@@ -204,7 +209,7 @@ class TyxCalendarViewState<T extends TyxEvent>
               TyxView.month => TyxCalendarMonthView<T>(
                   onEventTapped: widget.onEventTapped,
                   key: ValueKey("${_currentDate.year}-${_currentDate.month}"),
-                  option: widget.option,
+                  option: _option,
                   view: _view,
                   events: _events,
                   onViewChanged: _onViewChanged,

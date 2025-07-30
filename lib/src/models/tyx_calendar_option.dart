@@ -16,7 +16,7 @@ typedef OnRightClick = void Function(
 class TyxCalendarOption<T extends TyxEvent> {
   final double? timeslotHeight;
   final Duration? timelotSlotDuration;
-  final DateTime? initialDate;
+  DateTime? initialDate;
   final TimeOfDay? timeslotStartTime;
   final TimeOfDay? timeslotEndTime;
   final double? cellWidth;
