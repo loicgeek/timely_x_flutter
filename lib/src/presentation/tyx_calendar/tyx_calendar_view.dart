@@ -65,6 +65,11 @@ class _TyxCalendarViewState<T extends TyxEvent>
 
     if (widget.option.initialDate != oldWidget.option.initialDate) {
       _currentDate = widget.option.initialDate ?? DateTime.now();
+      if (widget.option.initialDate?.month !=
+              oldWidget.option.initialDate?.month &&
+          widget.option.initialView == TyxView.month) {
+        _onViewChanged(TyxView.month);
+      }
     }
 
     if (widget.option.initialView != oldWidget.option.initialView) {
