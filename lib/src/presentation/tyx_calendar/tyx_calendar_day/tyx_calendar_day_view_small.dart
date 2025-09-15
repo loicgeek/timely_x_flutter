@@ -495,7 +495,8 @@ class _TyxCalendarDayViewSmallState<T extends TyxEvent>
                     Icon(
                       Icons.location_on_outlined,
                       size: 12,
-                      color: colorScheme.onPrimaryContainer.withOpacity(0.7),
+                      color:
+                          colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
                     ),
                     const SizedBox(width: 4),
                     Expanded(
@@ -503,8 +504,8 @@ class _TyxCalendarDayViewSmallState<T extends TyxEvent>
                         event.locationAddress!,
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: 10,
-                          color:
-                              colorScheme.onPrimaryContainer.withOpacity(0.7),
+                          color: colorScheme.onPrimaryContainer
+                              .withValues(alpha: 0.7),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

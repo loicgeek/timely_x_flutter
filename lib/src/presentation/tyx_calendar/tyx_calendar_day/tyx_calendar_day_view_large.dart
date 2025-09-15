@@ -428,7 +428,7 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
                 side: BorderSide(
-                  color: colorScheme.primary.withOpacity(0.3),
+                  color: colorScheme.primary.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -449,7 +449,7 @@ class _TyxCalendarDayViewLargeState<T extends TyxEvent>
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '${TimeOfDay.fromDateTime(event.start).format(context)} - ${TimeOfDay.fromDateTime(event.end ?? event.start.add(const Duration(hours: 1))).format(context)}',
+                          '${TimeOfDay.fromDateTime(event.start).format(context)} - ${TimeOfDay.fromDateTime(event.end).format(context)}',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: colorScheme.onPrimaryContainer,
                           ),
