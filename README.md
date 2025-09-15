@@ -332,4 +332,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-Made with ❤️ by Loic NGOU
+Made with ❤️ by <a href="https://github.com/loicgeek">Loic NGOU</a>
