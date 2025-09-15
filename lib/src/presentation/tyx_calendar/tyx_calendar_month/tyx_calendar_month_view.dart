@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:timely_x/src/models/tyx_calendar_border.dart';
+import 'package:timely_x/src/models/tyx_calendar_mode.dart';
 
 import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_month/tyx_calendar_month_view_large.dart';
 import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_month/tyx_calendar_month_view_small.dart';
@@ -15,6 +16,9 @@ class TyxCalendarMonthView<T extends TyxEvent> extends StatefulWidget {
   final Function(T)? onEventTapped;
   final OnRightClick? onRightClick;
   final List<T>? events;
+  final TyxCalendarMode? mode;
+  final Set<DateTime>? selectedDates;
+  final Function(Set<DateTime> selectedDates)? onSelectedDatesChanged;
 
   const TyxCalendarMonthView({
     super.key,
@@ -26,6 +30,9 @@ class TyxCalendarMonthView<T extends TyxEvent> extends StatefulWidget {
     this.onEventTapped,
     this.onRightClick,
     this.events,
+    this.mode,
+    this.selectedDates,
+    this.onSelectedDatesChanged,
   });
 
   @override
@@ -50,6 +57,9 @@ class _TyxCalendarMonthViewState<T extends TyxEvent>
                 onEventTapped: widget.onEventTapped,
                 onRightClick: widget.onRightClick,
                 events: widget.events,
+                mode: widget.mode,
+                selectedDates: widget.selectedDates,
+                onSelectedDatesChanged: widget.onSelectedDatesChanged,
               )
             : TyxCalendarMonthViewSmall<T>(
                 option: widget.option,
@@ -60,6 +70,9 @@ class _TyxCalendarMonthViewState<T extends TyxEvent>
                 onEventTapped: widget.onEventTapped,
                 onRightClick: widget.onRightClick,
                 events: widget.events,
+                mode: widget.mode,
+                selectedDates: widget.selectedDates,
+                onSelectedDatesChanged: widget.onSelectedDatesChanged,
               );
       },
     );

@@ -17,6 +17,9 @@ class TyxCalendarMonthViewSmall<T extends TyxEvent> extends StatefulWidget {
   final TyxView view;
   final OnRightClick? onRightClick;
   final List<T>? events;
+  final TyxCalendarMode? mode;
+  final Set<DateTime>? selectedDates;
+  final Function(Set<DateTime> selectedDates)? onSelectedDatesChanged;
 
   const TyxCalendarMonthViewSmall({
     super.key,
@@ -28,6 +31,9 @@ class TyxCalendarMonthViewSmall<T extends TyxEvent> extends StatefulWidget {
     required this.view,
     this.onRightClick,
     this.events,
+    this.mode,
+    this.selectedDates,
+    this.onSelectedDatesChanged,
   });
 
   @override
@@ -40,12 +46,22 @@ class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
   late DateTime _currentMonth;
   late DateTime _selectedDate;
   final ScrollController _eventsScrollController = ScrollController();
+  late Set<DateTime> _selectedDates;
 
   @override
   void initState() {
     super.initState();
     _selectedDate = widget.option.initialDate ?? DateTime.now();
     _currentMonth = DateTime(_selectedDate.year, _selectedDate.month, 1);
+    _selectedDates = widget.selectedDates ?? {};
+  }
+
+  @override
+  void didUpdateWidget(covariant TyxCalendarMonthViewSmall<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedDates != oldWidget.selectedDates) {
+      _selectedDates = widget.selectedDates ?? {};
+    }
   }
 
   @override
@@ -65,7 +81,8 @@ class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
           child: ListView(
             children: [
               _buildCalendarGrid(),
-              _buildSelectedDayEvents(),
+              if (widget.mode == TyxCalendarMode.normal)
+                _buildSelectedDayEvents(),
             ],
           ),
         )
@@ -261,7 +278,10 @@ class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
 
   Widget _buildDayCell(DateTime day) {
     final isToday = _isToday(day);
-    final isSelected = isSameDay(day, _selectedDate);
+    final isSelected = (isSameDay(day, _selectedDate) &&
+            widget.mode == TyxCalendarMode.normal) ||
+        (_selectedDates.contains(day) &&
+            widget.mode == TyxCalendarMode.multiSelection);
     final isCurrentMonth = day.month == _currentMonth.month;
     final events = _getEventsForDay(day);
 
@@ -276,17 +296,33 @@ class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
 
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _selectedDate = day;
-        });
-        widget.onDateChanged?.call(day, events);
+        if (widget.mode == TyxCalendarMode.multiSelection) {
+          if (_selectedDates.contains(day)) {
+            _selectedDates.remove(day);
+          } else {
+            _selectedDates.add(day);
+          }
+          setState(() {});
+          widget.onSelectedDatesChanged?.call(_selectedDates);
+        } else {
+          setState(() {
+            _selectedDate = day;
+          });
+          widget.onDateChanged?.call(day, events);
+        }
       },
       onLongPressStart: (details) {
+        if (widget.mode == TyxCalendarMode.multiSelection) {
+          return;
+        }
         _callRightClick(
             position: details.globalPosition, date: day, events: events);
       },
       child: Listener(
         onPointerDown: (eventGesture) {
+          if (widget.mode == TyxCalendarMode.multiSelection) {
+            return;
+          }
           if (eventGesture.kind == PointerDeviceKind.mouse &&
               eventGesture.buttons == kSecondaryMouseButton) {
             _callRightClick(

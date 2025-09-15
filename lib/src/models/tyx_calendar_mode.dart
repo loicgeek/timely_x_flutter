@@ -1,0 +1,4 @@
+enum TyxCalendarMode {
+  normal,
+  multiSelection,
+}

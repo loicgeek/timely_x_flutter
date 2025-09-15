@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:timely_x/src/models/tyx_calendar_border.dart';
+import 'package:timely_x/src/models/tyx_calendar_mode.dart';
 import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_day/tyx_calendar_day_view.dart';
 import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_month/tyx_calendar_month_view.dart';
 import 'package:timely_x/src/presentation/tyx_calendar/tyx_calendar_week/tyx_calendar_week_view.dart';
@@ -21,6 +22,9 @@ class TyxCalendarView<T extends TyxEvent> extends StatefulWidget {
     this.onRightClick,
     this.events,
     this.getEvents,
+    this.mode = TyxCalendarMode.normal,
+    this.onSelectedDatesChanged,
+    this.selectedDates,
   });
   final Function(DateTime date, List<T> events)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
@@ -34,6 +38,9 @@ class TyxCalendarView<T extends TyxEvent> extends StatefulWidget {
   final Function(T)? onEventTapped;
   final OnRightClick? onRightClick;
   final List<T>? events;
+  final TyxCalendarMode? mode;
+  final Set<DateTime>? selectedDates;
+  final Function(Set<DateTime> selectedDates)? onSelectedDatesChanged;
 
   @override
   State<TyxCalendarView<T>> createState() => TyxCalendarViewState<T>();
@@ -47,6 +54,8 @@ class TyxCalendarViewState<T extends TyxEvent>
   List<T>? _events;
   late TyxCalendarBorder _border;
   late TyxCalendarOption<T> _option;
+  late TyxCalendarMode _mode;
+  Set<DateTime> _selectedDates = Set<DateTime>();
   @override
   void initState() {
     super.initState();
@@ -55,6 +64,8 @@ class TyxCalendarViewState<T extends TyxEvent>
     _view = widget.option.initialView;
     _events = widget.events;
     _border = _getBorder(_currentDate, _view);
+    _mode = widget.mode ?? TyxCalendarMode.normal;
+    _selectedDates = widget.selectedDates ?? {};
   }
 
   @override
@@ -63,7 +74,9 @@ class TyxCalendarViewState<T extends TyxEvent>
     debugPrint("widget updated");
     bool hasChanged = widget.events != oldWidget.events ||
         widget.option.initialDate != oldWidget.option.initialDate ||
-        widget.option.initialView != oldWidget.option.initialView;
+        widget.option.initialView != oldWidget.option.initialView ||
+        widget.mode != oldWidget.mode ||
+        widget.selectedDates != oldWidget.selectedDates;
 
     // Compare the references or perform a deeper equality check
     if (widget.events != oldWidget.events) {
@@ -79,6 +92,14 @@ class TyxCalendarViewState<T extends TyxEvent>
     if (widget.option.initialView != oldWidget.option.initialView) {
       debugPrint("initial view changed");
       _view = widget.option.initialView;
+    }
+    if (widget.mode != oldWidget.mode) {
+      debugPrint("mode changed");
+      _mode = widget.mode ?? TyxCalendarMode.normal;
+    }
+    if (widget.selectedDates != oldWidget.selectedDates) {
+      debugPrint("selected dates changed");
+      _selectedDates = widget.selectedDates ?? {};
     }
     if (hasChanged) {
       setState(() {});
@@ -221,6 +242,12 @@ class TyxCalendarViewState<T extends TyxEvent>
                   },
                   onBorderChanged: _onBorderChanged,
                   onRightClick: widget.onRightClick,
+                  mode: widget.mode,
+                  selectedDates: _selectedDates,
+                  onSelectedDatesChanged: (dates) {
+                    _selectedDates = dates;
+                    widget.onSelectedDatesChanged?.call(dates);
+                  },
                 ),
             },
           ),

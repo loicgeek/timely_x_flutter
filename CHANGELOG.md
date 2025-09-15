@@ -1,5 +1,8 @@
 
 
+## 0.0.15
+* Added multi selection mode to calendar view
+
 ## 0.0.14
 [BREAKING CHANGE]
 * Added events to calendar view

@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timely_x/src/models/tyx_calendar_border.dart';
+import 'package:timely_x/src/models/tyx_calendar_mode.dart';
 
 import 'package:timely_x/timely_x.dart';
 
@@ -17,6 +18,9 @@ class TyxCalendarMonthViewLarge<T extends TyxEvent> extends StatefulWidget {
   final OnRightClick? onRightClick;
   final Function(T)? onEventTapped;
   final List<T>? events;
+  final TyxCalendarMode? mode;
+  final Set<DateTime>? selectedDates;
+  final Function(Set<DateTime> selectedDates)? onSelectedDatesChanged;
   const TyxCalendarMonthViewLarge({
     super.key,
     required this.option,
@@ -27,6 +31,9 @@ class TyxCalendarMonthViewLarge<T extends TyxEvent> extends StatefulWidget {
     required this.view,
     this.onEventTapped,
     this.events,
+    this.mode,
+    this.selectedDates,
+    this.onSelectedDatesChanged,
   });
 
   @override
@@ -38,12 +45,22 @@ class _TyxCalendarMonthViewLargeState<T extends TyxEvent>
     extends State<TyxCalendarMonthViewLarge<T>> {
   late DateTime _currentMonth;
   late DateTime _selectedDate;
+  late Set<DateTime> _selectedDates;
 
   @override
   void initState() {
     super.initState();
     _selectedDate = widget.option.initialDate ?? DateTime.now();
     _currentMonth = DateTime(_selectedDate.year, _selectedDate.month, 1);
+    _selectedDates = widget.selectedDates ?? {};
+  }
+
+  @override
+  void didUpdateWidget(covariant TyxCalendarMonthViewLarge<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedDates != oldWidget.selectedDates) {
+      _selectedDates = widget.selectedDates ?? {};
+    }
   }
 
   @override
@@ -229,63 +246,109 @@ class _TyxCalendarMonthViewLargeState<T extends TyxEvent>
             date: DateTime(day.year, day.month, day.day),
             events: dayEvents);
       },
-      child: Listener(
-        onPointerDown: (eventGesture) {
-          if (eventGesture.kind == PointerDeviceKind.mouse &&
-              eventGesture.buttons == kSecondaryMouseButton) {
-            _callRightClick(
-              position: eventGesture.position,
-              date: DateTime(day.year, day.month, day.day),
-              events: dayEvents,
-            );
-          }
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color:
-                  isToday ? colorScheme.secondary : colorScheme.outlineVariant,
-              width: isToday ? 1 : .5,
+      child: Stack(
+        children: [
+          Listener(
+            onPointerDown: (eventGesture) {
+              if (eventGesture.kind == PointerDeviceKind.mouse &&
+                  eventGesture.buttons == kSecondaryMouseButton) {
+                _callRightClick(
+                  position: eventGesture.position,
+                  date: DateTime(day.year, day.month, day.day),
+                  events: dayEvents,
+                );
+              }
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: isToday
+                      ? colorScheme.secondary
+                      : colorScheme.outlineVariant,
+                  width: isToday ? 1 : .5,
+                ),
+              ),
+              child: Column(
+                children: [
+                  // Day number
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    decoration: BoxDecoration(
+                      borderRadius: isToday
+                          ? const BorderRadius.vertical(top: Radius.circular(0))
+                          : null,
+                    ),
+                    child: Text(
+                      day.day.toString(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight:
+                            isToday ? FontWeight.bold : FontWeight.normal,
+                        color: !isCurrentMonth ? theme.disabledColor : null,
+                      ),
+                    ),
+                  ),
+
+                  // Events for the day
+                  Expanded(
+                    child: dayEvents.isEmpty
+                        ? const SizedBox() // Empty placeholder
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 2, horizontal: 4),
+                            itemCount: dayEvents.length,
+                            itemBuilder: (context, index) {
+                              final event = dayEvents[index];
+                              return _buildEventIndicator(event);
+                            },
+                          ),
+                  ),
+                ],
+              ),
             ),
           ),
-          child: Column(
-            children: [
-              // Day number
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                decoration: BoxDecoration(
-                  borderRadius: isToday
-                      ? const BorderRadius.vertical(top: Radius.circular(0))
-                      : null,
-                ),
-                child: Text(
-                  day.day.toString(),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                    color: !isCurrentMonth ? theme.disabledColor : null,
+          if (widget.mode == TyxCalendarMode.multiSelection)
+            Positioned(
+              top: 2,
+              right: 2,
+              child: InkWell(
+                onTap: () {
+                  if (_selectedDates.contains(day)) {
+                    setState(() {
+                      _selectedDates.remove(day);
+                    });
+                  } else {
+                    setState(() {
+                      _selectedDates.add(day);
+                    });
+                  }
+                  widget.onSelectedDatesChanged?.call(_selectedDates);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _selectedDates.contains(day)
+                        ? colorScheme.primary
+                        : Colors.transparent,
+                    border: Border.all(
+                      color: colorScheme.primary,
+                      width: .5,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.check,
+                    color: _selectedDates.contains(day)
+                        ? colorScheme.onPrimary
+                        : Colors.transparent,
+                    size: 12,
                   ),
                 ),
               ),
-
-              // Events for the day
-              Expanded(
-                child: dayEvents.isEmpty
-                    ? const SizedBox() // Empty placeholder
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 2, horizontal: 4),
-                        itemCount: dayEvents.length,
-                        itemBuilder: (context, index) {
-                          final event = dayEvents[index];
-                          return _buildEventIndicator(event);
-                        },
-                      ),
-              ),
-            ],
-          ),
-        ),
+            ),
+        ],
       ),
     );
   }
