@@ -42,6 +42,21 @@ class TyxCalendarMonthView<T extends TyxEvent> extends StatefulWidget {
 
 class _TyxCalendarMonthViewState<T extends TyxEvent>
     extends State<TyxCalendarMonthView<T>> {
+  Set<DateTime> _selectedDates = Set<DateTime>();
+  @override
+  void initState() {
+    super.initState();
+    _selectedDates = widget.selectedDates ?? Set<DateTime>();
+  }
+
+  @override
+  void didUpdateWidget(covariant TyxCalendarMonthView<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedDates != oldWidget.selectedDates) {
+      _selectedDates = widget.selectedDates ?? {};
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -58,7 +73,7 @@ class _TyxCalendarMonthViewState<T extends TyxEvent>
                 onRightClick: widget.onRightClick,
                 events: widget.events,
                 mode: widget.mode,
-                selectedDates: widget.selectedDates,
+                selectedDates: _selectedDates,
                 onSelectedDatesChanged: widget.onSelectedDatesChanged,
               )
             : TyxCalendarMonthViewSmall<T>(
@@ -71,7 +86,7 @@ class _TyxCalendarMonthViewState<T extends TyxEvent>
                 onRightClick: widget.onRightClick,
                 events: widget.events,
                 mode: widget.mode,
-                selectedDates: widget.selectedDates,
+                selectedDates: _selectedDates,
                 onSelectedDatesChanged: widget.onSelectedDatesChanged,
               );
       },
