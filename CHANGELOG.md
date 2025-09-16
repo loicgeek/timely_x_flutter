@@ -1,4 +1,6 @@
 
+## 0.0.16
+* Updated README.md
 
 ## 0.0.15
 * Added multi selection mode to calendar view
