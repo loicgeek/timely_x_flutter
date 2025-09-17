@@ -9,6 +9,7 @@ class TyxEvent {
   String? title;
   String? description;
   String? locationAddress;
+  bool? allday;
 
   TyxEvent({
     required this.start,
@@ -19,6 +20,7 @@ class TyxEvent {
     this.title,
     this.description,
     this.locationAddress,
+    this.allday,
   });
 
   @override
@@ -32,7 +34,8 @@ class TyxEvent {
         other.title == title &&
         other.description == description &&
         other.locationAddress == locationAddress &&
-        other.resourceId == resourceId;
+        other.resourceId == resourceId &&
+        other.allday == allday;
   }
 
   @override
@@ -44,5 +47,6 @@ class TyxEvent {
       id.hashCode ^
       title.hashCode ^
       locationAddress.hashCode ^
-      description.hashCode;
+      description.hashCode ^
+      allday.hashCode;
 }

@@ -1,4 +1,8 @@
 
+
+## 0.0.17
+* Added all day event support
+
 ## 0.0.16
 * Updated README.md
 
