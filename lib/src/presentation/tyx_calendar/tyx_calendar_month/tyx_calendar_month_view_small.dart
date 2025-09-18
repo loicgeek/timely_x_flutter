@@ -238,6 +238,34 @@ class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
     );
   }
 
+  List<DateTime> _getDaysInMonth() {
+    // First day of the month
+    final firstDay = _currentMonth;
+
+    // Get the start day of week from options, default to Monday if not specified
+    final startWeekDay =
+        widget.option.startWeekDay ?? 1; // 1 = Monday, 7 = Sunday
+
+    // Calculate the correct offset
+    // If firstDay weekday is same as startWeekDay, offset is 0
+    // Otherwise we need to go back to the previous occurrence of startWeekDay
+    int diff = firstDay.weekday - startWeekDay;
+    int daysToSubtract = diff < 0 ? diff + 7 : diff;
+
+    final startDate = firstDay.subtract(Duration(days: daysToSubtract));
+
+    // Generate 42 days (6 weeks) to ensure we have enough days to cover all layouts
+
+    final result = List.generate(42, (index) {
+      return DateTime(
+        startDate.year,
+        startDate.month,
+        startDate.day + index,
+      );
+    });
+    return result;
+  }
+
   Widget _buildCalendarGrid() {
     final daysInMonth = _getDaysInMonth();
 
@@ -524,28 +552,6 @@ class _TyxCalendarMonthViewSmallState<T extends TyxEvent>
               ),
             ),
     );
-  }
-
-  List<DateTime> _getDaysInMonth() {
-    // First day of the month
-    final firstDay = _currentMonth;
-
-    // Get the start day of week from options, default to Monday if not specified
-    final startWeekDay =
-        widget.option.startWeekDay ?? 1; // 1 = Monday, 7 = Sunday
-
-    // Calculate the correct offset
-    // If firstDay weekday is same as startWeekDay, offset is 0
-    // Otherwise we need to go back to the previous occurrence of startWeekDay
-    int diff = firstDay.weekday - startWeekDay;
-    int daysToSubtract = diff < 0 ? diff + 7 : diff;
-
-    final startDate = firstDay.subtract(Duration(days: daysToSubtract));
-
-    // Generate 42 days (6 weeks) to ensure we have enough days to cover all layouts
-    return List.generate(42, (index) {
-      return startDate.add(Duration(days: index));
-    });
   }
 
   bool _isToday(DateTime date) {

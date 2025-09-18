@@ -434,7 +434,11 @@ class _TyxCalendarMonthViewLargeState<T extends TyxEvent>
 
     // Generate 42 days (6 weeks) to ensure we have enough days to cover all layouts
     return List.generate(42, (index) {
-      return startDate.add(Duration(days: index));
+      return DateTime(
+        startDate.year,
+        startDate.month,
+        startDate.day + index,
+      );
     });
   }
 

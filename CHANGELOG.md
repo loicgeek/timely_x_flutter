@@ -1,5 +1,8 @@
 
 
+## 0.0.18
+* Fixed month view generation, daylight saving time (DST) transition issue
+
 ## 0.0.17
 * Added all day event support
 

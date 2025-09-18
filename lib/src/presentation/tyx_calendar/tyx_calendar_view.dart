@@ -80,25 +80,20 @@ class TyxCalendarViewState<T extends TyxEvent>
 
     // Compare the references or perform a deeper equality check
     if (widget.events != oldWidget.events) {
-      debugPrint("events changed");
       _events = widget.events;
     }
 
     if (widget.option.initialDate != oldWidget.option.initialDate) {
-      debugPrint("initial date changed");
       _currentDate = widget.option.initialDate ?? DateTime.now();
     }
 
     if (widget.option.initialView != oldWidget.option.initialView) {
-      debugPrint("initial view changed");
       _view = widget.option.initialView;
     }
     if (widget.mode != oldWidget.mode) {
-      debugPrint("mode changed");
       _mode = widget.mode ?? TyxCalendarMode.normal;
     }
     if (widget.selectedDates != oldWidget.selectedDates) {
-      debugPrint("selected dates changed");
       _selectedDates = widget.selectedDates ?? {};
     }
     if (hasChanged) {
