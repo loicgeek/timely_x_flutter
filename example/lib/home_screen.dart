@@ -131,33 +131,46 @@ class _HomeScreenState extends State<HomeScreen> {
                   //   width: 200,
                   // ),
                   Expanded(
-                    child: TyxCalendarView(
-                      key: _calendarKey,
-                      onBorderChanged: (border) {
-                        setState(() {
-                          allEvents = generateEventsForMonth(
-                              allResources, border.start!);
-                        });
-                        debugPrint(
-                            "events changed: ${allEvents.map((r) => "${r.start}-${r.end}").join(",")}");
-                      },
-                      onRightClick: (position, date, events) {
-                        _showContextMenu(context, position);
-                      },
-                      events: allEvents,
-                      option: TyxCalendarOption(
-                        // eventsRetriever: (border) async {
-                        //   return generateEventsForMonth(
-                        //       allResources, _currentDate);
-                        // },
-                        initialView: TyxView.day,
+                    child: TyxResourceView(
+                      option: TyxResourceOption(
+                        resources: allResources,
+                        events: allEvents,
+                        initialDate: _currentDate,
+                        timeslotStartTime: const TimeOfDay(hour: 8, minute: 0),
+                        timeslotHeight: 50,
+                        cellWidth: 200,
+                        resourceHeaderHeight: 70,
                       ),
-                      mode: TyxCalendarMode.multiSelection,
-                      onSelectedDatesChanged: (dates) {
-                        print(dates);
-                      },
                     ),
                   ),
+                  // Expanded(
+                  //   child: TyxCalendarView(
+                  //     key: _calendarKey,
+                  //     onBorderChanged: (border) {
+                  //       setState(() {
+                  //         allEvents = generateEventsForMonth(
+                  //             allResources, border.start!);
+                  //       });
+                  //       debugPrint(
+                  //           "events changed: ${allEvents.map((r) => "${r.start}-${r.end}").join(",")}");
+                  //     },
+                  //     onRightClick: (position, date, events) {
+                  //       _showContextMenu(context, position);
+                  //     },
+                  //     events: allEvents,
+                  //     option: TyxCalendarOption(
+                  //       // eventsRetriever: (border) async {
+                  //       //   return generateEventsForMonth(
+                  //       //       allResources, _currentDate);
+                  //       // },
+                  //       initialView: TyxView.day,
+                  //     ),
+                  //     mode: TyxCalendarMode.multiSelection,
+                  //     onSelectedDatesChanged: (dates) {
+                  //       print(dates);
+                  //     },
+                  //   ),
+                  // ),
                 ],
               ),
             ),

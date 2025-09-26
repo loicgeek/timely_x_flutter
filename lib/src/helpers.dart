@@ -10,7 +10,7 @@ List<TyxResource> generateResources(int count) {
   List<TyxResource> resources = List.generate(count, (index) {
     return TyxResource(
       id: 'table_$index',
-      name: 'Table $index',
+      name: 'Provider $index',
     );
   });
   return resources;
