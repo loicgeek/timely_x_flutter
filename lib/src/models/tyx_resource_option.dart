@@ -5,7 +5,7 @@ import 'package:timely_x/src/models/tyx_event_enhanced.dart';
 import 'tyx_resource.dart';
 import 'tyx_resource_enhanced.dart';
 
-class TyxResourceOption {
+class TyxResourceOption<B extends TyxEvent, R extends TyxResource> {
   final double? timeslotHeight;
   final Duration? timelotSlotDuration;
   final DateTime? initialDate;
@@ -13,9 +13,6 @@ class TyxResourceOption {
   final double? cellWidth;
   final double? timesCellWidth;
   final double? resourceHeaderHeight;
-
-  final List<TyxResource>? resources;
-  final List<TyxEvent>? events;
 
   Widget Function(BuildContext context, TyxEventEnhanced item)? eventBuilder;
   Widget Function(BuildContext context, TyxResourceEnhanced item)?
@@ -28,9 +25,32 @@ class TyxResourceOption {
     this.cellWidth,
     this.timesCellWidth,
     this.resourceHeaderHeight,
-    this.resources,
-    this.events,
     this.eventBuilder,
     this.resourceBuilder,
   });
+
+  TyxResourceOption copyWith({
+    double? timeslotHeight,
+    Duration? timelotSlotDuration,
+    DateTime? initialDate,
+    TimeOfDay? timeslotStartTime,
+    double? cellWidth,
+    double? timesCellWidth,
+    double? resourceHeaderHeight,
+    Widget Function(BuildContext context, TyxEventEnhanced item)? eventBuilder,
+    Widget Function(BuildContext context, TyxResourceEnhanced item)?
+        resourceBuilder,
+  }) {
+    return TyxResourceOption(
+      timeslotHeight: timeslotHeight ?? this.timeslotHeight,
+      timelotSlotDuration: timelotSlotDuration ?? this.timelotSlotDuration,
+      initialDate: initialDate ?? this.initialDate,
+      timeslotStartTime: timeslotStartTime ?? this.timeslotStartTime,
+      cellWidth: cellWidth ?? this.cellWidth,
+      timesCellWidth: timesCellWidth ?? this.timesCellWidth,
+      resourceHeaderHeight: resourceHeaderHeight ?? this.resourceHeaderHeight,
+      eventBuilder: eventBuilder ?? this.eventBuilder,
+      resourceBuilder: resourceBuilder ?? this.resourceBuilder,
+    );
+  }
 }

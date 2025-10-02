@@ -4,32 +4,76 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:timely_x/src/models/tyx_resource_option.dart';
+import 'package:timely_x/src/models/tyx_resource_theme.dart';
+import 'package:timely_x/src/models/tyx_resource_view_mode.dart';
 import 'package:timely_x/src/presentation/tyx_resource/tyx_resource_view_content.dart';
+import 'package:timely_x/timely_x.dart';
 
-class TyxResourceView extends StatefulWidget {
+class TyxResourceView<R extends TyxResource, E extends TyxEvent>
+    extends StatefulWidget {
   const TyxResourceView({
     super.key,
     this.onDateChanged,
     this.onShowDatePicker,
     required this.option,
     this.currentDateFormatter,
+    this.viewMode = TyxResourceViewMode.day,
+    required this.resources,
+    required this.events,
   });
   final Function(DateTime date)? onDateChanged;
   final String Function(DateTime date)? currentDateFormatter;
   final Future<DateTime?> Function({required BuildContext context})?
       onShowDatePicker;
   final TyxResourceOption option;
+  final TyxResourceViewMode? viewMode;
+  final List<R> resources;
+  final List<E> events;
 
   @override
-  State<TyxResourceView> createState() => _TyxResourceViewState();
+  State<TyxResourceView<R, E>> createState() => _TyxResourceViewState<R, E>();
 }
 
-class _TyxResourceViewState extends State<TyxResourceView> {
+class _TyxResourceViewState<R extends TyxResource, E extends TyxEvent>
+    extends State<TyxResourceView<R, E>> {
   late DateTime _currentDate;
+  late TyxResourceViewMode _viewMode;
+  late List<R> _resources;
+  late List<E> _events;
   @override
   void initState() {
     super.initState();
     _currentDate = DateTime.now();
+    _viewMode = widget.viewMode!;
+    _resources = widget.resources;
+    _events = widget.events;
+  }
+
+  @override
+  void didUpdateWidget(covariant TyxResourceView<R, E> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    bool hasChanged = false;
+    if (oldWidget.viewMode != widget.viewMode) {
+      setState(() {
+        _viewMode = widget.viewMode!;
+      });
+      hasChanged = true;
+    }
+    if (oldWidget.resources != widget.resources) {
+      setState(() {
+        _resources = widget.resources;
+      });
+      hasChanged = true;
+    }
+    if (oldWidget.events != widget.events) {
+      setState(() {
+        _events = widget.events;
+      });
+      hasChanged = true;
+    }
+    if (hasChanged) {
+      setState(() {});
+    }
   }
 
   _onDateChanged(DateTime date) {
@@ -217,7 +261,23 @@ class _TyxResourceViewState extends State<TyxResourceView> {
           const SizedBox(height: 8),
           Expanded(
             child: TyxResourceViewContent(
-              option: widget.option,
+              option: widget.option.copyWith(initialDate: _currentDate),
+              viewMode: _viewMode,
+              resources: _resources,
+              events: _events,
+              theme: TyxResourceTheme.dark().copyWith(),
+              onTimeSlotTap: (dateTime, resource) {
+                print('Clicked time: $dateTime');
+                print('Resource: ${resource.name}');
+                // Show dialog to create new event at this time for this resource
+              },
+
+              // Handle event clicks (for viewing/editing events)
+              onEventTap: (event, resource) {
+                print('Clicked event: ${event}');
+                print('Resource: ${resource.name}');
+                // Show dialog to view or edit the event
+              },
             ),
           ),
         ],

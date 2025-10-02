@@ -98,22 +98,6 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Reservations",
-              style: TextStyle(fontSize: 22),
-            ),
-            const SizedBox(height: 5),
-            const Text("Tous vos services enregistrées sur la plateforme"),
-            Row(
-              children: [
-                IconButton(
-                    onPressed: () {
-                      _calendarKey.currentState?.navigateToDate(DateTime.now());
-                    },
-                    icon: const Icon(Icons.today))
-              ],
-            ),
-            SizedBox(height: 10),
             // Expanded(
             //   child: TyxResourceView(
             //     option: TyxResourceOption(
@@ -132,15 +116,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   // ),
                   Expanded(
                     child: TyxResourceView(
+                      resources: allResources,
+                      events: allEvents,
                       option: TyxResourceOption(
-                        resources: allResources,
-                        events: allEvents,
                         initialDate: _currentDate,
-                        timeslotStartTime: const TimeOfDay(hour: 8, minute: 0),
+                        timeslotStartTime: const TimeOfDay(hour: 0, minute: 0),
                         timeslotHeight: 50,
                         cellWidth: 200,
-                        resourceHeaderHeight: 70,
+                        resourceHeaderHeight: 100,
                       ),
+                      viewMode: TyxResourceViewMode.week,
                     ),
                   ),
                   // Expanded(

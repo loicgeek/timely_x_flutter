@@ -1,0 +1,1 @@
+enum TyxResourceViewMode { day, week }
