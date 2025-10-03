@@ -7,6 +7,8 @@ import 'package:timely_x/src/models/tyx_resource_option.dart';
 import 'package:timely_x/src/models/tyx_resource_theme.dart';
 import 'package:timely_x/src/models/tyx_resource_view_mode.dart';
 import 'package:timely_x/src/presentation/tyx_resource/tyx_resource_view_content.dart';
+
+import 'package:timely_x/src/presentation/tyx_resource/tyx_schedule_view.dart';
 import 'package:timely_x/timely_x.dart';
 
 class TyxResourceView<R extends TyxResource, E extends TyxEvent>
@@ -259,6 +261,28 @@ class _TyxResourceViewState<R extends TyxResource, E extends TyxEvent>
             ],
           ),
           const SizedBox(height: 8),
+          // Expanded(
+          //   child: TyxResourceVerticalContent(
+          //     option: widget.option.copyWith(initialDate: _currentDate),
+          //     viewMode: _viewMode,
+          //     resources: _resources,
+          //     events: _events,
+          //     theme: TyxResourceTheme.dark().copyWith(),
+          //     onTimeSlotTap: (dateTime, resource) {
+          //       print('Clicked time: $dateTime');
+          //       print('Resource: ${resource.name}');
+          //       // Show dialog to create new event at this time for this resource
+          //     },
+
+          //     // Handle event clicks (for viewing/editing events)
+          //     onEventTap: (event, resource) {
+          //       print('Clicked event: ${event}');
+          //       print('Resource: ${resource.name}');
+          //       // Show dialog to view or edit the event
+          //     },
+          //   ),
+          // ),
+
           Expanded(
             child: TyxResourceViewContent(
               option: widget.option.copyWith(initialDate: _currentDate),

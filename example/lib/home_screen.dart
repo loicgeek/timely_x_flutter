@@ -124,6 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         timeslotHeight: 50,
                         cellWidth: 200,
                         resourceHeaderHeight: 100,
+                        layoutDirection: TyxResourceLayoutDirection.vertical,
+                        resourceGrouping: TyxResourceGrouping.separate,
                       ),
                       viewMode: TyxResourceViewMode.week,
                     ),
