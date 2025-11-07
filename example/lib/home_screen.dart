@@ -114,50 +114,50 @@ class _HomeScreenState extends State<HomeScreen> {
                   // SizedBox(
                   //   width: 200,
                   // ),
-                  Expanded(
-                    child: TyxResourceView(
-                      resources: allResources,
-                      events: allEvents,
-                      option: TyxResourceOption(
-                        initialDate: _currentDate,
-                        timeslotStartTime: const TimeOfDay(hour: 0, minute: 0),
-                        timeslotHeight: 50,
-                        cellWidth: 200,
-                        resourceHeaderHeight: 100,
-                        layoutDirection: TyxResourceLayoutDirection.vertical,
-                        resourceGrouping: TyxResourceGrouping.separate,
-                      ),
-                      viewMode: TyxResourceViewMode.week,
-                    ),
-                  ),
                   // Expanded(
-                  //   child: TyxCalendarView(
-                  //     key: _calendarKey,
-                  //     onBorderChanged: (border) {
-                  //       setState(() {
-                  //         allEvents = generateEventsForMonth(
-                  //             allResources, border.start!);
-                  //       });
-                  //       debugPrint(
-                  //           "events changed: ${allEvents.map((r) => "${r.start}-${r.end}").join(",")}");
-                  //     },
-                  //     onRightClick: (position, date, events) {
-                  //       _showContextMenu(context, position);
-                  //     },
+                  //   child: TyxResourceView(
+                  //     resources: allResources,
                   //     events: allEvents,
-                  //     option: TyxCalendarOption(
-                  //       // eventsRetriever: (border) async {
-                  //       //   return generateEventsForMonth(
-                  //       //       allResources, _currentDate);
-                  //       // },
-                  //       initialView: TyxView.day,
+                  //     option: TyxResourceOption(
+                  //       initialDate: _currentDate,
+                  //       timeslotStartTime: const TimeOfDay(hour: 0, minute: 0),
+                  //       timeslotHeight: 50,
+                  //       cellWidth: 200,
+                  //       resourceHeaderHeight: 100,
+                  //       layoutDirection: TyxResourceLayoutDirection.vertical,
+                  //       resourceGrouping: TyxResourceGrouping.separate,
                   //     ),
-                  //     mode: TyxCalendarMode.multiSelection,
-                  //     onSelectedDatesChanged: (dates) {
-                  //       print(dates);
-                  //     },
+                  //     viewMode: TyxResourceViewMode.week,
                   //   ),
                   // ),
+                  Expanded(
+                    child: TyxCalendarView(
+                      key: _calendarKey,
+                      onBorderChanged: (border) {
+                        setState(() {
+                          allEvents = generateEventsForMonth(
+                              allResources, border.start!);
+                        });
+                        debugPrint(
+                            "events changed: ${allEvents.map((r) => "${r.start}-${r.end}").join(",")}");
+                      },
+                      onRightClick: (position, date, events) {
+                        _showContextMenu(context, position);
+                      },
+                      events: allEvents,
+                      option: TyxCalendarOption(
+                        // eventsRetriever: (border) async {
+                        //   return generateEventsForMonth(
+                        //       allResources, _currentDate);
+                        // },
+                        initialView: TyxView.day,
+                      ),
+                      mode: TyxCalendarMode.multiSelection,
+                      onSelectedDatesChanged: (dates) {
+                        print(dates);
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),
