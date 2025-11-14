@@ -144,9 +144,6 @@ class TyxCalendarViewState<T extends TyxEvent>
   }
 
   _onBorderChanged(TyxCalendarBorder border, {DateTime? initialDate}) async {
-    //_border = border;
-
-    debugPrint("border changed: ${border.start}-${border.end}");
     _option.initialDate = initialDate ?? border.start;
     widget.onBorderChanged?.call(border);
   }
@@ -176,10 +173,19 @@ class TyxCalendarViewState<T extends TyxEvent>
     });
   }
 
+  int isoWeekNumber(DateTime date) {
+    // Thursday of the current week determines the year
+    final thursday = date.add(Duration(days: 3 - ((date.weekday + 6) % 7)));
+    final firstThursday = DateTime(thursday.year, 1, 4);
+    return ((thursday.difference(firstThursday).inDays) ~/ 7) + 1;
+  }
+
   @override
   Widget build(BuildContext context) {
     var colorScheme = Theme.of(context).colorScheme;
     debugPrint("built calendar");
+    final weekNumber = isoWeekNumber(_currentDate);
+    final weekYear = _currentDate.year;
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -207,17 +213,11 @@ class TyxCalendarViewState<T extends TyxEvent>
                 ),
               TyxView.week => TyxCalendarWeekView<T>(
                   onEventTapped: widget.onEventTapped,
-                  key: ValueKey(
-                      "${_currentDate.year}-${_currentDate.month}-${_currentDate.day}"),
+                  key: ValueKey("$weekYear-week-$weekNumber"),
                   option: _option,
                   view: _view,
                   onViewChanged: _onViewChanged,
-                  onDateChanged: (date, events) {
-                    setState(() {
-                      _currentDate = date;
-                      widget.onDateChanged?.call(_currentDate, events);
-                    });
-                  },
+                  onDateChanged: _onDateChanged,
                   events: _events,
                   onBorderChanged: _onBorderChanged,
                   onRightClick: widget.onRightClick,

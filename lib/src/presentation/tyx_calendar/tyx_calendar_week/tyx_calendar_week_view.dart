@@ -8,7 +8,7 @@ import 'tyx_calendar_week_view_large.dart';
 class TyxCalendarWeekView<T extends TyxEvent> extends StatefulWidget {
   final TyxCalendarOption<T> option;
   final DateTime? initialDate;
-  final Function(DateTime date, List<T> events)? onDateChanged;
+  final Function(DateTime date)? onDateChanged;
   final Function(TyxView view)? onViewChanged;
   final Function(T)? onEventTapped;
   final TyxView view;
