@@ -139,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               allResources, border.start!);
                         });
                         debugPrint(
-                            "events changed: ${allEvents.map((r) => "${r.start}-${r.end}").join(",")}");
+                            "border changed: ${border.start}-${border.end}");
                       },
                       onRightClick: (position, date, events) {
                         _showContextMenu(context, position);

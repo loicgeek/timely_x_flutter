@@ -69,7 +69,8 @@ class TyxCalendarMonthOption<T> {
 }
 
 class TyxCalendarWeekOption<T extends TyxEvent> {
-  Widget Function(BuildContext context, T item)? eventIndicatorBuilder;
+  Widget Function(BuildContext context, TyxEventEnhanced<T> item)?
+      eventIndicatorBuilder;
   TyxCalendarWeekOption({
     this.eventIndicatorBuilder,
   });
