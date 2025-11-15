@@ -1,4 +1,5 @@
-
+## 0.0.19
+* Fixed week view builder and navigation
 
 ## 0.0.18
 * Fixed month view generation, daylight saving time (DST) transition issue
