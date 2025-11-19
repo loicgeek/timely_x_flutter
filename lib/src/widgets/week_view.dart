@@ -22,6 +22,7 @@ import 'grid_painter.dart';
 import 'appointment_widget.dart';
 import 'unavailability_painter.dart';
 import 'slot_highlight_painter.dart';
+import 'scroll_navigation_wrapper.dart';
 
 /// Calendar week view - shows multiple days for multiple resources
 class CalendarWeekView extends StatefulWidget {
@@ -82,6 +83,7 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
   double _columnWidth = 0;
   bool _needsHorizontalScroll = false;
   bool _isUpdatingScroll = false;
+  ScrollController? _lastHorizontalScrollSource;
 
   @override
   void initState() {
@@ -96,7 +98,15 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
 
     // Add listeners for scroll synchronization
     _gridVerticalController.addListener(_onGridVerticalScroll);
-    _gridHorizontalController.addListener(_onGridHorizontalScroll);
+    _gridHorizontalController.addListener(
+      () => _onAnyHorizontalScroll(_gridHorizontalController),
+    );
+    _resourceHeaderHorizontalController.addListener(
+      () => _onAnyHorizontalScroll(_resourceHeaderHorizontalController),
+    );
+    _dateHeaderHorizontalController.addListener(
+      () => _onAnyHorizontalScroll(_dateHeaderHorizontalController),
+    );
 
     widget.controller.addListener(_onControllerUpdate);
   }
@@ -104,7 +114,7 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
   @override
   void dispose() {
     _gridVerticalController.removeListener(_onGridVerticalScroll);
-    _gridHorizontalController.removeListener(_onGridHorizontalScroll);
+    // Note: We can't remove the specific lambda listeners, but dispose will clean up
     _gridVerticalController.dispose();
     _gridHorizontalController.dispose();
     _timeColumnVerticalController.dispose();
@@ -125,20 +135,39 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
     _isUpdatingScroll = false;
   }
 
-  void _onGridHorizontalScroll() {
+  void _onAnyHorizontalScroll(ScrollController source) {
     if (_isUpdatingScroll) return;
+
+    // Track the source to avoid circular updates
+    if (_lastHorizontalScrollSource == source) {
+      return;
+    }
+
     _isUpdatingScroll = true;
+    _lastHorizontalScrollSource = source;
 
-    final offset = _gridHorizontalController.offset;
+    final offset = source.offset;
 
-    if (_resourceHeaderHorizontalController.hasClients) {
+    // Sync all horizontal controllers to the same offset
+    if (_gridHorizontalController.hasClients &&
+        _gridHorizontalController != source &&
+        _gridHorizontalController.offset != offset) {
+      _gridHorizontalController.jumpTo(offset);
+    }
+
+    if (_resourceHeaderHorizontalController.hasClients &&
+        _resourceHeaderHorizontalController != source &&
+        _resourceHeaderHorizontalController.offset != offset) {
       _resourceHeaderHorizontalController.jumpTo(offset);
     }
 
-    if (_dateHeaderHorizontalController.hasClients) {
+    if (_dateHeaderHorizontalController.hasClients &&
+        _dateHeaderHorizontalController != source &&
+        _dateHeaderHorizontalController.offset != offset) {
       _dateHeaderHorizontalController.jumpTo(offset);
     }
 
+    _lastHorizontalScrollSource = null;
     _isUpdatingScroll = false;
   }
 
@@ -213,20 +242,24 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
               ),
               // Scrollable resource headers
               Expanded(
-                child: SingleChildScrollView(
-                  controller: _resourceHeaderHorizontalController,
-                  scrollDirection: Axis.horizontal,
-                  physics: const NeverScrollableScrollPhysics(),
-                  child: Row(
-                    children: resources.map((resource) {
-                      return ResourceHeader(
-                        resource: resource,
-                        width: _columnWidth * dates.length,
-                        theme: widget.theme,
-                        builder: widget.resourceHeaderBuilder,
-                        onTap: widget.onResourceHeaderTap,
-                      );
-                    }).toList(),
+                child: ScrollNavigationWrapper(
+                  child: SingleChildScrollView(
+                    controller: _resourceHeaderHorizontalController,
+                    scrollDirection: Axis.horizontal,
+                    physics: _needsHorizontalScroll
+                        ? const AlwaysScrollableScrollPhysics()
+                        : const NeverScrollableScrollPhysics(),
+                    child: Row(
+                      children: resources.map((resource) {
+                        return ResourceHeader(
+                          resource: resource,
+                          width: _columnWidth * dates.length,
+                          theme: widget.theme,
+                          builder: widget.resourceHeaderBuilder,
+                          onTap: widget.onResourceHeaderTap,
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ),
               ),
@@ -258,22 +291,26 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
               ),
               // Scrollable date headers
               Expanded(
-                child: SingleChildScrollView(
-                  controller: _dateHeaderHorizontalController,
-                  scrollDirection: Axis.horizontal,
-                  physics: const NeverScrollableScrollPhysics(),
-                  child: Row(
-                    children: [
-                      for (final resource in resources)
-                        for (final date in dates)
-                          DateHeader(
-                            date: date,
-                            width: _columnWidth,
-                            theme: widget.theme,
-                            builder: widget.dateHeaderBuilder,
-                            onTap: widget.onDateHeaderTap,
-                          ),
-                    ],
+                child: ScrollNavigationWrapper(
+                  child: SingleChildScrollView(
+                    controller: _dateHeaderHorizontalController,
+                    scrollDirection: Axis.horizontal,
+                    physics: _needsHorizontalScroll
+                        ? const AlwaysScrollableScrollPhysics()
+                        : const NeverScrollableScrollPhysics(),
+                    child: Row(
+                      children: [
+                        for (final resource in resources)
+                          for (final date in dates)
+                            DateHeader(
+                              date: date,
+                              width: _columnWidth,
+                              theme: widget.theme,
+                              builder: widget.dateHeaderBuilder,
+                              onTap: widget.onDateHeaderTap,
+                            ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -315,20 +352,24 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
               ),
               // Scrollable date headers
               Expanded(
-                child: SingleChildScrollView(
-                  controller: _dateHeaderHorizontalController,
-                  scrollDirection: Axis.horizontal,
-                  physics: const NeverScrollableScrollPhysics(),
-                  child: Row(
-                    children: dates.map((date) {
-                      return DateHeader(
-                        date: date,
-                        width: _columnWidth * resources.length,
-                        theme: widget.theme,
-                        builder: widget.dateHeaderBuilder,
-                        onTap: widget.onDateHeaderTap,
-                      );
-                    }).toList(),
+                child: ScrollNavigationWrapper(
+                  child: SingleChildScrollView(
+                    controller: _dateHeaderHorizontalController,
+                    scrollDirection: Axis.horizontal,
+                    physics: _needsHorizontalScroll
+                        ? const AlwaysScrollableScrollPhysics()
+                        : const NeverScrollableScrollPhysics(),
+                    child: Row(
+                      children: dates.map((date) {
+                        return DateHeader(
+                          date: date,
+                          width: _columnWidth * resources.length,
+                          theme: widget.theme,
+                          builder: widget.dateHeaderBuilder,
+                          onTap: widget.onDateHeaderTap,
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ),
               ),
@@ -360,22 +401,26 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
               ),
               // Scrollable resource headers
               Expanded(
-                child: SingleChildScrollView(
-                  controller: _resourceHeaderHorizontalController,
-                  scrollDirection: Axis.horizontal,
-                  physics: const NeverScrollableScrollPhysics(),
-                  child: Row(
-                    children: [
-                      for (final date in dates)
-                        for (final resource in resources)
-                          ResourceHeader(
-                            resource: resource,
-                            width: _columnWidth,
-                            theme: widget.theme,
-                            builder: widget.resourceHeaderBuilder,
-                            onTap: widget.onResourceHeaderTap,
-                          ),
-                    ],
+                child: ScrollNavigationWrapper(
+                  child: SingleChildScrollView(
+                    controller: _resourceHeaderHorizontalController,
+                    scrollDirection: Axis.horizontal,
+                    physics: _needsHorizontalScroll
+                        ? const AlwaysScrollableScrollPhysics()
+                        : const NeverScrollableScrollPhysics(),
+                    child: Row(
+                      children: [
+                        for (final date in dates)
+                          for (final resource in resources)
+                            ResourceHeader(
+                              resource: resource,
+                              width: _columnWidth,
+                              theme: widget.theme,
+                              builder: widget.resourceHeaderBuilder,
+                              onTap: widget.onResourceHeaderTap,
+                            ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -453,37 +498,39 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
     return SingleChildScrollView(
       controller: _gridVerticalController,
       physics: const AlwaysScrollableScrollPhysics(),
-      child: SingleChildScrollView(
-        controller: _gridHorizontalController,
-        scrollDirection: Axis.horizontal,
-        physics: _needsHorizontalScroll
-            ? const AlwaysScrollableScrollPhysics()
-            : const NeverScrollableScrollPhysics(),
-        child: SizedBox(
-          width: totalWidth,
-          height: totalHeight,
-          child: Stack(
-            children: [
-              // Grid background
-              CustomPaint(
-                size: Size(totalWidth, totalHeight),
-                painter: GridPainter(
-                  config: widget.config,
-                  theme: widget.theme,
-                  numberOfColumns: resources.length * dates.length,
-                  columnWidth: _columnWidth,
+      child: ScrollNavigationWrapper(
+        child: SingleChildScrollView(
+          controller: _gridHorizontalController,
+          scrollDirection: Axis.horizontal,
+          physics: _needsHorizontalScroll
+              ? const AlwaysScrollableScrollPhysics()
+              : const NeverScrollableScrollPhysics(),
+          child: SizedBox(
+            width: totalWidth,
+            height: totalHeight,
+            child: Stack(
+              children: [
+                // Grid background
+                CustomPaint(
+                  size: Size(totalWidth, totalHeight),
+                  painter: GridPainter(
+                    config: widget.config,
+                    theme: widget.theme,
+                    numberOfColumns: resources.length * dates.length,
+                    columnWidth: _columnWidth,
+                  ),
                 ),
-              ),
-              // Unavailability layers
-              ..._buildUnavailabilityLayers(resources, dates),
-              // Cell interaction layer
-              ..._buildCellInteractionLayer(resources, dates),
-              // Appointments
-              ..._buildAppointments(resources, dates),
-              // Current time indicator
-              if (_shouldShowCurrentTimeIndicator())
-                _buildCurrentTimeIndicator(totalWidth),
-            ],
+                // Unavailability layers
+                ..._buildUnavailabilityLayers(resources, dates),
+                // Cell interaction layer
+                ..._buildCellInteractionLayer(resources, dates),
+                // Appointments
+                ..._buildAppointments(resources, dates),
+                // Current time indicator
+                if (_shouldShowCurrentTimeIndicator())
+                  _buildCurrentTimeIndicator(totalWidth),
+              ],
+            ),
           ),
         ),
       ),

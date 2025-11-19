@@ -3,22 +3,13 @@
 import 'package:calendar2/calendar2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/calendar_config.dart';
-import '../models/calendar_theme.dart';
-import '../models/business_hours.dart';
-import '../models/available_slots.dart';
-import '../models/calendar_resource.dart';
-import '../models/calendar_resource_extensions.dart';
-import '../controllers/calendar_controller.dart';
 import '../utils/overlap_calculator.dart';
 import '../utils/date_time_utils.dart';
-import '../utils/business_hours_calculator.dart';
-import '../builders/builder_delegates.dart';
 import 'resource_header.dart';
 import 'grid_painter.dart';
 import 'appointment_widget.dart';
-import 'unavailability_painter.dart';
 import 'slot_highlight_painter.dart';
+import 'scroll_navigation_wrapper.dart';
 
 /// Calendar day view - shows all resources for a single day
 class CalendarDayView extends StatefulWidget {
@@ -74,6 +65,7 @@ class _CalendarDayViewState extends State<CalendarDayView> {
   double _columnWidth = 0;
   bool _needsHorizontalScroll = false;
   bool _isUpdatingScroll = false;
+  ScrollController? _lastHorizontalScrollSource;
 
   @override
   void initState() {
@@ -87,7 +79,12 @@ class _CalendarDayViewState extends State<CalendarDayView> {
 
     // Add listeners for scroll synchronization
     _gridVerticalController.addListener(_onGridVerticalScroll);
-    _gridHorizontalController.addListener(_onGridHorizontalScroll);
+    _gridHorizontalController.addListener(
+      () => _onAnyHorizontalScroll(_gridHorizontalController),
+    );
+    _resourceHeaderHorizontalController.addListener(
+      () => _onAnyHorizontalScroll(_resourceHeaderHorizontalController),
+    );
 
     widget.controller.addListener(_onControllerUpdate);
   }
@@ -95,7 +92,7 @@ class _CalendarDayViewState extends State<CalendarDayView> {
   @override
   void dispose() {
     _gridVerticalController.removeListener(_onGridVerticalScroll);
-    _gridHorizontalController.removeListener(_onGridHorizontalScroll);
+    // Note: We can't remove the specific lambda listeners, but dispose will clean up
     _gridVerticalController.dispose();
     _gridHorizontalController.dispose();
     _timeColumnVerticalController.dispose();
@@ -115,16 +112,33 @@ class _CalendarDayViewState extends State<CalendarDayView> {
     _isUpdatingScroll = false;
   }
 
-  void _onGridHorizontalScroll() {
+  void _onAnyHorizontalScroll(ScrollController source) {
     if (_isUpdatingScroll) return;
-    _isUpdatingScroll = true;
 
-    if (_resourceHeaderHorizontalController.hasClients) {
-      _resourceHeaderHorizontalController.jumpTo(
-        _gridHorizontalController.offset,
-      );
+    // Track the source to avoid circular updates
+    if (_lastHorizontalScrollSource == source) {
+      return;
     }
 
+    _isUpdatingScroll = true;
+    _lastHorizontalScrollSource = source;
+
+    final offset = source.offset;
+
+    // Sync all horizontal controllers to the same offset
+    if (_gridHorizontalController.hasClients &&
+        _gridHorizontalController != source &&
+        _gridHorizontalController.offset != offset) {
+      _gridHorizontalController.jumpTo(offset);
+    }
+
+    if (_resourceHeaderHorizontalController.hasClients &&
+        _resourceHeaderHorizontalController != source &&
+        _resourceHeaderHorizontalController.offset != offset) {
+      _resourceHeaderHorizontalController.jumpTo(offset);
+    }
+
+    _lastHorizontalScrollSource = null;
     _isUpdatingScroll = false;
   }
 
@@ -190,21 +204,24 @@ class _CalendarDayViewState extends State<CalendarDayView> {
           ),
           // Scrollable resource headers
           Expanded(
-            child: SingleChildScrollView(
-              controller: _resourceHeaderHorizontalController,
-              scrollDirection: Axis.horizontal,
-              physics:
-                  const NeverScrollableScrollPhysics(), // Controlled by grid scroll
-              child: Row(
-                children: resources.map((resource) {
-                  return ResourceHeader(
-                    resource: resource,
-                    width: _columnWidth,
-                    theme: widget.theme,
-                    builder: widget.resourceHeaderBuilder,
-                    onTap: widget.onResourceHeaderTap,
-                  );
-                }).toList(),
+            child: ScrollNavigationWrapper(
+              child: SingleChildScrollView(
+                controller: _resourceHeaderHorizontalController,
+                scrollDirection: Axis.horizontal,
+                physics: _needsHorizontalScroll
+                    ? const AlwaysScrollableScrollPhysics()
+                    : const NeverScrollableScrollPhysics(),
+                child: Row(
+                  children: resources.map((resource) {
+                    return ResourceHeader(
+                      resource: resource,
+                      width: _columnWidth,
+                      theme: widget.theme,
+                      builder: widget.resourceHeaderBuilder,
+                      onTap: widget.onResourceHeaderTap,
+                    );
+                  }).toList(),
+                ),
               ),
             ),
           ),
@@ -280,37 +297,39 @@ class _CalendarDayViewState extends State<CalendarDayView> {
     return SingleChildScrollView(
       controller: _gridVerticalController,
       physics: const AlwaysScrollableScrollPhysics(),
-      child: SingleChildScrollView(
-        controller: _gridHorizontalController,
-        scrollDirection: Axis.horizontal,
-        physics: _needsHorizontalScroll
-            ? const AlwaysScrollableScrollPhysics()
-            : const NeverScrollableScrollPhysics(),
-        child: SizedBox(
-          width: totalWidth,
-          height: totalHeight,
-          child: Stack(
-            children: [
-              // Grid background
-              CustomPaint(
-                size: Size(totalWidth, totalHeight),
-                painter: GridPainter(
-                  config: widget.config,
-                  theme: widget.theme,
-                  numberOfColumns: resources.length,
-                  columnWidth: _columnWidth,
+      child: ScrollNavigationWrapper(
+        child: SingleChildScrollView(
+          controller: _gridHorizontalController,
+          scrollDirection: Axis.horizontal,
+          physics: _needsHorizontalScroll
+              ? const AlwaysScrollableScrollPhysics()
+              : const NeverScrollableScrollPhysics(),
+          child: SizedBox(
+            width: totalWidth,
+            height: totalHeight,
+            child: Stack(
+              children: [
+                // Grid background
+                CustomPaint(
+                  size: Size(totalWidth, totalHeight),
+                  painter: GridPainter(
+                    config: widget.config,
+                    theme: widget.theme,
+                    numberOfColumns: resources.length,
+                    columnWidth: _columnWidth,
+                  ),
                 ),
-              ),
-              // Unavailability layers (business hours)
-              ..._buildUnavailabilityLayers(resources),
-              // Cell interaction layer
-              ..._buildCellInteractionLayer(resources),
-              // Appointments
-              ..._buildAppointments(resources),
-              // Current time indicator
-              if (_shouldShowCurrentTimeIndicator())
-                _buildCurrentTimeIndicator(totalWidth),
-            ],
+                // Unavailability layers (business hours)
+                ..._buildUnavailabilityLayers(resources),
+                // Cell interaction layer
+                ..._buildCellInteractionLayer(resources),
+                // Appointments
+                ..._buildAppointments(resources),
+                // Current time indicator
+                if (_shouldShowCurrentTimeIndicator())
+                  _buildCurrentTimeIndicator(totalWidth),
+              ],
+            ),
           ),
         ),
       ),
