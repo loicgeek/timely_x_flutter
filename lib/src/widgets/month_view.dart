@@ -173,12 +173,11 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hoveredDate = date),
       onExit: (_) => setState(() => _hoveredDate = null),
-      child: GestureDetector(
-        onTapDown: (details) =>
-            _onCellTap(date, appointments, details.globalPosition),
-        onLongPressDown: (details) =>
-            _onCellLongPress(date, appointments, details.globalPosition),
-        behavior: HitTestBehavior.opaque,
+      child: _MonthCellGestureHandler(
+        date: date,
+        appointments: appointments,
+        onCellTap: _onCellTap,
+        onCellLongPress: _onCellLongPress,
         child: Container(
           decoration: BoxDecoration(
             color: _getCellBackgroundColor(
@@ -653,4 +652,74 @@ class _DefaultResource extends CalendarResource {
 
   @override
   final String name;
+}
+
+/// Helper widget to properly handle month cell tap and long press gestures
+/// Prevents both callbacks from firing on mobile devices
+class _MonthCellGestureHandler extends StatefulWidget {
+  const _MonthCellGestureHandler({
+    Key? key,
+    required this.date,
+    required this.appointments,
+    required this.onCellTap,
+    required this.onCellLongPress,
+    required this.child,
+  }) : super(key: key);
+
+  final DateTime date;
+  final List<CalendarAppointment> appointments;
+  final void Function(DateTime, List<CalendarAppointment>, Offset)? onCellTap;
+  final void Function(DateTime, List<CalendarAppointment>, Offset)?
+  onCellLongPress;
+  final Widget child;
+
+  @override
+  State<_MonthCellGestureHandler> createState() =>
+      _MonthCellGestureHandlerState();
+}
+
+class _MonthCellGestureHandlerState extends State<_MonthCellGestureHandler> {
+  bool _longPressTriggered = false;
+  Offset? _tapDownGlobalPosition;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (details) {
+        // Track tap position and reset long press flag
+        _longPressTriggered = false;
+        _tapDownGlobalPosition = details.globalPosition;
+      },
+      onTapUp: (details) {
+        // Only fire tap if long press wasn't triggered
+        if (!_longPressTriggered && widget.onCellTap != null) {
+          widget.onCellTap!(
+            widget.date,
+            widget.appointments,
+            details.globalPosition,
+          );
+        }
+        // Reset flag
+        _longPressTriggered = false;
+      },
+      onTapCancel: () {
+        // Reset flag on cancel
+        _longPressTriggered = false;
+      },
+      onLongPressStart: (details) {
+        // Mark that long press was triggered
+        _longPressTriggered = true;
+
+        if (widget.onCellLongPress != null) {
+          widget.onCellLongPress!(
+            widget.date,
+            widget.appointments,
+            details.globalPosition,
+          );
+        }
+      },
+      child: widget.child,
+    );
+  }
 }

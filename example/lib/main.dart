@@ -138,6 +138,11 @@ class _CalendarDemoState extends State<CalendarDemo> {
     _controller.updateAppointments(appointments);
   }
 
+  void _handleCellLongPress(CellTapData data) {
+    print("Cell long press: ${data.resource.name} ${data.dateTime}");
+    // _showCreateDialog(data.resource, data.dateTime);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -162,6 +167,7 @@ class _CalendarDemoState extends State<CalendarDemo> {
               onAppointmentLongPress: _handleAppointmentLongPress,
               onAppointmentSecondaryTap: _handleAppointmentSecondaryTap,
               onCellTap: _handleCellTap,
+              onCellLongPress: _handleCellLongPress,
               onResourceHeaderTap: _handleResourceHeaderTap,
               onDateHeaderTap: _handleDateHeaderTap,
             ),

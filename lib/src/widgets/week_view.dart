@@ -1,5 +1,6 @@
 // lib/src/widgets/week_view.dart (UPDATED with layout options and cell interactions)
 
+import 'package:calendar2/calendar2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/calendar_config.dart';
@@ -699,43 +700,14 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
             top: hour * cellHeight.toDouble(),
             width: _columnWidth,
             height: cellHeight,
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTapDown: (details) {
-                // Calculate exact time from tap position
-                final exactDateTime = _calculateTimeFromOffset(
-                  cellDateTime,
-                  details.localPosition.dy,
-                  cellHeight,
-                );
-
-                widget.onCellTap?.call(
-                  CellTapData(
-                    resource: cell.resource,
-                    dateTime: exactDateTime,
-                    globalPosition: details.globalPosition,
-                    appointments: cellAppointments,
-                  ),
-                );
-              },
-              onLongPressStart: (details) {
-                // Calculate exact time from long press position
-                final exactDateTime = _calculateTimeFromOffset(
-                  cellDateTime,
-                  details.localPosition.dy,
-                  cellHeight,
-                );
-
-                widget.onCellLongPress?.call(
-                  CellTapData(
-                    resource: cell.resource,
-                    dateTime: exactDateTime,
-                    globalPosition: details.globalPosition,
-                    appointments: cellAppointments,
-                  ),
-                );
-              },
-              child: Container(color: Colors.transparent),
+            child: _CellGestureHandler(
+              cellDateTime: cellDateTime,
+              cellHeight: cellHeight,
+              resource: cell.resource,
+              cellAppointments: cellAppointments,
+              onCellTap: widget.onCellTap,
+              onCellLongPress: widget.onCellLongPress,
+              calculateTimeFromOffset: _calculateTimeFromOffset,
             ),
           ),
         );
@@ -900,6 +872,98 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Helper widget to properly handle cell tap and long press gestures
+/// Prevents both callbacks from firing on mobile devices
+class _CellGestureHandler extends StatefulWidget {
+  const _CellGestureHandler({
+    Key? key,
+    required this.cellDateTime,
+    required this.cellHeight,
+    required this.resource,
+    required this.cellAppointments,
+    required this.onCellTap,
+    required this.onCellLongPress,
+    required this.calculateTimeFromOffset,
+  }) : super(key: key);
+
+  final DateTime cellDateTime;
+  final double cellHeight;
+  final CalendarResource resource;
+  final List<CalendarAppointment> cellAppointments;
+  final OnCellTap? onCellTap;
+  final OnCellLongPress? onCellLongPress;
+  final DateTime Function(DateTime, double, double) calculateTimeFromOffset;
+
+  @override
+  State<_CellGestureHandler> createState() => _CellGestureHandlerState();
+}
+
+class _CellGestureHandlerState extends State<_CellGestureHandler> {
+  bool _longPressTriggered = false;
+  Offset? _tapDownPosition;
+  Offset? _tapDownGlobalPosition;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (details) {
+        // Track tap position for later use
+        _longPressTriggered = false;
+        _tapDownPosition = details.localPosition;
+        _tapDownGlobalPosition = details.globalPosition;
+      },
+      onTapUp: (details) {
+        // Only fire tap if long press wasn't triggered
+        if (!_longPressTriggered && widget.onCellTap != null) {
+          final exactDateTime = widget.calculateTimeFromOffset(
+            widget.cellDateTime,
+            details.localPosition.dy,
+            widget.cellHeight,
+          );
+
+          widget.onCellTap!.call(
+            CellTapData(
+              resource: widget.resource,
+              dateTime: exactDateTime,
+              globalPosition: details.globalPosition,
+              appointments: widget.cellAppointments,
+            ),
+          );
+        }
+        // Reset flag
+        _longPressTriggered = false;
+      },
+      onTapCancel: () {
+        // Reset flag on cancel
+        _longPressTriggered = false;
+      },
+      onLongPressStart: (details) {
+        // Mark that long press was triggered
+        _longPressTriggered = true;
+
+        if (widget.onCellLongPress != null) {
+          final exactDateTime = widget.calculateTimeFromOffset(
+            widget.cellDateTime,
+            details.localPosition.dy,
+            widget.cellHeight,
+          );
+
+          widget.onCellLongPress!.call(
+            CellTapData(
+              resource: widget.resource,
+              dateTime: exactDateTime,
+              globalPosition: details.globalPosition,
+              appointments: widget.cellAppointments,
+            ),
+          );
+        }
+      },
+      child: Container(color: Colors.transparent),
     );
   }
 }
