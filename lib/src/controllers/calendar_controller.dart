@@ -643,7 +643,7 @@ class CalendarController extends ChangeNotifier {
     DateTime? endDate,
   }) {
     final start = startDate ?? _agendaStartDate;
-    final end = endDate ?? _agendaEndDate;
+    var end = endDate ?? _agendaEndDate;
 
     var filtered = _appointments;
 
@@ -656,10 +656,11 @@ class CalendarController extends ChangeNotifier {
 
     // Apply date range filter
     if (start != null && end != null) {
+      end = DateTime(end.year, end.month, end.day, 23, 59, 59);
       filtered = filtered
           .where(
             (apt) =>
-                !apt.startTime.isAfter(end) && !apt.endTime.isBefore(start),
+                !apt.startTime.isAfter(end!) && !apt.endTime.isBefore(start),
           )
           .toList();
     }
