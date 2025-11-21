@@ -62,13 +62,18 @@ class CalendarController extends ChangeNotifier {
         );
       case CalendarViewType.month:
         return DateTime(_currentDate.year, _currentDate.month, 1);
+
+      // For agenda view, return custom start date or today
       case CalendarViewType.agenda:
-        // For agenda view, return custom start date or today
         if (_agendaStartDate != null) {
           return _agendaStartDate!;
         }
-        final now = DateTime.now();
-        return DateTime(now.year, now.month, now.day);
+        // Use _currentDate instead of DateTime.now()
+        return DateTime(
+          _currentDate.year,
+          _currentDate.month,
+          _currentDate.day,
+        );
     }
   }
 
