@@ -134,7 +134,7 @@ class _AgendaViewState extends State<AgendaView> {
         startDate.day + widget.controller.effectiveNumberOfDays,
       );
     }
-    endDate = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+    //  endDate = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
 
     // Group appointments
     final groups = AgendaGroupingUtils.groupAppointments(
