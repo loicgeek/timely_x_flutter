@@ -1,5 +1,6 @@
 // example/lib/main.dart
 
+import 'package:calendar2_example/screens/agenda_view_example.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar2/calendar2.dart';
 import 'widgets/custom_navigation_bar.dart';
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
       title: 'Calendar View Demo',
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       debugShowCheckedModeBanner: false,
-      home: const CalendarDemo(),
+      home: const AgendaViewExample(),
     );
   }
 }

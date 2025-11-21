@@ -1,5 +1,6 @@
-// lib/src/controllers/calendar_controller.dart (renamed from week_view_controller.dart)
+// lib/src/controllers/calendar_controller.dart (Fixed)
 
+import 'package:calendar2/src/models/agenda_view_config.dart';
 import 'package:flutter/material.dart';
 import '../models/calendar_appointment.dart';
 import '../models/calendar_resource.dart';
@@ -25,6 +26,13 @@ class CalendarController extends ChangeNotifier {
   final Set<DateTime> _selectedDates = {};
   DateTime? _rangeStartDate;
   DateTime? _rangeEndDate;
+
+  // Agenda-specific date range (when using custom date range mode)
+  DateTime? _agendaStartDate;
+  DateTime? _agendaEndDate;
+
+  // Selected resource filter for agenda view
+  Set<String> _selectedResourceIds = {};
 
   // Getters
   CalendarConfig get config => _config;
@@ -54,6 +62,13 @@ class CalendarController extends ChangeNotifier {
         );
       case CalendarViewType.month:
         return DateTime(_currentDate.year, _currentDate.month, 1);
+      case CalendarViewType.agenda:
+        // For agenda view, return custom start date or today
+        if (_agendaStartDate != null) {
+          return _agendaStartDate!;
+        }
+        final now = DateTime.now();
+        return DateTime(now.year, now.month, now.day);
     }
   }
 
@@ -70,6 +85,13 @@ class CalendarController extends ChangeNotifier {
         final date = viewStartDate;
         final nextMonth = DateTime(date.year, date.month + 1, 1);
         return nextMonth.difference(date).inDays;
+      case CalendarViewType.agenda:
+        // Use agenda config or calculate from custom range
+        if (_agendaStartDate != null && _agendaEndDate != null) {
+          return _agendaEndDate!.difference(_agendaStartDate!).inDays + 1;
+        }
+        final agendaConfig = _config.agendaConfig ?? const AgendaViewConfig();
+        return agendaConfig.daysToShow;
     }
   }
 
@@ -93,6 +115,25 @@ class CalendarController extends ChangeNotifier {
 
   /// Get selection range end date
   DateTime? get selectionRangeEnd => _rangeEndDate;
+
+  /// Get agenda start date (for custom date range mode)
+  DateTime? get agendaStartDate => _agendaStartDate;
+
+  /// Get agenda end date (for custom date range mode)
+  DateTime? get agendaEndDate => _agendaEndDate;
+
+  /// Get selected resource IDs for filtering
+  Set<String> get selectedResourceIds => Set.unmodifiable(_selectedResourceIds);
+
+  /// Get filtered appointments based on selected resources
+  List<CalendarAppointment> get filteredAppointments {
+    if (_selectedResourceIds.isEmpty) {
+      return _appointments;
+    }
+    return _appointments
+        .where((apt) => _selectedResourceIds.contains(apt.resourceId))
+        .toList();
+  }
 
   /// Check if a date is selected
   bool isDateSelected(DateTime date) {
@@ -217,6 +258,10 @@ class CalendarController extends ChangeNotifier {
       case CalendarViewType.month:
         _currentDate = DateTime(_currentDate.year, _currentDate.month + 1);
         break;
+      case CalendarViewType.agenda:
+        final agendaConfig = _config.agendaConfig ?? const AgendaViewConfig();
+        nextAgendaPeriod(agendaConfig.daysToShow);
+        break;
     }
     notifyListeners();
   }
@@ -232,6 +277,10 @@ class CalendarController extends ChangeNotifier {
         break;
       case CalendarViewType.month:
         _currentDate = DateTime(_currentDate.year, _currentDate.month - 1);
+        break;
+      case CalendarViewType.agenda:
+        final agendaConfig = _config.agendaConfig ?? const AgendaViewConfig();
+        previousAgendaPeriod(agendaConfig.daysToShow);
         break;
     }
     notifyListeners();
@@ -466,6 +515,185 @@ class CalendarController extends ChangeNotifier {
         }
       case CalendarViewType.month:
         return DateTimeUtils.formatDate(_currentDate, monthFormatStr);
+      case CalendarViewType.agenda:
+        return getAgendaViewPeriodDescription();
+    }
+  }
+
+  // ============================================================================
+  // Additional Methods for Agenda View
+  // ============================================================================
+
+  /// Set custom date range for agenda view
+  void setAgendaDateRange(DateTime startDate, DateTime endDate) {
+    _agendaStartDate = DateTime(startDate.year, startDate.month, startDate.day);
+    _agendaEndDate = DateTime(endDate.year, endDate.month, endDate.day);
+    notifyListeners();
+  }
+
+  /// Clear custom date range (will use relative mode)
+  void clearAgendaDateRange() {
+    _agendaStartDate = null;
+    _agendaEndDate = null;
+    notifyListeners();
+  }
+
+  /// Navigate to next period in agenda view
+  void nextAgendaPeriod(int days) {
+    if (_config.viewType != CalendarViewType.agenda) return;
+
+    if (_agendaStartDate != null && _agendaEndDate != null) {
+      // Custom date range mode - shift by specified days
+      _agendaStartDate = DateTime(
+        _agendaStartDate!.year,
+        _agendaStartDate!.month,
+        _agendaStartDate!.day + days,
+      );
+      _agendaEndDate = DateTime(
+        _agendaEndDate!.year,
+        _agendaEndDate!.month,
+        _agendaEndDate!.day + days,
+      );
+    } else {
+      // Relative mode - just update current date
+      _currentDate = DateTime(
+        _currentDate.year,
+        _currentDate.month,
+        _currentDate.day + days,
+      );
+    }
+    notifyListeners();
+  }
+
+  /// Navigate to previous period in agenda view
+  void previousAgendaPeriod(int days) {
+    if (_config.viewType != CalendarViewType.agenda) return;
+
+    if (_agendaStartDate != null && _agendaEndDate != null) {
+      // Custom date range mode - shift by specified days
+      _agendaStartDate = DateTime(
+        _agendaStartDate!.year,
+        _agendaStartDate!.month,
+        _agendaStartDate!.day - days,
+      );
+      _agendaEndDate = DateTime(
+        _agendaEndDate!.year,
+        _agendaEndDate!.month,
+        _agendaEndDate!.day - days,
+      );
+    } else {
+      // Relative mode - just update current date
+      _currentDate = DateTime(
+        _currentDate.year,
+        _currentDate.month,
+        _currentDate.day - days,
+      );
+    }
+    notifyListeners();
+  }
+
+  /// Set resource filter for agenda view
+  void setResourceFilter(Set<String> resourceIds) {
+    _selectedResourceIds = Set.from(resourceIds);
+    notifyListeners();
+  }
+
+  /// Add resource to filter
+  void addResourceToFilter(String resourceId) {
+    _selectedResourceIds.add(resourceId);
+    notifyListeners();
+  }
+
+  /// Remove resource from filter
+  void removeResourceFromFilter(String resourceId) {
+    _selectedResourceIds.remove(resourceId);
+    notifyListeners();
+  }
+
+  /// Toggle resource filter
+  void toggleResourceFilter(String resourceId) {
+    if (_selectedResourceIds.contains(resourceId)) {
+      _selectedResourceIds.remove(resourceId);
+    } else {
+      _selectedResourceIds.add(resourceId);
+    }
+    notifyListeners();
+  }
+
+  /// Clear resource filter (show all resources)
+  void clearResourceFilter() {
+    _selectedResourceIds.clear();
+    notifyListeners();
+  }
+
+  /// Check if resource is filtered
+  bool isResourceFiltered(String resourceId) {
+    if (_selectedResourceIds.isEmpty) return true; // No filter = all shown
+    return _selectedResourceIds.contains(resourceId);
+  }
+
+  /// Get appointments for agenda view (respects filters and date range)
+  List<CalendarAppointment> getAgendaAppointments({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) {
+    final start = startDate ?? _agendaStartDate;
+    final end = endDate ?? _agendaEndDate;
+
+    var filtered = _appointments;
+
+    // Apply resource filter
+    if (_selectedResourceIds.isNotEmpty) {
+      filtered = filtered
+          .where((apt) => _selectedResourceIds.contains(apt.resourceId))
+          .toList();
+    }
+
+    // Apply date range filter
+    if (start != null && end != null) {
+      filtered = filtered
+          .where(
+            (apt) =>
+                !apt.startTime.isAfter(end) && !apt.endTime.isBefore(start),
+          )
+          .toList();
+    }
+
+    // Sort by start time
+    filtered.sort((a, b) => a.startTime.compareTo(b.startTime));
+
+    return filtered;
+  }
+
+  /// Get agenda view period description
+  String getAgendaViewPeriodDescription([String? dateFormat]) {
+    final format = dateFormat ?? 'MMM d, yyyy';
+
+    if (_agendaStartDate != null && _agendaEndDate != null) {
+      // Custom date range mode
+      if (DateTimeUtils.isSameDay(_agendaStartDate!, _agendaEndDate!)) {
+        return DateTimeUtils.formatDate(_agendaStartDate!, format);
+      } else if (_agendaStartDate!.month == _agendaEndDate!.month) {
+        return '${DateTimeUtils.formatDate(_agendaStartDate!, 'MMM d')} - '
+            '${DateTimeUtils.formatDate(_agendaEndDate!, 'd, yyyy')}';
+      } else {
+        return '${DateTimeUtils.formatDate(_agendaStartDate!, 'MMM d')} - '
+            '${DateTimeUtils.formatDate(_agendaEndDate!, 'MMM d, yyyy')}';
+      }
+    } else {
+      // Relative mode - show number of days from current date
+      final agendaConfig = _config.agendaConfig ?? const AgendaViewConfig();
+      final days = agendaConfig.daysToShow;
+
+      if (days == 1) {
+        return 'Today';
+      } else if (days == 7) {
+        return 'Next 7 days';
+      } else if (days == 30) {
+        return 'Next 30 days';
+      } else {
+        return 'Next $days days';
+      }
     }
   }
 }

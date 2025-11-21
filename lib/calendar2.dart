@@ -8,6 +8,7 @@ export 'src/models/week_view_layout.dart';
 export 'src/models/business_hours.dart';
 export 'src/models/available_slots.dart';
 export 'src/models/calendar_resource_extensions.dart';
+export 'src/models/agenda_view_config.dart';
 
 // utils
 export 'src/utils/business_hours_calculator.dart';

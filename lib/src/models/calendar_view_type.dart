@@ -8,8 +8,11 @@ enum CalendarViewType {
   /// Shows a week (7 days) with resources
   week,
 
-  /// Shows a month overview (to be implemented)
+  /// Shows a month overview
   month,
+
+  /// Shows chronological list of appointments (agenda/schedule view)
+  agenda,
 }
 
 /// Date selection mode for month view
@@ -52,6 +55,8 @@ class ViewTypeConfig {
         return 7;
       case CalendarViewType.month:
         return 30; // Will be calculated dynamically for actual implementation
+      case CalendarViewType.agenda:
+        return 7; // Default to 7 days for agenda view
     }
   }
 

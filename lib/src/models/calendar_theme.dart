@@ -129,6 +129,87 @@ class CalendarTheme {
     this.dragPlaceholderOpacity = 0.3,
     this.dragPlaceholderBorderColor = const Color(0x80000000),
     this.dragPlaceholderBorderWidth = 2.0,
+
+    // Agenda view
+
+    // Colors (7 properties)
+    this.agendaItemBackgroundColor = Colors.white,
+    this.agendaItemHoverColor = const Color(0xFFF5F5F5),
+    this.agendaItemSelectedColor = const Color(0xFFE3F2FD),
+    this.agendaDateHeaderBackgroundColor = const Color(0xFFF5F5F5),
+    this.agendaResourceHeaderBackgroundColor = const Color(0xFFFAFAFA),
+    this.agendaDividerColor = const Color(0xFFE0E0E0),
+    this.agendaEmptyBackgroundColor = const Color(0xFFFAFAFA),
+
+    // Text Styles (8 properties)
+    this.agendaDateHeaderTextStyle = const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      color: Colors.black87,
+    ),
+    this.agendaResourceHeaderTextStyle = const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+    ),
+    this.agendaTimeTextStyle = const TextStyle(
+      fontSize: 12,
+      color: Colors.black54,
+    ),
+    this.agendaTitleTextStyle = const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+    ),
+    this.agendaSubtitleTextStyle = const TextStyle(
+      fontSize: 12,
+      color: Colors.black54,
+    ),
+    this.agendaDurationTextStyle = const TextStyle(
+      fontSize: 11,
+      color: Colors.black45,
+    ),
+    this.agendaResourceNameTextStyle = const TextStyle(fontSize: 12),
+    this.agendaEmptyTextStyle = const TextStyle(
+      fontSize: 14,
+      color: Colors.black45,
+    ),
+
+    // Date Formats (3 properties)
+    this.agendaDateHeaderFormat = 'EEEE, MMMM d', // "Monday, November 18"
+    this.agendaTimeFormat = 'h:mm a', // "2:30 PM"
+    this.agendaDurationFormat = 'H:mm', // "1:30"
+    // Spacing (8 properties)
+    this.agendaDateHeaderPadding = const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 12,
+    ),
+    this.agendaResourceHeaderPadding = const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 10,
+    ),
+    this.agendaItemPadding = const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 12,
+    ),
+    this.agendaItemMargin = EdgeInsets.zero,
+    this.agendaTimeToTitleSpacing = 12.0,
+    this.agendaTitleToSubtitleSpacing = 4.0,
+    this.agendaResourceAvatarRadius = 16.0,
+    this.agendaAvatarSpacing = 12.0,
+
+    // Decorations (5 properties)
+    this.agendaItemBorderRadius = 0.0,
+    this.agendaItemShadow = const [
+      BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+    ],
+    this.agendaDividerThickness = 1.0,
+    this.agendaDividerIndent = 16.0,
+    this.agendaDividerEndIndent = 0.0,
+
+    // Indicators (4 properties)
+    this.agendaStatusIndicatorSize = 8.0,
+    this.agendaShowColorBar = true,
+    this.agendaColorBarWidth = 4.0,
+    this.agendaShowStatusIndicator = false,
   });
 
   // Grid colors
@@ -208,6 +289,172 @@ class CalendarTheme {
   final Color dragPlaceholderBorderColor;
   final double dragPlaceholderBorderWidth;
 
+  // Agenda view specific theme properties (add to CalendarTheme)
+
+  // ============================================================================
+  // Agenda View Colors (7 properties)
+  // ============================================================================
+
+  /// Background color for agenda list items
+  /// Default: Colors.white
+  final Color? agendaItemBackgroundColor;
+
+  /// Hover color for agenda list items
+  /// Default: Color(0xFFF5F5F5)
+  final Color? agendaItemHoverColor;
+
+  /// Background color for selected agenda items
+  /// Default: Color(0xFFE3F2FD)
+  final Color? agendaItemSelectedColor;
+
+  /// Background color for date group headers
+  /// Default: Color(0xFFF5F5F5)
+  final Color? agendaDateHeaderBackgroundColor;
+
+  /// Background color for resource group headers
+  /// Default: Color(0xFFFAFAFA)
+  final Color? agendaResourceHeaderBackgroundColor;
+
+  /// Divider color between agenda items
+  /// Default: Color(0xFFE0E0E0)
+  final Color? agendaDividerColor;
+
+  /// Background color for empty state
+  /// Default: Color(0xFFFAFAFA)
+  final Color? agendaEmptyBackgroundColor;
+
+  // ============================================================================
+  // Agenda View Text Styles (6 properties)
+  // ============================================================================
+
+  /// Text style for date group headers (e.g., "Monday, Nov 21")
+  /// Default: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)
+  final TextStyle? agendaDateHeaderTextStyle;
+
+  /// Text style for resource group headers
+  /// Default: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87)
+  final TextStyle? agendaResourceHeaderTextStyle;
+
+  /// Text style for appointment time in agenda items
+  /// Default: TextStyle(fontSize: 12, color: Colors.black54)
+  final TextStyle? agendaTimeTextStyle;
+
+  /// Text style for appointment title in agenda items
+  /// Default: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87)
+  final TextStyle? agendaTitleTextStyle;
+
+  /// Text style for appointment subtitle/location
+  /// Default: TextStyle(fontSize: 12, color: Colors.black54)
+  final TextStyle? agendaSubtitleTextStyle;
+
+  /// Text style for appointment duration
+  /// Default: TextStyle(fontSize: 11, color: Colors.black45)
+  final TextStyle? agendaDurationTextStyle;
+
+  /// Text style for resource name when shown in items
+  /// Default: TextStyle(fontSize: 12, color: Colors.black54)
+  final TextStyle? agendaResourceNameTextStyle;
+
+  /// Text style for empty state message
+  /// Default: TextStyle(fontSize: 14, color: Colors.black45)
+  final TextStyle? agendaEmptyTextStyle;
+
+  // ============================================================================
+  // Agenda View Date Formats (3 properties)
+  // ============================================================================
+
+  /// Format for date headers in agenda view
+  /// Default: 'EEEE, MMMM d' (e.g., "Monday, November 21")
+  final String? agendaDateHeaderFormat;
+
+  /// Format for time display in agenda items
+  /// Default: 'h:mm a' (e.g., "2:30 PM")
+  final String? agendaTimeFormat;
+
+  /// Format for duration display
+  /// Default: 'H:mm' (e.g., "1:30" for 1 hour 30 minutes)
+  final String? agendaDurationFormat;
+
+  // ============================================================================
+  // Agenda View Spacing (8 properties)
+  // ============================================================================
+
+  /// Padding for date group headers
+  /// Default: EdgeInsets.symmetric(horizontal: 16, vertical: 12)
+  final EdgeInsets? agendaDateHeaderPadding;
+
+  /// Padding for resource group headers
+  /// Default: EdgeInsets.symmetric(horizontal: 16, vertical: 10)
+  final EdgeInsets? agendaResourceHeaderPadding;
+
+  /// Padding for individual agenda items
+  /// Default: EdgeInsets.symmetric(horizontal: 16, vertical: 12)
+  final EdgeInsets? agendaItemPadding;
+
+  /// Margin between agenda items
+  /// Default: EdgeInsets.zero
+  final EdgeInsets? agendaItemMargin;
+
+  /// Spacing between appointment time and title
+  /// Default: 12.0
+  final double? agendaTimeToTitleSpacing;
+
+  /// Spacing between title and subtitle
+  /// Default: 4.0
+  final double? agendaTitleToSubtitleSpacing;
+
+  /// Radius for resource avatar in agenda items
+  /// Default: 16.0
+  final double? agendaResourceAvatarRadius;
+
+  /// Spacing around resource avatar
+  /// Default: 12.0
+  final double? agendaAvatarSpacing;
+
+  // ============================================================================
+  // Agenda View Decorations (5 properties)
+  // ============================================================================
+
+  /// Border radius for agenda items
+  /// Default: 0.0 (square corners)
+  final double? agendaItemBorderRadius;
+
+  /// Elevation/shadow for agenda items
+  /// Default: null (no shadow)
+  final List<BoxShadow>? agendaItemShadow;
+
+  /// Thickness of divider between items
+  /// Default: 1.0
+  final double? agendaDividerThickness;
+
+  /// Indent for divider
+  /// Default: 16.0
+  final double? agendaDividerIndent;
+
+  /// End indent for divider
+  /// Default: 0.0
+  final double? agendaDividerEndIndent;
+
+  // ============================================================================
+  // Agenda View Indicators (4 properties)
+  // ============================================================================
+
+  /// Size of appointment status indicator dot
+  /// Default: 8.0
+  final double? agendaStatusIndicatorSize;
+
+  /// Show colored bar on left side of item
+  /// Default: true
+  final bool? agendaShowColorBar;
+
+  /// Width of colored bar
+  /// Default: 4.0
+  final double? agendaColorBarWidth;
+
+  /// Show appointment status indicator
+  /// Default: false
+  final bool? agendaShowStatusIndicator;
+
   CalendarTheme copyWith({
     Color? gridLineColor,
     Color? hourLineColor,
@@ -267,6 +514,53 @@ class CalendarTheme {
     double? dragPlaceholderOpacity,
     Color? dragPlaceholderBorderColor,
     double? dragPlaceholderBorderWidth,
+
+    // Agenda view colors
+    Color? agendaItemBackgroundColor,
+    Color? agendaItemHoverColor,
+    Color? agendaItemSelectedColor,
+    Color? agendaDateHeaderBackgroundColor,
+    Color? agendaResourceHeaderBackgroundColor,
+    Color? agendaDividerColor,
+    Color? agendaEmptyBackgroundColor,
+
+    // Agenda view text styles
+    TextStyle? agendaDateHeaderTextStyle,
+    TextStyle? agendaResourceHeaderTextStyle,
+    TextStyle? agendaTimeTextStyle,
+    TextStyle? agendaTitleTextStyle,
+    TextStyle? agendaSubtitleTextStyle,
+    TextStyle? agendaDurationTextStyle,
+    TextStyle? agendaResourceNameTextStyle,
+    TextStyle? agendaEmptyTextStyle,
+
+    // Agenda view date formats
+    String? agendaDateHeaderFormat,
+    String? agendaTimeFormat,
+    String? agendaDurationFormat,
+
+    // Agenda view spacing
+    EdgeInsets? agendaDateHeaderPadding,
+    EdgeInsets? agendaResourceHeaderPadding,
+    EdgeInsets? agendaItemPadding,
+    EdgeInsets? agendaItemMargin,
+    double? agendaTimeToTitleSpacing,
+    double? agendaTitleToSubtitleSpacing,
+    double? agendaResourceAvatarRadius,
+    double? agendaAvatarSpacing,
+
+    // Agenda view decorations
+    double? agendaItemBorderRadius,
+    List<BoxShadow>? agendaItemShadow,
+    double? agendaDividerThickness,
+    double? agendaDividerIndent,
+    double? agendaDividerEndIndent,
+
+    // Agenda view indicators
+    double? agendaStatusIndicatorSize,
+    bool? agendaShowColorBar,
+    double? agendaColorBarWidth,
+    bool? agendaShowStatusIndicator,
   }) {
     return CalendarTheme(
       gridLineColor: gridLineColor ?? this.gridLineColor,
@@ -352,6 +646,76 @@ class CalendarTheme {
           dragPlaceholderBorderColor ?? this.dragPlaceholderBorderColor,
       dragPlaceholderBorderWidth:
           dragPlaceholderBorderWidth ?? this.dragPlaceholderBorderWidth,
+
+      // Agenda view colors
+      agendaItemBackgroundColor:
+          agendaItemBackgroundColor ?? this.agendaItemBackgroundColor,
+      agendaItemHoverColor: agendaItemHoverColor ?? this.agendaItemHoverColor,
+      agendaItemSelectedColor:
+          agendaItemSelectedColor ?? this.agendaItemSelectedColor,
+      agendaDateHeaderBackgroundColor:
+          agendaDateHeaderBackgroundColor ??
+          this.agendaDateHeaderBackgroundColor,
+      agendaResourceHeaderBackgroundColor:
+          agendaResourceHeaderBackgroundColor ??
+          this.agendaResourceHeaderBackgroundColor,
+      agendaDividerColor: agendaDividerColor ?? this.agendaDividerColor,
+      agendaEmptyBackgroundColor:
+          agendaEmptyBackgroundColor ?? this.agendaEmptyBackgroundColor,
+
+      // Agenda view text styles
+      agendaDateHeaderTextStyle:
+          agendaDateHeaderTextStyle ?? this.agendaDateHeaderTextStyle,
+      agendaResourceHeaderTextStyle:
+          agendaResourceHeaderTextStyle ?? this.agendaResourceHeaderTextStyle,
+      agendaTimeTextStyle: agendaTimeTextStyle ?? this.agendaTimeTextStyle,
+      agendaTitleTextStyle: agendaTitleTextStyle ?? this.agendaTitleTextStyle,
+      agendaSubtitleTextStyle:
+          agendaSubtitleTextStyle ?? this.agendaSubtitleTextStyle,
+      agendaDurationTextStyle:
+          agendaDurationTextStyle ?? this.agendaDurationTextStyle,
+      agendaResourceNameTextStyle:
+          agendaResourceNameTextStyle ?? this.agendaResourceNameTextStyle,
+      agendaEmptyTextStyle: agendaEmptyTextStyle ?? this.agendaEmptyTextStyle,
+
+      // Agenda view date formats
+      agendaDateHeaderFormat:
+          agendaDateHeaderFormat ?? this.agendaDateHeaderFormat,
+      agendaTimeFormat: agendaTimeFormat ?? this.agendaTimeFormat,
+      agendaDurationFormat: agendaDurationFormat ?? this.agendaDurationFormat,
+
+      // Agenda view spacing
+      agendaDateHeaderPadding:
+          agendaDateHeaderPadding ?? this.agendaDateHeaderPadding,
+      agendaResourceHeaderPadding:
+          agendaResourceHeaderPadding ?? this.agendaResourceHeaderPadding,
+      agendaItemPadding: agendaItemPadding ?? this.agendaItemPadding,
+      agendaItemMargin: agendaItemMargin ?? this.agendaItemMargin,
+      agendaTimeToTitleSpacing:
+          agendaTimeToTitleSpacing ?? this.agendaTimeToTitleSpacing,
+      agendaTitleToSubtitleSpacing:
+          agendaTitleToSubtitleSpacing ?? this.agendaTitleToSubtitleSpacing,
+      agendaResourceAvatarRadius:
+          agendaResourceAvatarRadius ?? this.agendaResourceAvatarRadius,
+      agendaAvatarSpacing: agendaAvatarSpacing ?? this.agendaAvatarSpacing,
+
+      // Agenda view decorations
+      agendaItemBorderRadius:
+          agendaItemBorderRadius ?? this.agendaItemBorderRadius,
+      agendaItemShadow: agendaItemShadow ?? this.agendaItemShadow,
+      agendaDividerThickness:
+          agendaDividerThickness ?? this.agendaDividerThickness,
+      agendaDividerIndent: agendaDividerIndent ?? this.agendaDividerIndent,
+      agendaDividerEndIndent:
+          agendaDividerEndIndent ?? this.agendaDividerEndIndent,
+
+      // Agenda view indicators
+      agendaStatusIndicatorSize:
+          agendaStatusIndicatorSize ?? this.agendaStatusIndicatorSize,
+      agendaShowColorBar: agendaShowColorBar ?? this.agendaShowColorBar,
+      agendaColorBarWidth: agendaColorBarWidth ?? this.agendaColorBarWidth,
+      agendaShowStatusIndicator:
+          agendaShowStatusIndicator ?? this.agendaShowStatusIndicator,
     );
   }
 }

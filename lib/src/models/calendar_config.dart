@@ -1,5 +1,6 @@
-// lib/src/models/calendar_config.dart (Updated)
+// lib/src/models/calendar_config.dart (Fixed)
 
+import 'agenda_view_config.dart';
 import 'calendar_view_type.dart';
 import 'week_view_layout.dart';
 
@@ -31,12 +32,13 @@ class CalendarConfig {
     this.maxOverlaps = 4,
     this.dateSelectionMode = DateSelectionMode.none,
     this.firstDayOfWeek = DateTime.monday,
+    this.agendaConfig,
   });
 
   /// Starting date for the view
   final DateTime? startDate;
 
-  /// Type of view (day, week, month)
+  /// Type of view (day, week, month, agenda)
   final CalendarViewType viewType;
 
   /// Layout mode for week view (resources-first or days-first)
@@ -109,6 +111,9 @@ class CalendarConfig {
   /// Follows Dart's DateTime.weekday convention
   final int firstDayOfWeek;
 
+  /// Configuration for agenda view (when viewType is agenda)
+  final AgendaViewConfig? agendaConfig;
+
   /// Total height of the grid
   double get totalGridHeight {
     final hours = dayEndHour - dayStartHour;
@@ -137,13 +142,21 @@ class CalendarConfig {
         totalColumns = numberOfResources;
         break;
       case CalendarViewType.week:
-        // Week view: resources Ãƒâ€” days
-        totalColumns = numberOfResources * effectiveNumberOfDays!;
+        // Week view: resources × days
+        totalColumns = numberOfResources * effectiveNumberOfDays;
         break;
       case CalendarViewType.month:
         // Month view: different layout (grid)
         totalColumns = 7; // Days of week
         break;
+      case CalendarViewType.agenda:
+        // Agenda view: list layout, no column calculation needed
+        // Return default dimensions as agenda view doesn't use columns
+        return ColumnDimensions(
+          columnWidth: viewportWidth,
+          requiresHorizontalScroll: false,
+          totalContentWidth: viewportWidth,
+        );
     }
 
     final availableWidth = viewportWidth - timeColumnWidth - 16;
@@ -198,6 +211,7 @@ class CalendarConfig {
     int? maxOverlaps,
     DateSelectionMode? dateSelectionMode,
     int? firstDayOfWeek,
+    AgendaViewConfig? agendaConfig,
   }) {
     return CalendarConfig(
       startDate: startDate ?? this.startDate,
@@ -225,6 +239,7 @@ class CalendarConfig {
       maxOverlaps: maxOverlaps ?? this.maxOverlaps,
       dateSelectionMode: dateSelectionMode ?? this.dateSelectionMode,
       firstDayOfWeek: firstDayOfWeek ?? this.firstDayOfWeek,
+      agendaConfig: agendaConfig ?? this.agendaConfig,
     );
   }
 }
