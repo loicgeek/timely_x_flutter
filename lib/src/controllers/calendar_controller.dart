@@ -703,11 +703,12 @@ class CalendarController extends ChangeNotifier {
   }
 
   /// Get agenda view period description
+
   String getAgendaViewPeriodDescription([String? dateFormat]) {
     final format = dateFormat ?? 'MMM d, yyyy';
 
     if (_agendaStartDate != null && _agendaEndDate != null) {
-      // Custom date range mode
+      // === 1. Custom Date Range Mode (Logic is already good) ===
       if (DateTimeUtils.isSameDay(_agendaStartDate!, _agendaEndDate!)) {
         return DateTimeUtils.formatDate(_agendaStartDate!, format);
       } else if (_agendaStartDate!.month == _agendaEndDate!.month) {
@@ -718,18 +719,53 @@ class CalendarController extends ChangeNotifier {
             '${DateTimeUtils.formatDate(_agendaEndDate!, 'MMM d, yyyy')}';
       }
     } else {
-      // Relative mode - show number of days from current date
+      // === 2. Relative Mode (FIXED LOGIC) ===
+
+      // Get the actual period start date (from controller's _currentDate)
+      final startDate = viewStartDate;
+
+      // Get the number of days to show from the config
       final agendaConfig = _config.agendaConfig ?? const AgendaViewConfig();
       final days = agendaConfig.daysToShow;
 
-      if (days == 1) {
-        return 'Today';
-      } else if (days == 7) {
-        return 'Next 7 days';
-      } else if (days == 30) {
-        return 'Next 30 days';
+      // Calculate the end date for the displayed period.
+      // Use calendar arithmetic on startDate to find the exact end date.
+      final endDate = DateTimeUtils.addDays(startDate, days - 1);
+
+      // If the start date is today, we can use simple descriptions
+      final today = DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+      );
+      if (DateTimeUtils.isSameDay(startDate, today) &&
+          !agendaConfig.showPastAppointments) {
+        if (days == 1) {
+          return 'Today';
+        } else {
+          // Return 'Next X days' only if the period starts today and looks forward
+          return 'Next $days days';
+        }
+      }
+
+      // For all other cases (including navigated periods), display the date range:
+      final weekFormat = 'MMM d';
+      final yearFormat = 'MMM d, yyyy';
+
+      if (DateTimeUtils.isSameDay(startDate, endDate)) {
+        return DateTimeUtils.formatDate(
+          startDate,
+          format,
+        ); // Should only happen if days=1 and navigated
+      } else if (startDate.month == endDate.month &&
+          startDate.year == endDate.year) {
+        // Example: Dec 1 - 7, 2025
+        return '${DateTimeUtils.formatDate(startDate, weekFormat)} - '
+            '${DateTimeUtils.formatDate(endDate, 'd, yyyy')}';
       } else {
-        return 'Next $days days';
+        // Example: Dec 25, 2025 - Jan 5, 2026
+        return '${DateTimeUtils.formatDate(startDate, weekFormat)} - '
+            '${DateTimeUtils.formatDate(endDate, yearFormat)}';
       }
     }
   }
