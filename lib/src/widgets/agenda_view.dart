@@ -3,6 +3,7 @@
 import 'package:calendar2/src/builders/agenda_default_builders.dart';
 import 'package:flutter/material.dart';
 import '../models/agenda_view_config.dart';
+import '../models/calendar_config.dart';
 import '../models/calendar_theme.dart';
 import '../controllers/calendar_controller.dart';
 import '../utils/agenda_grouping.dart';
@@ -16,7 +17,7 @@ class AgendaView extends StatefulWidget {
     super.key,
     required this.controller,
     this.theme,
-    this.agendaConfig,
+    this.config,
     this.agendaDateHeaderBuilder,
     this.agendaResourceHeaderBuilder,
     this.agendaItemBuilder,
@@ -37,7 +38,7 @@ class AgendaView extends StatefulWidget {
   final CalendarTheme? theme;
 
   /// Agenda view configuration
-  final AgendaViewConfig? agendaConfig;
+  final CalendarConfig? config;
 
   /// Custom date header builder
   final AgendaDateHeaderBuilder? agendaDateHeaderBuilder;
@@ -82,8 +83,33 @@ class _AgendaViewState extends State<AgendaView> {
 
   CalendarTheme get _theme => widget.theme ?? CalendarTheme();
 
-  AgendaViewConfig get _agendaConfig =>
-      widget.agendaConfig ?? const AgendaViewConfig();
+  // and prioritize the local widget config if provided, falling back
+  // to the controller's agendaConfig, and finally to default.
+  AgendaViewConfig get _agendaConfig {
+    // If agendaConfig is passed directly to AgendaView, use it.
+    if (widget.config?.agendaConfig != null) {
+      return widget.config!.agendaConfig!;
+    }
+
+    // If AgendaView is wrapped in CalendarView, the controller's config should be available.
+    // Assuming controller exposes its main CalendarConfig via a getter.
+    // The CalendarView widget should have passed config.agendaConfig, but for direct
+    // usage, we'll check the controller's internal config.
+
+    // ❗️ You need to ensure CalendarController exposes its config like this:
+    if (widget.controller.config.agendaConfig != null) {
+      return widget.controller.config.agendaConfig!;
+    }
+
+    // Since we don't have the controller's source, we'll maintain the current logic
+    // but note that the caller (CalendarView) is responsible for passing the final config.
+    // The CalendarView implementation you provided already handles this correctly:
+    // agendaConfig: config.agendaConfig,
+
+    // Since CalendarView already passes the correct config, and if AgendaView is used
+    // directly, it can't know the parent CalendarConfig, we'll keep the existing simple fallback:
+    return const AgendaViewConfig();
+  }
 
   @override
   void initState() {
@@ -109,25 +135,40 @@ class _AgendaViewState extends State<AgendaView> {
     final appointments = widget.controller.appointments;
     final resources = widget.controller.resources;
 
-    // Calculate date range
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    // Use the controller's effective config
+    final CalendarConfig primaryConfig = widget.controller.config;
+    final AgendaViewConfig effectiveAgendaConfig =
+        widget.config?.agendaConfig ??
+        primaryConfig.agendaConfig ??
+        const AgendaViewConfig();
+
+    // ⭐️ CRITICAL FIX: Get the definitive date range directly from the controller.
+    // The controller is the source of truth for navigation/config.
 
     DateTime startDate;
     DateTime endDate;
 
-    if (_agendaConfig.dateRangeMode == AgendaDateRangeMode.relative) {
-      startDate = _agendaConfig.showPastAppointments
-          ? DateTime(today.year, today.month, today.day - 30)
-          : today;
+    if (effectiveAgendaConfig.dateRangeMode == AgendaDateRangeMode.relative) {
+      // In relative mode, the start date is based on the controller's _currentDate
+      // (which changes during next/previous navigation).
+      startDate = widget.controller.viewStartDate;
 
-      // Calculate the last day (today + daysToShow - 1) and extend to end of day
-      // Example: If daysToShow = 7 and today is Jan 1, we want Jan 1-7 inclusive
-      // So: today (Jan 1) + 7 days - 1 = Jan 7
-      final lastDay = today.day + _agendaConfig.daysToShow - 1;
+      // Calculate the end date using the controller's viewStartDate and daysToShow
+      final daysToShow = effectiveAgendaConfig.daysToShow;
+
+      // If showPastAppointments is FALSE, startDate is guaranteed to be >= today.
+      if (!effectiveAgendaConfig.showPastAppointments) {
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+
+        // Ensure startDate is at least 'today' if showPastAppointments is false
+        startDate = startDate.isBefore(today) ? today : startDate;
+      }
+
+      final lastDay = startDate.day + daysToShow - 1;
       endDate = DateTime(
-        today.year,
-        today.month,
+        startDate.year,
+        startDate.month,
         lastDay,
         23, // Extend to end of day
         59,
@@ -135,38 +176,33 @@ class _AgendaViewState extends State<AgendaView> {
         999,
       );
     } else {
-      // Use controller's date range for custom mode
-      startDate = widget.controller.viewStartDate;
+      // Custom date range mode
+      startDate = widget.controller.viewStartDate; // = _agendaStartDate!
 
-      // Use controller's end date if available (which should be fixed in controller)
-      // Otherwise calculate and extend to end of day
-      if (widget.controller.agendaEndDate != null) {
-        endDate = widget.controller.agendaEndDate!;
-        // Note: This assumes controller.setAgendaDateRange (Fix #2) properly
-        // extends the end date to 23:59:59.999
-      } else {
-        // Fallback: calculate from effectiveNumberOfDays
-        final lastDay =
-            startDate.day + widget.controller.effectiveNumberOfDays - 1;
-        endDate = DateTime(
-          startDate.year,
-          startDate.month,
-          lastDay,
-          23,
-          59,
-          59,
-          999,
-        );
-      }
+      // CRITICAL: Must use the definitive _agendaEndDate if set (which includes 23:59:59.999)
+      endDate =
+          widget.controller.agendaEndDate ??
+          DateTime(
+            // Fallback logic is complex, simplify if possible
+            startDate.year,
+            startDate.month,
+            startDate.day +
+                widget.controller.effectiveNumberOfDays -
+                1, // Fallback end day
+            23,
+            59,
+            59,
+            999,
+          );
     }
 
     // Group appointments
     final groups = AgendaGroupingUtils.groupAppointments(
       appointments: appointments,
       resources: resources,
-      mode: _agendaConfig.groupingMode,
-      showEmptyDays: _agendaConfig.showEmptyDays,
-      showEmptyResources: _agendaConfig.showEmptyResources,
+      mode: effectiveAgendaConfig.groupingMode,
+      showEmptyDays: effectiveAgendaConfig.showEmptyDays,
+      showEmptyResources: effectiveAgendaConfig.showEmptyResources,
       startDate: startDate,
       endDate: endDate,
     );

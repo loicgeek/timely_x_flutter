@@ -32,7 +32,7 @@ class CustomNavigationBar extends StatelessWidget {
             children: [
               // Month Indicator
               Text(
-                DateFormat('MMMM yyyy').format(controller.currentDate),
+                controller.getViewPeriodDescription(),
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -141,6 +141,7 @@ class CustomNavigationBar extends StatelessWidget {
           CalendarViewType.month,
           Icons.calendar_month,
         ),
+        _buildViewMenuItem('Agenda', CalendarViewType.agenda, Icons.view_list),
       ],
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

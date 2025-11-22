@@ -147,7 +147,7 @@ class CalendarView extends StatelessWidget {
             return AgendaView(
               controller: controller,
               theme: theme,
-              agendaConfig: config.agendaConfig,
+              config: config,
               agendaDateHeaderBuilder: agendaDateHeaderBuilder,
               agendaResourceHeaderBuilder: agendaResourceHeaderBuilder,
               agendaItemBuilder: agendaItemBuilder,

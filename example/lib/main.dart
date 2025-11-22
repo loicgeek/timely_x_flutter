@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       title: 'Calendar View Demo',
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       debugShowCheckedModeBanner: false,
-      home: const AgendaViewExample(),
+      home: const CalendarDemo(),
     );
   }
 }
