@@ -531,8 +531,21 @@ class CalendarController extends ChangeNotifier {
 
   /// Set custom date range for agenda view
   void setAgendaDateRange(DateTime startDate, DateTime endDate) {
+    // Normalize start date to beginning of day
     _agendaStartDate = DateTime(startDate.year, startDate.month, startDate.day);
-    _agendaEndDate = DateTime(endDate.year, endDate.month, endDate.day);
+
+    // CRITICAL FIX: Extend end date to end of day
+    // This ensures appointments later in the day are included in the range
+    _agendaEndDate = DateTime(
+      endDate.year,
+      endDate.month,
+      endDate.day,
+      23,
+      59,
+      59,
+      999,
+    );
+
     notifyListeners();
   }
 
@@ -549,15 +562,23 @@ class CalendarController extends ChangeNotifier {
 
     if (_agendaStartDate != null && _agendaEndDate != null) {
       // Custom date range mode - shift by specified days
+      // CRITICAL: Preserve start of day for start date
       _agendaStartDate = DateTime(
         _agendaStartDate!.year,
         _agendaStartDate!.month,
         _agendaStartDate!.day + days,
       );
+
+      // CRITICAL FIX: Preserve end of day for end date
+      // Without this, navigation would reset end date to midnight
       _agendaEndDate = DateTime(
         _agendaEndDate!.year,
         _agendaEndDate!.month,
         _agendaEndDate!.day + days,
+        23, // End of day
+        59,
+        59,
+        999,
       );
     } else {
       // Relative mode - just update current date
@@ -576,15 +597,23 @@ class CalendarController extends ChangeNotifier {
 
     if (_agendaStartDate != null && _agendaEndDate != null) {
       // Custom date range mode - shift by specified days
+      // CRITICAL: Preserve start of day for start date
       _agendaStartDate = DateTime(
         _agendaStartDate!.year,
         _agendaStartDate!.month,
         _agendaStartDate!.day - days,
       );
+
+      // CRITICAL FIX: Preserve end of day for end date
+      // Without this, navigation would reset end date to midnight
       _agendaEndDate = DateTime(
         _agendaEndDate!.year,
         _agendaEndDate!.month,
         _agendaEndDate!.day - days,
+        23, // End of day
+        59,
+        59,
+        999,
       );
     } else {
       // Relative mode - just update current date
@@ -656,7 +685,9 @@ class CalendarController extends ChangeNotifier {
 
     // Apply date range filter
     if (start != null && end != null) {
-      //  end = DateTime(end.year, end.month, end.day, 23, 59, 59);
+      // CRITICAL FIX: Extend end date to end of day to include all appointments on that day
+      // Without this, appointments later in the day would be excluded
+      end = DateTime(end.year, end.month, end.day, 23, 59, 59, 999);
       filtered = filtered
           .where(
             (apt) =>

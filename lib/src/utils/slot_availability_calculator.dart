@@ -61,18 +61,34 @@ class SlotAvailabilityCalculator {
   }
 
   /// Get all available slots for a date range
+  /// Get all available slots for a date range
+  ///
+  /// FIXED: End date comparison now uses extended end date to include
+  /// all slots that occur on the end date
   static List<AvailableSlot> getAvailableSlotsInRange({
     required SlotAvailability slotAvailability,
     required DateTime startDate,
     required DateTime endDate,
     Duration? minDuration,
   }) {
+    // CRITICAL FIX: Extend end date to end of day
+    // This ensures slots later in the day are included in the range
+    final extendedEndDate = DateTime(
+      endDate.year,
+      endDate.month,
+      endDate.day,
+      23,
+      59,
+      59,
+      999,
+    );
+
     final slots = slotAvailability.slots.where((slot) {
       final isInRange =
           (slot.startTime.isAtSameMomentAs(startDate) ||
               slot.startTime.isAfter(startDate)) &&
-          (slot.endTime.isAtSameMomentAs(endDate) ||
-              slot.endTime.isBefore(endDate));
+          (slot.endTime.isAtSameMomentAs(extendedEndDate) ||
+              slot.endTime.isBefore(extendedEndDate));
 
       final meetsMinDuration =
           minDuration == null ||

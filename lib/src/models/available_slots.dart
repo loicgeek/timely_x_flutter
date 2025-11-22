@@ -305,8 +305,18 @@ class SlotBuilder {
     final slots = <AvailableSlot>[];
     var currentDate = DateTime(startDate.year, startDate.month, startDate.day);
     final end = DateTime(endDate.year, endDate.month, endDate.day);
+    final normalizedEndDate = DateTime(
+      endDate.year,
+      endDate.month,
+      endDate.day,
+      23,
+      59,
+      59,
+      999,
+    );
 
-    while (currentDate.isBefore(end) || currentDate.isAtSameMomentAs(end)) {
+    while (currentDate.isBefore(normalizedEndDate) ||
+        currentDate.isAtSameMomentAs(normalizedEndDate)) {
       if (daysOfWeek.contains(currentDate.weekday)) {
         final daySlots = _generateSlotsForDay(
           date: currentDate,
@@ -406,9 +416,19 @@ class SlotBuilder {
   }) {
     final slots = <AvailableSlot>[];
     var currentDate = DateTime(startDate.year, startDate.month, startDate.day);
-    final end = DateTime(endDate.year, endDate.month, endDate.day);
 
-    while (currentDate.isBefore(end) || currentDate.isAtSameMomentAs(end)) {
+    final normalizedEndDate = DateTime(
+      endDate.year,
+      endDate.month,
+      endDate.day,
+      23,
+      59,
+      59,
+      999,
+    );
+
+    while (currentDate.isBefore(normalizedEndDate) ||
+        currentDate.isAtSameMomentAs(normalizedEndDate)) {
       if (daysOfWeek.contains(currentDate.weekday)) {
         for (final slotTime in slotTimes) {
           final startTime = DateTime(

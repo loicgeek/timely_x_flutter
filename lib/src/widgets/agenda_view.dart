@@ -120,21 +120,45 @@ class _AgendaViewState extends State<AgendaView> {
       startDate = _agendaConfig.showPastAppointments
           ? DateTime(today.year, today.month, today.day - 30)
           : today;
+
+      // Calculate the last day (today + daysToShow - 1) and extend to end of day
+      // Example: If daysToShow = 7 and today is Jan 1, we want Jan 1-7 inclusive
+      // So: today (Jan 1) + 7 days - 1 = Jan 7
+      final lastDay = today.day + _agendaConfig.daysToShow - 1;
       endDate = DateTime(
         today.year,
         today.month,
-        today.day + _agendaConfig.daysToShow,
+        lastDay,
+        23, // Extend to end of day
+        59,
+        59,
+        999,
       );
     } else {
       // Use controller's date range for custom mode
       startDate = widget.controller.viewStartDate;
-      endDate = DateTime(
-        startDate.year,
-        startDate.month,
-        startDate.day + widget.controller.effectiveNumberOfDays,
-      );
+
+      // Use controller's end date if available (which should be fixed in controller)
+      // Otherwise calculate and extend to end of day
+      if (widget.controller.agendaEndDate != null) {
+        endDate = widget.controller.agendaEndDate!;
+        // Note: This assumes controller.setAgendaDateRange (Fix #2) properly
+        // extends the end date to 23:59:59.999
+      } else {
+        // Fallback: calculate from effectiveNumberOfDays
+        final lastDay =
+            startDate.day + widget.controller.effectiveNumberOfDays - 1;
+        endDate = DateTime(
+          startDate.year,
+          startDate.month,
+          lastDay,
+          23,
+          59,
+          59,
+          999,
+        );
+      }
     }
-    //  endDate = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
 
     // Group appointments
     final groups = AgendaGroupingUtils.groupAppointments(
