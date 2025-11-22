@@ -13,6 +13,7 @@ export 'src/utils/agenda_grouping.dart';
 
 // utils
 export 'src/utils/business_hours_calculator.dart';
+export 'src/utils/slot_availability_calculator.dart';
 
 // Controllers
 export 'src/controllers/calendar_controller.dart';
