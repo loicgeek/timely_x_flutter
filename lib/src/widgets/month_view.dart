@@ -206,8 +206,15 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
                 isSelected: isSelected,
               ),
               SizedBox(height: widget.theme.appointmentSpacing * 2),
-              if (appointments.isNotEmpty)
-                Expanded(child: _buildAppointmentsList(date, appointments)),
+              if (appointments.isNotEmpty) ...[
+                if (widget.config.monthViewSmallModePredicate(context))
+                  _buildDotIndicators(
+                    appointments,
+                    widget.theme.monthViewMaxVisibleAppointments,
+                  )
+                else
+                  Expanded(child: _buildAppointmentsList(date, appointments)),
+              ],
             ],
           ),
         ),
@@ -344,6 +351,48 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
 
         return _buildAppointmentItem(date, appointments[i]);
       },
+    );
+  }
+
+  // ⭐️ Build appointments as colored dots ⭐️
+  Widget _buildDotIndicators(
+    List<CalendarAppointment> appointments,
+    int maxDots,
+  ) {
+    final visibleDots = appointments.length > maxDots
+        ? maxDots - 1
+        : appointments.length;
+    final remaining = appointments.length - visibleDots;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 4.0),
+      child: Wrap(
+        spacing: 4.0, // horizontal spacing between dots
+        runSpacing: 4.0, // vertical spacing between dot rows
+        children: [
+          // Visible dots
+          ...appointments.take(visibleDots).map((apt) {
+            return Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: apt.color,
+                shape: BoxShape.circle,
+              ),
+            );
+          }),
+
+          // Plus more indicator
+          if (remaining > 0)
+            Text(
+              '+$remaining',
+              style: widget.theme.monthViewMoreTextStyle.copyWith(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+        ],
+      ),
     );
   }
 

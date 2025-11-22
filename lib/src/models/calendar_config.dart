@@ -1,8 +1,23 @@
 // lib/src/models/calendar_config.dart (Fixed)
 
+import 'package:flutter/material.dart';
+
 import 'agenda_view_config.dart';
 import 'calendar_view_type.dart';
 import 'week_view_layout.dart';
+
+/// Predicate that determines if the month cell should switch to a simplified
+/// appointment rendering (e.g., dots instead of titles) based on available width.
+///
+/// [context] is the build context for accessing theme/data.
+/// Returns true when the screen width is less than 600px, indicating small screens.
+typedef MonthViewSmallModePredicate = bool Function(BuildContext context);
+
+/// Default predicate for small mode in month view
+/// Returns true when the screen width is less than 600px, indicating small screens.
+bool defaultMonthViewSmallModePredicate(BuildContext context) {
+  return MediaQuery.of(context).size.width < 600;
+}
 
 /// Configuration for the calendar view
 class CalendarConfig {
@@ -33,6 +48,7 @@ class CalendarConfig {
     this.dateSelectionMode = DateSelectionMode.none,
     this.firstDayOfWeek = DateTime.monday,
     this.agendaConfig,
+    this.monthViewSmallModePredicate = defaultMonthViewSmallModePredicate,
   });
 
   /// Starting date for the view
@@ -113,6 +129,10 @@ class CalendarConfig {
 
   /// Configuration for agenda view (when viewType is agenda)
   final AgendaViewConfig? agendaConfig;
+
+  /// Function to determine if the month cell width requires switching to a
+  /// simplified rendering mode (like dots).
+  final MonthViewSmallModePredicate monthViewSmallModePredicate;
 
   /// Total height of the grid
   double get totalGridHeight {
