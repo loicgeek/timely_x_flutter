@@ -208,9 +208,11 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
               SizedBox(height: widget.theme.appointmentSpacing * 2),
               if (appointments.isNotEmpty) ...[
                 if (widget.config.monthViewSmallModePredicate(context))
-                  _buildDotIndicators(
-                    appointments,
-                    widget.theme.monthViewMaxVisibleAppointments,
+                  Expanded(
+                    child: _buildDotIndicators(
+                      appointments,
+                      widget.theme.monthViewMaxVisibleAppointments,
+                    ),
                   )
                 else
                   Expanded(child: _buildAppointmentsList(date, appointments)),
