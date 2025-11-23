@@ -198,14 +198,17 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildDayNumber(
-                date: date,
-                isToday: isToday,
-                isCurrentMonth: isCurrentMonth,
-                isWeekend: isWeekend,
-                isSelected: isSelected,
+              Expanded(
+                flex: 2,
+                child: _buildDayNumber(
+                  date: date,
+                  isToday: isToday,
+                  isCurrentMonth: isCurrentMonth,
+                  isWeekend: isWeekend,
+                  isSelected: isSelected,
+                ),
               ),
-              SizedBox(height: widget.theme.appointmentSpacing * 2),
+              SizedBox(height: widget.theme.appointmentSpacing),
               if (appointments.isNotEmpty) ...[
                 if (widget.config.monthViewSmallModePredicate(context))
                   Expanded(
@@ -312,7 +315,7 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
         );
       },
       child: Container(
-        padding: EdgeInsets.all(4),
+        padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           color: isToday
               ? widget.theme.todayHighlightColor
@@ -357,40 +360,60 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
   }
 
   // ⭐️ Build appointments as colored dots ⭐️
+
   Widget _buildDotIndicators(
     List<CalendarAppointment> appointments,
     int maxDots,
   ) {
+    // Ensure the visibleDots calculation respects the maxDots limit.
     final visibleDots = appointments.length > maxDots
         ? maxDots - 1
         : appointments.length;
     final remaining = appointments.length - visibleDots;
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 4.0),
-      child: Wrap(
-        spacing: 4.0, // horizontal spacing between dots
-        runSpacing: 4.0, // vertical spacing between dot rows
+    // Define fixed, small dimensions for the indicators
+    const double dotSize = 6.0;
+    const double indicatorFontSize = 8.0; // Small font size for "+X"
+
+    return SingleChildScrollView(
+      // 💡 CRITICAL: Ensure content can scroll if needed
+      physics:
+          const NeverScrollableScrollPhysics(), // Prevent vertical scrolling for this
+      child: Row(
+        spacing: 4.0, // Horizontal spacing between dots/indicator
+        // runSpacing: 2.0, // Vertical spacing between dot rows
         children: [
-          // Visible dots
+          // 1. Visible dots
           ...appointments.take(visibleDots).map((apt) {
-            return Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: apt.color,
-                shape: BoxShape.circle,
+            // MouseRegion/GestureDetector can be added here if dots need interaction
+            return Tooltip(
+              // Optional: Show title on hover for better UX
+              message: apt.title,
+              child: Container(
+                width: dotSize,
+                height: dotSize,
+                decoration: BoxDecoration(
+                  color: apt.color,
+                  shape: BoxShape.circle,
+                ),
               ),
             );
           }),
 
-          // Plus more indicator
+          // 2. Plus more indicator
           if (remaining > 0)
-            Text(
-              '+$remaining',
-              style: widget.theme.monthViewMoreTextStyle.copyWith(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 2.0,
+              ), // Slight offset for text
+              child: Text(
+                '+$remaining',
+                style: widget.theme.monthViewMoreTextStyle.copyWith(
+                  fontSize: indicatorFontSize,
+                  fontWeight: FontWeight.bold,
+                ),
+                // 💡 CRITICAL: Ensure text doesn't wrap or overflow
+                overflow: TextOverflow.ellipsis,
               ),
             ),
         ],
