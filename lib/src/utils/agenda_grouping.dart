@@ -168,7 +168,9 @@ class AgendaGroupingUtils {
         .map(
           (apt) => AgendaItem(
             appointment: apt,
-            resource: resourceMap[apt.resourceId]!,
+            resource:
+                resourceMap[apt.resourceId] ??
+                _DefaultResource(id: apt.resourceId, name: 'Unknown'),
             showResource: true,
             showDate: true,
           ),
@@ -215,7 +217,9 @@ class AgendaGroupingUtils {
             .map(
               (apt) => AgendaItem(
                 appointment: apt,
-                resource: resourceMap[apt.resourceId]!,
+                resource:
+                    resourceMap[apt.resourceId] ??
+                    _DefaultResource(id: apt.resourceId, name: 'Unknown'),
                 showResource: true,
               ),
             )
@@ -464,4 +468,15 @@ class AgendaGroupingUtils {
 
     return '';
   }
+}
+
+// Simple default resource for cases where resource is not found
+class _DefaultResource extends CalendarResource {
+  _DefaultResource({required this.id, required this.name});
+
+  @override
+  final String id;
+
+  @override
+  final String name;
 }
