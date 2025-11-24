@@ -591,6 +591,7 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
         businessHours: businessHours,
         date: date,
         config: widget.config,
+        themeStyle: widget.theme.unavailabilityStyle,
       );
 
       if (unavailabilities.isEmpty) return;

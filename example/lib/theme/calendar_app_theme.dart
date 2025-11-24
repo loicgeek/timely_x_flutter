@@ -77,5 +77,12 @@ class CalendarAppTheme {
     headerShadow: [
       BoxShadow(color: Color(0x0A000000), blurRadius: 2, offset: Offset(0, 1)),
     ],
+    unavailabilityStyle: UnavailabilityStyle(
+      pattern: UnavailabilityPattern.diagonalLines,
+      backgroundColor: Color(0xFFFAFAFA),
+      patternColor: Color(0xFFE0E0E0),
+      lineWidth: 1.0,
+      lineSpacing: 8.0,
+    ),
   );
 }

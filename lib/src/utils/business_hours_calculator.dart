@@ -13,6 +13,7 @@ class BusinessHoursCalculator {
     required BusinessHours? businessHours,
     required DateTime date,
     required CalendarConfig config,
+    UnavailabilityStyle? themeStyle, // Add this parameter
   }) {
     if (businessHours == null) return [];
 
@@ -31,9 +32,11 @@ class BusinessHoursCalculator {
       for (final period in nonWorkingPeriods) {
         periods.add((
           period: period,
-          style: UnavailabilityStylePresets.standard.copyWith(
-            showDebugLabel: kDebugMode,
-          ),
+          style:
+              themeStyle ??
+              UnavailabilityStylePresets.standard.copyWith(
+                showDebugLabel: kDebugMode,
+              ),
         ));
       }
     }
@@ -47,6 +50,7 @@ class BusinessHoursCalculator {
           period: timeRange,
           style:
               unavailability.style ??
+              themeStyle ??
               _getDefaultStyleForType(unavailability.type),
         ));
       }

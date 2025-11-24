@@ -360,6 +360,7 @@ class _CalendarDayViewState extends State<CalendarDayView> {
               businessHours: businessHours,
               date: currentDate,
               config: widget.config,
+              themeStyle: widget.theme.unavailabilityStyle,
             );
 
         if (unavailabilities.isEmpty) continue;

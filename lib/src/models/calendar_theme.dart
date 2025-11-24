@@ -1,5 +1,6 @@
 // lib/src/models/calendar_theme.dart
 
+import 'package:calendar2/src/models/business_hours.dart';
 import 'package:flutter/material.dart';
 
 /// Theme configuration for the calendar
@@ -210,6 +211,9 @@ class CalendarTheme {
     this.agendaShowColorBar = true,
     this.agendaColorBarWidth = 4.0,
     this.agendaShowStatusIndicator = false,
+
+    // Unavailability style
+    this.unavailabilityStyle,
   });
 
   // Grid colors
@@ -455,6 +459,12 @@ class CalendarTheme {
   /// Default: false
   final bool? agendaShowStatusIndicator;
 
+  /// Default style for unavailability periods
+  /// When an UnavailabilityPeriod doesn't specify a custom style,
+  /// this theme style will be used instead
+  /// Default: UnavailabilityStylePresets.standard
+  final UnavailabilityStyle? unavailabilityStyle;
+
   CalendarTheme copyWith({
     Color? gridLineColor,
     Color? hourLineColor,
@@ -561,6 +571,9 @@ class CalendarTheme {
     bool? agendaShowColorBar,
     double? agendaColorBarWidth,
     bool? agendaShowStatusIndicator,
+
+    // Unavailability style
+    UnavailabilityStyle? unavailabilityStyle,
   }) {
     return CalendarTheme(
       gridLineColor: gridLineColor ?? this.gridLineColor,
@@ -716,6 +729,9 @@ class CalendarTheme {
       agendaColorBarWidth: agendaColorBarWidth ?? this.agendaColorBarWidth,
       agendaShowStatusIndicator:
           agendaShowStatusIndicator ?? this.agendaShowStatusIndicator,
+
+      // Unavailability style
+      unavailabilityStyle: unavailabilityStyle ?? this.unavailabilityStyle,
     );
   }
 }
