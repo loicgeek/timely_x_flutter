@@ -1,27 +1,18 @@
 // lib/src/widgets/week_view.dart (UPDATED with layout options and cell interactions)
 
+import 'dart:async';
+
 import 'package:calendar2/calendar2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
-import '../models/calendar_config.dart';
-import '../models/calendar_resource.dart';
-import '../models/calendar_resource_extensions.dart';
-import '../models/calendar_theme.dart';
 import '../models/appointment_position.dart';
-import '../models/week_view_layout.dart';
-import '../models/interaction_data.dart';
-import '../models/business_hours.dart';
-import '../models/available_slots.dart';
-import '../controllers/calendar_controller.dart';
 import '../utils/overlap_calculator.dart';
 import '../utils/date_time_utils.dart';
-import '../utils/business_hours_calculator.dart';
-import '../builders/builder_delegates.dart';
 import 'resource_header.dart';
 import 'date_header.dart';
 import 'grid_painter.dart';
 import 'appointment_widget.dart';
-import 'unavailability_painter.dart';
 import 'slot_highlight_painter.dart';
 import 'scroll_navigation_wrapper.dart';
 
@@ -84,7 +75,16 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
   double _columnWidth = 0;
   bool _needsHorizontalScroll = false;
   bool _isUpdatingScroll = false;
-  ScrollController? _lastHorizontalScrollSource;
+
+  int? _verticalSyncCallbackId;
+
+  ScrollController?
+  _horizontalScrollSource; // Track which controller is scrolling
+
+  final Map<String, List<AppointmentPosition>> _positionCache = {};
+
+  Timer? _scrollDebounceTimer;
+  bool _isScrolling = false;
 
   @override
   void initState() {
@@ -99,80 +99,155 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
 
     // Add listeners for scroll synchronization
     _gridVerticalController.addListener(_onGridVerticalScroll);
-    _gridHorizontalController.addListener(
-      () => _onAnyHorizontalScroll(_gridHorizontalController),
-    );
+    _gridHorizontalController.addListener(_onGridHorizontalScroll);
     _resourceHeaderHorizontalController.addListener(
-      () => _onAnyHorizontalScroll(_resourceHeaderHorizontalController),
+      _onResourceHeaderHorizontalScroll,
     );
-    _dateHeaderHorizontalController.addListener(
-      () => _onAnyHorizontalScroll(_dateHeaderHorizontalController),
-    );
+    _dateHeaderHorizontalController.addListener(_onDateHeaderHorizontalScroll);
+
+    _gridVerticalController.addListener(_onScrollChanged);
 
     widget.controller.addListener(_onControllerUpdate);
   }
 
+  void _onScrollChanged() {
+    if (!_isScrolling) {
+      setState(() => _isScrolling = true);
+    }
+
+    _scrollDebounceTimer?.cancel();
+    _scrollDebounceTimer = Timer(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        setState(() => _isScrolling = false);
+      }
+    });
+  }
+
   @override
   void dispose() {
+    _scrollDebounceTimer?.cancel();
+    _positionCache.clear();
+    // Cancel any pending frame callbacks
+    if (_verticalSyncCallbackId != null) {
+      SchedulerBinding.instance.cancelFrameCallbackWithId(
+        _verticalSyncCallbackId!,
+      );
+    }
+
+    // Remove all listeners
+    _gridVerticalController.removeListener(_onScrollChanged);
     _gridVerticalController.removeListener(_onGridVerticalScroll);
-    // Note: We can't remove the specific lambda listeners, but dispose will clean up
+    _gridHorizontalController.removeListener(_onGridHorizontalScroll);
+    _resourceHeaderHorizontalController.removeListener(
+      _onResourceHeaderHorizontalScroll,
+    );
+    _dateHeaderHorizontalController.removeListener(
+      // ← THIS WAS MISSING!
+      _onDateHeaderHorizontalScroll,
+    );
+
+    // Dispose all controllers
     _gridVerticalController.dispose();
     _gridHorizontalController.dispose();
     _timeColumnVerticalController.dispose();
     _resourceHeaderHorizontalController.dispose();
-    _dateHeaderHorizontalController.dispose();
+    _dateHeaderHorizontalController.dispose(); // ← THIS WAS MISSING!
+
     widget.controller.removeListener(_onControllerUpdate);
     super.dispose();
   }
 
+  /// Improved vertical scroll synchronization
   void _onGridVerticalScroll() {
     if (_isUpdatingScroll) return;
+    _syncVerticalScrollImmediate(); // ← Change to immediate
+  }
+
+  void _syncVerticalScrollImmediate() {
+    if (_isUpdatingScroll) return;
+
     _isUpdatingScroll = true;
 
-    if (_timeColumnVerticalController.hasClients) {
-      _timeColumnVerticalController.jumpTo(_gridVerticalController.offset);
+    if (!_gridVerticalController.hasClients ||
+        !_timeColumnVerticalController.hasClients) {
+      _isUpdatingScroll = false;
+      return;
     }
+
+    final offset = _gridVerticalController.position.pixels;
+    _timeColumnVerticalController.jumpTo(offset);
 
     _isUpdatingScroll = false;
   }
 
-  void _onAnyHorizontalScroll(ScrollController source) {
+  /// Improved horizontal scroll synchronization for grid
+  void _onGridHorizontalScroll() {
+    if (_isUpdatingScroll) return;
+    _horizontalScrollSource = _gridHorizontalController;
+    _syncHorizontalScrollImmediate();
+  }
+
+  /// Improved horizontal scroll synchronization for resource header
+  void _onResourceHeaderHorizontalScroll() {
+    if (_isUpdatingScroll) return;
+    _horizontalScrollSource = _resourceHeaderHorizontalController;
+    _syncHorizontalScrollImmediate();
+  }
+
+  void _onDateHeaderHorizontalScroll() {
+    if (_isUpdatingScroll) return;
+    _horizontalScrollSource = _dateHeaderHorizontalController;
+    _syncHorizontalScrollImmediate();
+  }
+
+  void _syncHorizontalScrollImmediate() {
     if (_isUpdatingScroll) return;
 
-    // Track the source to avoid circular updates
-    if (_lastHorizontalScrollSource == source) {
+    _isUpdatingScroll = true;
+
+    // Use the tracked source controller
+    final source = _horizontalScrollSource;
+
+    // Safety check
+    if (source == null || !source.hasClients) {
+      _isUpdatingScroll = false;
       return;
     }
 
-    _isUpdatingScroll = true;
-    _lastHorizontalScrollSource = source;
+    // Get source position
+    final sourcePosition = source.position;
+    final targetOffset = sourcePosition.pixels;
 
-    final offset = source.offset;
+    // Get all target controllers (everything EXCEPT the source)
+    final targets = <ScrollController>[
+      if (_gridHorizontalController.hasClients &&
+          _gridHorizontalController != source)
+        _gridHorizontalController,
+      if (_resourceHeaderHorizontalController.hasClients &&
+          _resourceHeaderHorizontalController != source)
+        _resourceHeaderHorizontalController,
+      if (_dateHeaderHorizontalController.hasClients &&
+          _dateHeaderHorizontalController != source)
+        _dateHeaderHorizontalController,
+    ];
 
-    // Sync all horizontal controllers to the same offset
-    if (_gridHorizontalController.hasClients &&
-        _gridHorizontalController != source &&
-        _gridHorizontalController.offset != offset) {
-      _gridHorizontalController.jumpTo(offset);
+    // Sync all targets immediately using jumpTo (no physics check needed)
+    for (final target in targets) {
+      if (target.hasClients) {
+        final currentOffset = target.position.pixels;
+
+        // Only update if different (prevents unnecessary rebuilds)
+        if ((currentOffset - targetOffset).abs() > 0.1) {
+          target.jumpTo(targetOffset);
+        }
+      }
     }
 
-    if (_resourceHeaderHorizontalController.hasClients &&
-        _resourceHeaderHorizontalController != source &&
-        _resourceHeaderHorizontalController.offset != offset) {
-      _resourceHeaderHorizontalController.jumpTo(offset);
-    }
-
-    if (_dateHeaderHorizontalController.hasClients &&
-        _dateHeaderHorizontalController != source &&
-        _dateHeaderHorizontalController.offset != offset) {
-      _dateHeaderHorizontalController.jumpTo(offset);
-    }
-
-    _lastHorizontalScrollSource = null;
     _isUpdatingScroll = false;
   }
 
   void _onControllerUpdate() {
+    _positionCache.clear(); // Clear cache when appointments change
     setState(() {});
   }
 
@@ -452,8 +527,22 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
           ),
         ),
         // Grid
-        Expanded(child: _buildGrid()),
+        Expanded(child: _buildGridWithScrollbar()),
       ],
+    );
+  }
+
+  Widget _buildGridWithScrollbar() {
+    return RawScrollbar(
+      controller: _gridVerticalController,
+      thumbVisibility: widget.theme.scrollbarTheme.scrollbarAlwaysVisible,
+      trackVisibility: widget.theme.scrollbarTheme.scrollbarAlwaysVisible,
+      thickness: widget.theme.scrollbarTheme.scrollbarThickness,
+      radius: widget.theme.scrollbarTheme.scrollbarRadius,
+      thumbColor: widget.theme.scrollbarTheme.scrollbarThumbColor,
+      trackColor: widget.theme.scrollbarTheme.scrollbarTrackColor,
+      trackBorderColor: widget.theme.scrollbarTheme.scrollbarTrackBorderColor,
+      child: _buildGrid(),
     );
   }
 
@@ -490,47 +579,196 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
     return Column(children: slots);
   }
 
+  void _handleGridTap(
+    Offset localPosition,
+    List<CalendarResource> resources,
+    List<DateTime> dates,
+  ) {
+    if (widget.onCellTap == null) return;
+
+    final tapData = _calculateCellFromPosition(localPosition, resources, dates);
+    if (tapData == null) return;
+
+    widget.onCellTap!(tapData);
+  }
+
+  void _handleGridLongPress(
+    Offset localPosition,
+    List<CalendarResource> resources,
+    List<DateTime> dates,
+  ) {
+    if (widget.onCellLongPress == null) return;
+
+    final tapData = _calculateCellFromPosition(localPosition, resources, dates);
+    if (tapData == null) return;
+
+    widget.onCellLongPress!(tapData);
+  }
+
+  CellTapData? _calculateCellFromPosition(
+    Offset localPosition,
+    List<CalendarResource> resources,
+    List<DateTime> dates,
+  ) {
+    // Account for scroll offsets to get actual position in grid
+    final verticalOffset = _gridVerticalController.hasClients
+        ? _gridVerticalController.position.pixels
+        : 0.0;
+    final horizontalOffset = _gridHorizontalController.hasClients
+        ? _gridHorizontalController.position.pixels
+        : 0.0;
+
+    // Adjust tap position by scroll offsets
+    final adjustedX = localPosition.dx + horizontalOffset;
+    final adjustedY = localPosition.dy + verticalOffset;
+
+    // Calculate column index from adjusted x position
+    final columnIndex = (adjustedX / _columnWidth).floor();
+    final totalColumns = resources.length * dates.length;
+
+    if (columnIndex < 0 || columnIndex >= totalColumns) {
+      print('Column out of bounds: $columnIndex (max: $totalColumns)');
+      return null;
+    }
+
+    // Determine resource and date based on layout
+    CalendarResource resource;
+    DateTime date;
+
+    switch (widget.config.weekViewLayout) {
+      case WeekViewLayout.resourcesFirst:
+        // Column layout: Resource1[Day1, Day2...], Resource2[Day1, Day2...]
+        final resourceIndex = columnIndex ~/ dates.length;
+        final dateIndex = columnIndex % dates.length;
+
+        if (resourceIndex >= resources.length || dateIndex >= dates.length) {
+          print(
+            'Index out of bounds - resource: $resourceIndex, date: $dateIndex',
+          );
+          return null;
+        }
+
+        resource = resources[resourceIndex];
+        date = dates[dateIndex];
+        break;
+
+      case WeekViewLayout.daysFirst:
+        // Column layout: Day1[Resource1, Resource2...], Day2[Resource1, Resource2...]
+        final dateIndex = columnIndex ~/ resources.length;
+        final resourceIndex = columnIndex % resources.length;
+
+        if (dateIndex >= dates.length || resourceIndex >= resources.length) {
+          print(
+            'Index out of bounds - date: $dateIndex, resource: $resourceIndex',
+          );
+          return null;
+        }
+
+        resource = resources[resourceIndex];
+        date = dates[dateIndex];
+        break;
+    }
+
+    // Calculate time from adjusted y position
+    final hourOffset = adjustedY / widget.config.hourHeight;
+    final hour = widget.config.dayStartHour + hourOffset.floor();
+    final minuteFraction = hourOffset - hourOffset.floor();
+    final minutes = (minuteFraction * 60).round();
+
+    // Validate hour is within day bounds
+    if (hour < widget.config.dayStartHour || hour >= widget.config.dayEndHour) {
+      print('Hour out of bounds: $hour');
+      return null;
+    }
+
+    // Snap to time slot if enabled
+    final snappedMinutes = widget.config.enableSnapping
+        ? (minutes ~/ widget.config.snapToMinutes) * widget.config.snapToMinutes
+        : minutes;
+
+    final dateTime = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      hour,
+      snappedMinutes.clamp(0, 59),
+    );
+
+    // Get appointments at this location
+    final cellAppointments = widget.controller.appointments.where((apt) {
+      return apt.resourceId == resource.id &&
+          apt.startTime.year == date.year &&
+          apt.startTime.month == date.month &&
+          apt.startTime.day == date.day &&
+          apt.startTime.isBefore(dateTime.add(const Duration(hours: 1))) &&
+          apt.endTime.isAfter(dateTime);
+    }).toList();
+
+    // Debug output
+    print(
+      'Tap: column=$columnIndex, resource=${resource.name}, date=${date.day}/${date.month}, time=$hour:${snappedMinutes.toString().padLeft(2, '0')}',
+    );
+
+    return CellTapData(
+      resource: resource,
+      dateTime: dateTime,
+      globalPosition: localPosition,
+      appointments: cellAppointments,
+    );
+  }
+
   Widget _buildGrid() {
     final resources = widget.controller.resources;
     final dates = widget.controller.visibleDates;
     final totalWidth = _columnWidth * resources.length * dates.length;
     final totalHeight = widget.config.totalGridHeight;
 
-    return SingleChildScrollView(
-      controller: _gridVerticalController,
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: ScrollNavigationWrapper(
-        child: SingleChildScrollView(
-          controller: _gridHorizontalController,
-          scrollDirection: Axis.horizontal,
-          physics: _needsHorizontalScroll
-              ? const AlwaysScrollableScrollPhysics()
-              : const NeverScrollableScrollPhysics(),
-          child: SizedBox(
-            width: totalWidth,
-            height: totalHeight,
-            child: Stack(
-              children: [
-                // Grid background
-                CustomPaint(
-                  size: Size(totalWidth, totalHeight),
-                  painter: GridPainter(
-                    config: widget.config,
-                    theme: widget.theme,
-                    numberOfColumns: resources.length * dates.length,
-                    columnWidth: _columnWidth,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapUp: (details) =>
+          _handleGridTap(details.localPosition, resources, dates),
+      onLongPressStart: (details) =>
+          _handleGridLongPress(details.localPosition, resources, dates),
+      child: SingleChildScrollView(
+        controller: _gridVerticalController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: ScrollNavigationWrapper(
+          child: SingleChildScrollView(
+            controller: _gridHorizontalController,
+            scrollDirection: Axis.horizontal,
+            physics: _needsHorizontalScroll
+                ? const AlwaysScrollableScrollPhysics()
+                : const NeverScrollableScrollPhysics(),
+            child: SizedBox(
+              width: totalWidth,
+              height: totalHeight,
+              child: Stack(
+                children: [
+                  // Grid background
+                  RepaintBoundary(
+                    child: CustomPaint(
+                      size: Size(totalWidth, totalHeight),
+                      painter: GridPainter(
+                        config: widget.config,
+                        theme: widget.theme,
+                        numberOfColumns: resources.length * dates.length,
+                        columnWidth: _columnWidth,
+                      ),
+                    ),
                   ),
-                ),
-                // Unavailability layers
-                ..._buildUnavailabilityLayers(resources, dates),
-                // Cell interaction layer
-                ..._buildCellInteractionLayer(resources, dates),
-                // Appointments
-                ..._buildAppointments(resources, dates),
-                // Current time indicator
-                if (_shouldShowCurrentTimeIndicator())
-                  _buildCurrentTimeIndicator(totalWidth),
-              ],
+                  // Unavailability layers
+                  RepaintBoundary(
+                    child: Stack(
+                      children: _buildUnavailabilityLayers(resources, dates),
+                    ),
+                  ),
+                  // Appointments
+                  ..._buildAppointments(resources, dates),
+                  // Current time indicator
+                  if (_shouldShowCurrentTimeIndicator())
+                    _buildCurrentTimeIndicator(totalWidth),
+                ],
+              ),
             ),
           ),
         ),
@@ -650,6 +888,7 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
     List<CalendarResource> resources,
     List<DateTime> dates,
   ) {
+    return [];
     final widgets = <Widget>[];
     final cellHeight = widget.config.hourHeight;
     int columnIndex = 0;
@@ -725,25 +964,74 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
     List<DateTime> dates,
   ) {
     final widgets = <Widget>[];
+
+    // Handle initial render (before scroll controller is attached)
+    if (!_gridVerticalController.hasClients) {
+      // Render all appointments on first build
+      int columnIndex = 0;
+      switch (widget.config.weekViewLayout) {
+        case WeekViewLayout.resourcesFirst:
+          for (final resource in resources) {
+            for (final date in dates) {
+              _addAllAppointments(widgets, resource, date, columnIndex);
+              columnIndex++;
+            }
+          }
+          break;
+        case WeekViewLayout.daysFirst:
+          for (final date in dates) {
+            for (final resource in resources) {
+              _addAllAppointments(widgets, resource, date, columnIndex);
+              columnIndex++;
+            }
+          }
+          break;
+      }
+      return widgets;
+    }
+
+    // After initial render, use viewport culling for performance
+    final scrollOffset = _gridVerticalController.position.pixels;
+    final viewportHeight = _gridVerticalController.position.viewportDimension;
+
+    // Buffer zone (render slightly above/below viewport)
+    final buffer = _isScrolling
+        ? widget.config.hourHeight *
+              2 // 2 hours when scrolling
+        : widget.config.hourHeight; // 1 hour when stopped
+    final visibleStart = (scrollOffset - buffer).clamp(0.0, double.infinity);
+    final visibleEnd = scrollOffset + viewportHeight + buffer;
+
     int columnIndex = 0;
 
-    // Determine column order based on layout
     switch (widget.config.weekViewLayout) {
       case WeekViewLayout.resourcesFirst:
-        // Resources first: Resource1[Day1, Day2...], Resource2[Day1, Day2...]
         for (final resource in resources) {
           for (final date in dates) {
-            _addAppointmentsForCell(widgets, resource, date, columnIndex);
+            _addVisibleAppointments(
+              widgets,
+              resource,
+              date,
+              columnIndex,
+              visibleStart,
+              visibleEnd,
+            );
             columnIndex++;
           }
         }
         break;
 
       case WeekViewLayout.daysFirst:
-        // Days first: Day1[Resource1, Resource2...], Day2[Resource1, Resource2...]
         for (final date in dates) {
           for (final resource in resources) {
-            _addAppointmentsForCell(widgets, resource, date, columnIndex);
+            _addVisibleAppointments(
+              widgets,
+              resource,
+              date,
+              columnIndex,
+              visibleStart,
+              visibleEnd,
+            );
             columnIndex++;
           }
         }
@@ -753,7 +1041,8 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
     return widgets;
   }
 
-  void _addAppointmentsForCell(
+  // Add this helper method for initial render (no culling)
+  void _addAllAppointments(
     List<Widget> widgets,
     CalendarResource resource,
     DateTime date,
@@ -784,7 +1073,82 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
     for (final position in positions) {
       widgets.add(
         AppointmentWidget(
-          key: ValueKey(position.appointment.id),
+          key: ValueKey(
+            '${position.appointment.id}_${position.rect.top.toInt()}_${position.rect.left.toInt()}',
+          ),
+          position: position,
+          resource: resource,
+          theme: widget.theme,
+          isSelected:
+              widget.controller.selectedAppointment?.id ==
+              position.appointment.id,
+          builder: widget.appointmentBuilder,
+          onTap: widget.onAppointmentTap,
+          onLongPress: widget.onAppointmentLongPress,
+          onSecondaryTap: widget.onAppointmentSecondaryTap,
+          enableDrag: widget.config.enableDragAndDrop,
+        ),
+      );
+    }
+  }
+
+  void _addVisibleAppointments(
+    List<Widget> widgets,
+    CalendarResource resource,
+    DateTime date,
+    int columnIndex,
+    double visibleStart,
+    double visibleEnd,
+  ) {
+    final appointments = widget.controller.getAppointmentsForResourceDate(
+      resource.id,
+      date,
+    );
+
+    if (appointments.isEmpty) return;
+
+    // Create cache key
+    final cacheKey =
+        '${resource.id}_${date.year}_${date.month}_${date.day}_$columnIndex';
+
+    // Check cache first
+    List<AppointmentPosition> positions;
+    if (_positionCache.containsKey(cacheKey)) {
+      positions = _positionCache[cacheKey]!; // Use cached positions
+    } else {
+      // Calculate and cache
+      final dayStart = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        widget.config.dayStartHour,
+      );
+
+      positions = OverlapCalculator.calculatePositions(
+        appointments: appointments,
+        cellWidth: _columnWidth,
+        cellLeft: columnIndex * _columnWidth,
+        hourHeight: widget.config.hourHeight,
+        dayStart: dayStart,
+      );
+
+      _positionCache[cacheKey] = positions; // Cache for next time
+    }
+
+    // Render visible appointments (same as before)
+    for (final position in positions) {
+      final top = position.rect.top;
+      final bottom = top + position.rect.height;
+
+      if (bottom < visibleStart || top > visibleEnd) {
+        continue;
+      }
+
+      widgets.add(
+        AppointmentWidget(
+          key: ValueKey(
+            '${position.appointment.id}_${position.rect.top.toInt()}_${position.rect.left.toInt()}',
+          ),
           position: position,
           resource: resource,
           theme: widget.theme,

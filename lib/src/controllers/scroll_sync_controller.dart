@@ -1,10 +1,11 @@
 // lib/src/controllers/scroll_sync_controller.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../utils/date_time_utils.dart';
 
-/// Controller for synchronizing scroll positions
+/// Controller for synchronizing scroll positions with smooth physics
 class ScrollSyncController {
   ScrollSyncController() {
     horizontalScrollController = ScrollController()
@@ -20,6 +21,10 @@ class ScrollSyncController {
   final List<ScrollController> _linkedVerticalControllers = [];
 
   bool _isUpdating = false;
+
+  // Track if we're actively scrolling to avoid interrupting momentum
+  bool _isActivelyScrolling = false;
+  int? _frameCallbackId;
 
   /// Link a horizontal scroll controller
   void linkHorizontal(ScrollController controller) {
@@ -43,30 +48,87 @@ class ScrollSyncController {
 
   void _onHorizontalScroll() {
     if (_isUpdating) return;
-    _isUpdating = true;
+    _scheduleSync(() => _syncHorizontal());
+  }
 
-    final offset = horizontalScrollController.offset;
+  void _onVerticalScroll() {
+    if (_isUpdating) return;
+    _scheduleSync(() => _syncVertical());
+  }
+
+  /// Schedule sync on next frame to batch updates and maintain smooth scrolling
+  void _scheduleSync(VoidCallback syncCallback) {
+    if (_frameCallbackId != null) return; // Already scheduled
+
+    _frameCallbackId = SchedulerBinding.instance.scheduleFrameCallback((_) {
+      _frameCallbackId = null;
+      if (!_isUpdating) {
+        syncCallback();
+      }
+    });
+  }
+
+  void _syncHorizontal() {
+    if (!horizontalScrollController.hasClients) return;
+
+    _isUpdating = true;
+    final position = horizontalScrollController.position;
+    final offset = position.pixels;
+
     for (final controller in _linkedHorizontalControllers) {
       if (controller.hasClients) {
-        controller.jumpTo(offset);
+        _syncController(controller, offset, position);
       }
     }
 
     _isUpdating = false;
   }
 
-  void _onVerticalScroll() {
-    if (_isUpdating) return;
-    _isUpdating = true;
+  void _syncVertical() {
+    if (!verticalScrollController.hasClients) return;
 
-    final offset = verticalScrollController.offset;
+    _isUpdating = true;
+    final position = verticalScrollController.position;
+    final offset = position.pixels;
+
     for (final controller in _linkedVerticalControllers) {
       if (controller.hasClients) {
-        controller.jumpTo(offset);
+        _syncController(controller, offset, position);
       }
     }
 
     _isUpdating = false;
+  }
+
+  /// Sync a controller while respecting physics and momentum
+  void _syncController(
+    ScrollController target,
+    double offset,
+    ScrollPosition sourcePosition,
+  ) {
+    final targetPosition = target.position;
+
+    // If the target is close enough, don't update to avoid jitter
+    if ((targetPosition.pixels - offset).abs() < 0.5) {
+      return;
+    }
+
+    // Check if source is actively being dragged or has momentum
+    final isDragging =
+        sourcePosition is ScrollPositionWithSingleContext &&
+        sourcePosition.activity?.isScrolling == true;
+
+    if (isDragging) {
+      // During active scrolling, use jumpTo for immediate response
+      // but only if the difference is significant
+      if ((targetPosition.pixels - offset).abs() > 1.0) {
+        target.jumpTo(offset);
+      }
+    } else {
+      // When not actively scrolling, use physics-based correction
+      // This prevents interrupting momentum
+      targetPosition.correctPixels(offset);
+    }
   }
 
   /// Scroll to a specific time
@@ -93,6 +155,12 @@ class ScrollSyncController {
   }
 
   void dispose() {
+    // Cancel any pending frame callbacks
+    if (_frameCallbackId != null) {
+      SchedulerBinding.instance.cancelFrameCallbackWithId(_frameCallbackId!);
+      _frameCallbackId = null;
+    }
+
     horizontalScrollController.dispose();
     verticalScrollController.dispose();
     _linkedHorizontalControllers.clear();

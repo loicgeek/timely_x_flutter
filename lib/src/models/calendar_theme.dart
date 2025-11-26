@@ -3,6 +3,28 @@
 import 'package:calendar2/src/models/business_hours.dart';
 import 'package:flutter/material.dart';
 
+class CalendarScrollbarTheme {
+  final double scrollbarThickness;
+  final double scrollbarMinThumbLength;
+  final Radius scrollbarRadius;
+  final Color scrollbarThumbColor;
+  final Color scrollbarTrackColor;
+  final Color scrollbarTrackBorderColor;
+  final bool scrollbarAlwaysVisible;
+  final EdgeInsets scrollbarPadding;
+
+  const CalendarScrollbarTheme({
+    this.scrollbarThickness = 8.0,
+    this.scrollbarMinThumbLength = 48.0,
+    this.scrollbarRadius = const Radius.circular(4.0),
+    this.scrollbarThumbColor = const Color(0xFF9E9E9E),
+    this.scrollbarTrackColor = const Color(0xFFE0E0E0),
+    this.scrollbarTrackBorderColor = const Color(0xFFBDBDBD),
+    this.scrollbarAlwaysVisible = true,
+    this.scrollbarPadding = const EdgeInsets.only(right: 2.0),
+  });
+}
+
 /// Theme configuration for the calendar
 class CalendarTheme {
   const CalendarTheme({
@@ -214,6 +236,9 @@ class CalendarTheme {
 
     // Unavailability style
     this.unavailabilityStyle,
+
+    // Scrollbar theme
+    this.scrollbarTheme = const CalendarScrollbarTheme(),
   });
 
   // Grid colors
@@ -465,6 +490,8 @@ class CalendarTheme {
   /// Default: UnavailabilityStylePresets.standard
   final UnavailabilityStyle? unavailabilityStyle;
 
+  final CalendarScrollbarTheme scrollbarTheme;
+
   CalendarTheme copyWith({
     Color? gridLineColor,
     Color? hourLineColor,
@@ -574,6 +601,9 @@ class CalendarTheme {
 
     // Unavailability style
     UnavailabilityStyle? unavailabilityStyle,
+
+    // Scrollbar theme
+    CalendarScrollbarTheme? scrollbarTheme,
   }) {
     return CalendarTheme(
       gridLineColor: gridLineColor ?? this.gridLineColor,
@@ -732,6 +762,9 @@ class CalendarTheme {
 
       // Unavailability style
       unavailabilityStyle: unavailabilityStyle ?? this.unavailabilityStyle,
+
+      // Scrollbar theme
+      scrollbarTheme: scrollbarTheme ?? this.scrollbarTheme,
     );
   }
 }

@@ -1,8 +1,9 @@
-// example/lib/main.dart
+// example/lib/main.dart - UPDATED WITH PERFORMANCE TESTING
 
-import 'package:calendar2_example/screens/agenda_view_example.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar2/calendar2.dart';
+import 'package:performance/performance.dart';
+import 'dart:math' as math;
 import 'widgets/custom_navigation_bar.dart';
 import 'builders/custom_calendar_builders.dart';
 import 'theme/calendar_app_theme.dart';
@@ -17,10 +18,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      showPerformanceOverlay: false, // Shows FPS overlay
       title: 'Calendar View Demo',
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       debugShowCheckedModeBanner: false,
-      home: const CalendarDemo(),
+      home: CustomPerformanceOverlay(child: const CalendarDemo()),
     );
   }
 }
@@ -36,6 +38,13 @@ class _CalendarDemoState extends State<CalendarDemo> {
   late CalendarController _controller;
   late CustomCalendarBuilders _builders;
 
+  // PERFORMANCE TESTING CONFIGURATION
+  static const int numberOfResources = 6;
+  static const int numberOfDays = 21; // 2 weeks
+  static const int appointmentsPerResourcePerDay = 10; // Adjust this!
+
+  // Total appointments = 6 resources × 21 days × 10 = 1260 appointments
+
   @override
   void initState() {
     super.initState();
@@ -49,99 +58,177 @@ class _CalendarDemoState extends State<CalendarDemo> {
     );
 
     _loadSampleData();
+
+    // Print performance info
+    print('╔════════════════════════════════════════════════╗');
+    print('║     PERFORMANCE TEST CONFIGURATION             ║');
+    print('╠════════════════════════════════════════════════╣');
+    print('║ Resources: $numberOfResources');
+    print('║ Days: $numberOfDays');
+    print('║ Appointments per resource/day: $appointmentsPerResourcePerDay');
+    print(
+      '║ Total appointments: ${numberOfResources * numberOfDays * appointmentsPerResourcePerDay}',
+    );
+    print('╚════════════════════════════════════════════════╝');
   }
 
   void _loadSampleData() {
-    final resources = [
-      DefaultResourceWithBusinessHours(
-        id: '1',
-        name: 'Dr. Smith',
-        color: Colors.blue,
-        businessHours: BusinessHours(
-          workingHours: const {
-            DateTime.monday: [TimePeriod(startTime: 10.0, endTime: 15.5)],
-            DateTime.tuesday: [TimePeriod(startTime: 9.0, endTime: 16.0)],
-            DateTime.wednesday: [TimePeriod(startTime: 10.0, endTime: 15.0)],
-            DateTime.thursday: [TimePeriod(startTime: 10.0, endTime: 15.0)],
-            DateTime.friday: [TimePeriod(startTime: 10.0, endTime: 15.0)],
-          },
+    final random = math.Random(42); // Fixed seed for reproducible results
 
-          showNonWorkingHours: true,
-          showBreaks: true,
-        ),
-      ),
-      DefaultResource(
-        id: '2',
-        name: 'Fernanda Martinez',
-        color: const Color(0xFF4CAF50),
-      ),
-      DefaultResource(
-        id: '3',
-        name: 'Dayana Arteag',
-        color: const Color(0xFFFF9800),
-      ),
-      DefaultResource(
-        id: '4',
-        name: 'na Llamuca',
-        color: const Color(0xFF9C27B0),
-      ),
-    ];
+    // Create resources
+    final resources = _generateResources(numberOfResources);
 
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final appointments = <DefaultAppointment>[];
-
-    for (int day = 0; day < 7; day++) {
-      final date = today.add(Duration(days: day));
-
-      appointments.addAll([
-        DefaultAppointment(
-          id: 'apt${day}_1',
-          resourceId: '1',
-          startTime: date.add(const Duration(hours: 9)),
-          endTime: date.add(const Duration(hours: 10)),
-          title: 'Haircut',
-          subtitle: 'John Doe',
-          color: const Color(0xFF2196F3),
-        ),
-        DefaultAppointment(
-          id: 'apt${day}_2',
-          resourceId: '2',
-          startTime: date.add(const Duration(hours: 10)),
-          endTime: date.add(const Duration(hours: 11, minutes: 30)),
-          title: 'Color Treatment',
-          subtitle: 'Jane Smith',
-          color: const Color(0xFF4CAF50),
-        ),
-        DefaultAppointment(
-          id: 'apt${day}_3',
-          resourceId: '3',
-          startTime: date.add(const Duration(hours: 13)),
-          endTime: date.add(const Duration(hours: 14)),
-          title: 'Manicure',
-          subtitle: 'Alice Johnson',
-          color: const Color(0xFFFF9800),
-        ),
-        if (day % 2 == 0)
-          DefaultAppointment(
-            id: 'apt${day}_4',
-            resourceId: '1',
-            startTime: date.add(const Duration(hours: 9, minutes: 30)),
-            endTime: date.add(const Duration(hours: 10, minutes: 30)),
-            title: 'Consultation',
-            subtitle: 'Bob Wilson',
-            color: const Color(0xFF1976D2),
-          ),
-      ]);
-    }
+    // Generate appointments
+    final appointments = _generateAppointments(
+      resources: resources,
+      numberOfDays: numberOfDays,
+      appointmentsPerDay: appointmentsPerResourcePerDay,
+      random: random,
+    );
 
     _controller.updateResources(resources);
     _controller.updateAppointments(appointments);
+
+    print('Loaded ${appointments.length} appointments successfully!');
+  }
+
+  List<CalendarResource> _generateResources(int count) {
+    final resourceNames = [
+      'Dr. Smith',
+      'Dr. Johnson',
+      'Dr. Williams',
+      'Dr. Brown',
+      'Dr. Jones',
+      'Dr. Garcia',
+      'Dr. Miller',
+      'Dr. Davis',
+      'Dr. Rodriguez',
+      'Dr. Martinez',
+    ];
+
+    final colors = [
+      Colors.blue,
+      const Color(0xFF4CAF50),
+      const Color(0xFFFF9800),
+      const Color(0xFF9C27B0),
+      const Color(0xFFE91E63),
+      const Color(0xFF00BCD4),
+      const Color(0xFF8BC34A),
+      const Color(0xFFFF5722),
+      const Color(0xFF673AB7),
+      const Color(0xFF009688),
+    ];
+
+    return List.generate(count, (i) {
+      if (i == 0) {
+        // First resource with business hours
+        return DefaultResourceWithBusinessHours(
+          id: '${i + 1}',
+          name: resourceNames[i % resourceNames.length],
+          color: colors[i % colors.length],
+          businessHours: BusinessHours(
+            workingHours: const {
+              DateTime.monday: [TimePeriod(startTime: 9.0, endTime: 17.0)],
+              DateTime.tuesday: [TimePeriod(startTime: 9.0, endTime: 17.0)],
+              DateTime.wednesday: [TimePeriod(startTime: 9.0, endTime: 17.0)],
+              DateTime.thursday: [TimePeriod(startTime: 9.0, endTime: 17.0)],
+              DateTime.friday: [TimePeriod(startTime: 9.0, endTime: 17.0)],
+            },
+            showNonWorkingHours: true,
+            showBreaks: true,
+          ),
+        );
+      }
+
+      return DefaultResource(
+        id: '${i + 1}',
+        name: resourceNames[i % resourceNames.length],
+        color: colors[i % colors.length],
+      );
+    });
+  }
+
+  List<DefaultAppointment> _generateAppointments({
+    required List<CalendarResource> resources,
+    required int numberOfDays,
+    required int appointmentsPerDay,
+    required math.Random random,
+  }) {
+    final appointments = <DefaultAppointment>[];
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final serviceTypes = [
+      'Consultation',
+      'Follow-up',
+      'Check-up',
+      'Treatment',
+      'Surgery',
+      'X-Ray',
+      'Lab Work',
+      'Physical',
+      'Therapy',
+      'Review',
+    ];
+
+    final clientNames = [
+      'John Doe',
+      'Jane Smith',
+      'Bob Wilson',
+      'Alice Johnson',
+      'Charlie Brown',
+      'Diana Prince',
+      'Eva Green',
+      'Frank Miller',
+      'Grace Lee',
+      'Henry Ford',
+      'Iris West',
+      'Jack Ryan',
+    ];
+
+    int appointmentId = 1;
+
+    for (int day = 0; day < numberOfDays; day++) {
+      final date = today.add(Duration(days: day));
+
+      for (final resource in resources) {
+        for (int apt = 0; apt < appointmentsPerDay; apt++) {
+          // Generate random time between 8 AM and 5 PM
+          final startHour = 8 + random.nextInt(9); // 8-16 (5 PM)
+          final startMinute = random.nextInt(4) * 15; // 0, 15, 30, 45
+
+          // Generate random duration (30 min to 2 hours)
+          final durationMinutes = [30, 45, 60, 90, 120][random.nextInt(5)];
+
+          final startTime = date.add(
+            Duration(hours: startHour, minutes: startMinute),
+          );
+
+          final endTime = startTime.add(Duration(minutes: durationMinutes));
+
+          // Don't create appointments that end after 6 PM
+          if (endTime.hour >= 18) continue;
+
+          appointments.add(
+            DefaultAppointment(
+              id: 'apt_${appointmentId++}',
+              resourceId: resource.id,
+              startTime: startTime,
+              endTime: endTime,
+              title: serviceTypes[random.nextInt(serviceTypes.length)],
+              subtitle: clientNames[random.nextInt(clientNames.length)],
+              color: resource.color ?? Colors.blue,
+            ),
+          );
+        }
+      }
+    }
+
+    return appointments;
   }
 
   void _handleCellLongPress(CellTapData data) {
     print("Cell long press: ${data.resource.name} ${data.dateTime}");
-    // _showCreateDialog(data.resource, data.dateTime);
   }
 
   @override
@@ -153,6 +240,29 @@ class _CalendarDemoState extends State<CalendarDemo> {
           CustomNavigationBar(
             controller: _controller,
             onAddPressed: _handleAddPressed,
+          ),
+          // Performance info banner
+          Container(
+            color: Colors.amber.shade100,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                const Icon(Icons.speed, size: 20, color: Colors.orange),
+                const SizedBox(width: 8),
+                Text(
+                  'Performance Test: ${numberOfResources * numberOfDays * appointmentsPerResourcePerDay} appointments',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  'Watch FPS overlay above',
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
+                ),
+              ],
+            ),
           ),
           Expanded(
             child: CalendarView(
@@ -175,25 +285,68 @@ class _CalendarDemoState extends State<CalendarDemo> {
           ),
         ],
       ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // Add more appointments button
+          FloatingActionButton.small(
+            heroTag: 'add_more',
+            onPressed: _addMoreAppointments,
+            backgroundColor: Colors.green,
+            child: const Icon(Icons.add, size: 20),
+          ),
+          const SizedBox(height: 8),
+          // Reload button
+          FloatingActionButton.small(
+            heroTag: 'reload',
+            onPressed: _loadSampleData,
+            backgroundColor: Colors.blue,
+            child: const Icon(Icons.refresh, size: 20),
+          ),
+          const SizedBox(height: 8),
+          // Clear all button
+          FloatingActionButton.small(
+            heroTag: 'clear',
+            onPressed: _clearAllAppointments,
+            backgroundColor: Colors.red,
+            child: const Icon(Icons.clear, size: 20),
+          ),
+        ],
+      ),
     );
+  }
+
+  void _addMoreAppointments() {
+    final random = math.Random();
+    final newAppointments = _generateAppointments(
+      resources: _controller.resources,
+      numberOfDays: 7,
+      appointmentsPerDay: 3,
+      random: random,
+    );
+
+    for (final apt in newAppointments) {
+      _controller.addAppointment(apt);
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Added ${newAppointments.length} appointments')),
+    );
+  }
+
+  void _clearAllAppointments() {
+    setState(() {
+      _controller.updateAppointments([]);
+    });
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Cleared all appointments')));
   }
 
   void _handleAddPressed() {
     if (_controller.resources.isNotEmpty) {
       _showCreateDialog(_controller.resources.first, DateTime.now());
     }
-  }
-
-  void _handleWaitlistPressed() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Waitlist feature coming soon')),
-    );
-  }
-
-  void _handleQuickSalePressed() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Quick sale feature coming soon')),
-    );
   }
 
   void _handleAppointmentTap(AppointmentTapData data) {

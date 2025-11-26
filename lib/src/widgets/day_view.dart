@@ -2,6 +2,7 @@
 
 import 'package:calendar2/calendar2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import '../utils/overlap_calculator.dart';
 import '../utils/date_time_utils.dart';
@@ -61,11 +62,16 @@ class _CalendarDayViewState extends State<CalendarDayView> {
   late ScrollController _gridHorizontalController;
   late ScrollController _timeColumnVerticalController;
   late ScrollController _resourceHeaderHorizontalController;
+  late ScrollController _dateHeaderHorizontalController;
 
   double _columnWidth = 0;
   bool _needsHorizontalScroll = false;
   bool _isUpdatingScroll = false;
-  ScrollController? _lastHorizontalScrollSource;
+
+  int? _verticalSyncCallbackId;
+
+  ScrollController?
+  _horizontalScrollSource; // Track which controller is scrolling
 
   @override
   void initState() {
@@ -76,69 +82,136 @@ class _CalendarDayViewState extends State<CalendarDayView> {
     _gridHorizontalController = ScrollController();
     _timeColumnVerticalController = ScrollController();
     _resourceHeaderHorizontalController = ScrollController();
+    _dateHeaderHorizontalController = ScrollController();
 
     // Add listeners for scroll synchronization
     _gridVerticalController.addListener(_onGridVerticalScroll);
-    _gridHorizontalController.addListener(
-      () => _onAnyHorizontalScroll(_gridHorizontalController),
-    );
+    _gridHorizontalController.addListener(_onGridHorizontalScroll);
     _resourceHeaderHorizontalController.addListener(
-      () => _onAnyHorizontalScroll(_resourceHeaderHorizontalController),
+      _onResourceHeaderHorizontalScroll,
     );
+    _dateHeaderHorizontalController.addListener(_onDateHeaderHorizontalScroll);
 
     widget.controller.addListener(_onControllerUpdate);
   }
 
   @override
   void dispose() {
+    // Cancel any pending frame callbacks
+    if (_verticalSyncCallbackId != null) {
+      SchedulerBinding.instance.cancelFrameCallbackWithId(
+        _verticalSyncCallbackId!,
+      );
+    }
+
+    // Remove all listeners
     _gridVerticalController.removeListener(_onGridVerticalScroll);
-    // Note: We can't remove the specific lambda listeners, but dispose will clean up
+    _gridHorizontalController.removeListener(_onGridHorizontalScroll);
+    _resourceHeaderHorizontalController.removeListener(
+      _onResourceHeaderHorizontalScroll,
+    );
+    _dateHeaderHorizontalController.removeListener(
+      // ← THIS WAS MISSING!
+      _onDateHeaderHorizontalScroll,
+    );
+
+    // Dispose all controllers
     _gridVerticalController.dispose();
     _gridHorizontalController.dispose();
     _timeColumnVerticalController.dispose();
     _resourceHeaderHorizontalController.dispose();
+    _dateHeaderHorizontalController.dispose(); // ← THIS WAS MISSING!
+
     widget.controller.removeListener(_onControllerUpdate);
     super.dispose();
   }
 
+  /// Improved vertical scroll synchronization
   void _onGridVerticalScroll() {
     if (_isUpdatingScroll) return;
+    _syncVerticalScrollImmediate(); // ← Change to immediate
+  }
+
+  void _syncVerticalScrollImmediate() {
+    if (_isUpdatingScroll) return;
+
     _isUpdatingScroll = true;
 
-    if (_timeColumnVerticalController.hasClients) {
-      _timeColumnVerticalController.jumpTo(_gridVerticalController.offset);
+    if (!_gridVerticalController.hasClients ||
+        !_timeColumnVerticalController.hasClients) {
+      _isUpdatingScroll = false;
+      return;
     }
+
+    final offset = _gridVerticalController.position.pixels;
+    _timeColumnVerticalController.jumpTo(offset);
 
     _isUpdatingScroll = false;
   }
 
-  void _onAnyHorizontalScroll(ScrollController source) {
+  /// Improved horizontal scroll synchronization for grid
+  void _onGridHorizontalScroll() {
+    if (_isUpdatingScroll) return;
+    _horizontalScrollSource = _gridHorizontalController;
+    _syncHorizontalScrollImmediate();
+  }
+
+  /// Improved horizontal scroll synchronization for resource header
+  void _onResourceHeaderHorizontalScroll() {
+    if (_isUpdatingScroll) return;
+    _horizontalScrollSource = _resourceHeaderHorizontalController;
+    _syncHorizontalScrollImmediate();
+  }
+
+  void _onDateHeaderHorizontalScroll() {
+    if (_isUpdatingScroll) return;
+    _horizontalScrollSource = _dateHeaderHorizontalController;
+    _syncHorizontalScrollImmediate();
+  }
+
+  void _syncHorizontalScrollImmediate() {
     if (_isUpdatingScroll) return;
 
-    // Track the source to avoid circular updates
-    if (_lastHorizontalScrollSource == source) {
+    _isUpdatingScroll = true;
+
+    // Use the tracked source controller
+    final source = _horizontalScrollSource;
+
+    // Safety check
+    if (source == null || !source.hasClients) {
+      _isUpdatingScroll = false;
       return;
     }
 
-    _isUpdatingScroll = true;
-    _lastHorizontalScrollSource = source;
+    // Get source position
+    final sourcePosition = source.position;
+    final targetOffset = sourcePosition.pixels;
 
-    final offset = source.offset;
+    // Get all target controllers (everything EXCEPT the source)
+    final targets = <ScrollController>[
+      if (_gridHorizontalController.hasClients &&
+          _gridHorizontalController != source)
+        _gridHorizontalController,
+      if (_resourceHeaderHorizontalController.hasClients &&
+          _resourceHeaderHorizontalController != source)
+        _resourceHeaderHorizontalController,
+      if (_dateHeaderHorizontalController.hasClients &&
+          _dateHeaderHorizontalController != source)
+        _dateHeaderHorizontalController,
+    ];
 
-    // Sync all horizontal controllers to the same offset
-    if (_gridHorizontalController.hasClients &&
-        _gridHorizontalController != source &&
-        _gridHorizontalController.offset != offset) {
-      _gridHorizontalController.jumpTo(offset);
+    // Sync all targets immediately using jumpTo (no physics check needed)
+    for (final target in targets) {
+      if (target.hasClients) {
+        final currentOffset = target.position.pixels;
+
+        // Only update if different (prevents unnecessary rebuilds)
+        if ((currentOffset - targetOffset).abs() > 0.1) {
+          target.jumpTo(targetOffset);
+        }
+      }
     }
 
-    if (_resourceHeaderHorizontalController.hasClients &&
-        _resourceHeaderHorizontalController != source &&
-        _resourceHeaderHorizontalController.offset != offset) {
-      _resourceHeaderHorizontalController.jumpTo(offset);
-    }
-
-    _lastHorizontalScrollSource = null;
     _isUpdatingScroll = false;
   }
 
@@ -251,8 +324,22 @@ class _CalendarDayViewState extends State<CalendarDayView> {
           ),
         ),
         // Grid
-        Expanded(child: _buildGrid()),
+        Expanded(child: _buildGridWithScrollbar()),
       ],
+    );
+  }
+
+  Widget _buildGridWithScrollbar() {
+    return RawScrollbar(
+      controller: _gridVerticalController,
+      thumbVisibility: widget.theme.scrollbarTheme.scrollbarAlwaysVisible,
+      trackVisibility: widget.theme.scrollbarTheme.scrollbarAlwaysVisible,
+      thickness: widget.theme.scrollbarTheme.scrollbarThickness,
+      radius: widget.theme.scrollbarTheme.scrollbarRadius,
+      thumbColor: widget.theme.scrollbarTheme.scrollbarThumbColor,
+      trackColor: widget.theme.scrollbarTheme.scrollbarTrackColor,
+      trackBorderColor: widget.theme.scrollbarTheme.scrollbarTrackBorderColor,
+      child: _buildGrid(),
     );
   }
 
