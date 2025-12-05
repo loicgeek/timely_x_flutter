@@ -2,7 +2,7 @@
 
 A powerful, flexible, and highly customizable calendar widget for Flutter that displays appointments across multiple resources (people, rooms, equipment, etc.) in day, week, and month views.
 
-[![Pub Version](https://img.shields.io/pub/v/flutter_resource_calendar)](https://pub.dev/packages/flutter_resource_calendar)
+[![Pub Version](https://img.shields.io/pub/v/timely_x)](https://pub.dev/packages/timely_x)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.0.0-blue.svg)](https://flutter.dev)
 
@@ -61,7 +61,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_resource_calendar: ^1.0.0
+  timely_x: ^1.0.0
   intl: ^0.18.0  # Required for date formatting
 ```
 
@@ -75,7 +75,7 @@ flutter pub get
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_resource_calendar/flutter_resource_calendar.dart';
+import 'package:timely_x/timely_x.dart';
 
 class MyCalendar extends StatefulWidget {
   @override
@@ -869,7 +869,7 @@ Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTIN
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/flutter_resource_calendar.git
+git clone https://github.com/yourusername/timely_x.git
 
 # Get dependencies
 flutter pub get
@@ -884,7 +884,7 @@ flutter run
 
 ### Reporting Issues
 
-Please use the [issue tracker](https://github.com/yourusername/flutter_resource_calendar/issues) to report bugs or request features.
+Please use the [issue tracker](https://github.com/yourusername/timely_x/issues) to report bugs or request features.
 
 ## 📝 Examples
 
@@ -932,8 +932,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - 📧 Email: loic.ngou98@gmail.com
 - 💬 Discord: [Join our server](https://discord.gg/example)
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/flutter_resource_calendar/issues)
-- 📖 Documentation: [Full docs](https://yourusername.github.io/flutter_resource_calendar)
+- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/timely_x/issues)
+- 📖 Documentation: [Full docs](https://yourusername.github.io/timely_x)
 
 ## 🗺️ Roadmap
 

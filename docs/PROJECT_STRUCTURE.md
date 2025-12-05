@@ -5,7 +5,7 @@ This document explains the organization of the Flutter Resource Calendar codebas
 ## Directory Structure
 
 ```
-flutter_resource_calendar/
+timely_x/
 ├── lib/
 │   ├── src/
 │   │   ├── builders/          # Widget builders and delegates
@@ -46,7 +46,7 @@ flutter_resource_calendar/
 │   │       ├── time_column.dart
 │   │       └── week_view.dart
 │   │
-│   └── flutter_resource_calendar.dart  # Main export file
+│   └── timely_x.dart  # Main export file
 │
 ├── test/                      # Unit and widget tests
 │   ├── controllers/
@@ -540,10 +540,10 @@ test/
 
 ### Main Export File
 
-`lib/flutter_resource_calendar.dart` exports all public APIs:
+`lib/timely_x.dart` exports all public APIs:
 
 ```dart
-library flutter_resource_calendar;
+library timely_x;
 
 // Models
 export 'src/models/calendar_appointment.dart';

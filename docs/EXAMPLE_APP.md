@@ -6,7 +6,7 @@ This is a complete, working example of a Flutter Resource Calendar application.
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_resource_calendar/flutter_resource_calendar.dart';
+import 'package:timely_x/timely_x.dart';
 
 void main() {
   runApp(MyApp());
@@ -546,7 +546,7 @@ cd calendar_example
 dependencies:
   flutter:
     sdk: flutter
-  flutter_resource_calendar: ^1.0.0
+  timely_x: ^1.0.0
   intl: ^0.18.0
 ```
 
