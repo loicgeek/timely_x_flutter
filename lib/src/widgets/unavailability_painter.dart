@@ -167,7 +167,7 @@ class UnavailabilityPainter extends CustomPainter {
     UnavailabilityStyle style,
   ) {
     final paint = Paint()
-      ..color = style.patternColor.withOpacity(style.opacity)
+      ..color = style.patternColor.withValues(alpha: style.opacity)
       ..strokeWidth = style.lineWidth
       ..style = PaintingStyle.stroke;
 

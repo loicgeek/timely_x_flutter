@@ -114,6 +114,7 @@ class ScrollSyncController {
     }
 
     // Check if source is actively being dragged or has momentum
+    // ignore: invalid_use_of_protected_member
     final isDragging =
         sourcePosition is ScrollPositionWithSingleContext &&
         sourcePosition.activity?.isScrolling == true;
