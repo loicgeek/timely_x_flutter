@@ -19,7 +19,7 @@ import 'scroll_navigation_wrapper.dart';
 /// Calendar week view - shows multiple days for multiple resources
 class CalendarWeekView extends StatefulWidget {
   const CalendarWeekView({
-    Key? key,
+    super.key,
     required this.controller,
     required this.config,
     required this.theme,
@@ -37,7 +37,7 @@ class CalendarWeekView extends StatefulWidget {
     this.onAppointmentDragEnd,
     this.onResourceHeaderTap,
     this.onDateHeaderTap,
-  }) : super(key: key);
+  });
 
   final CalendarController controller;
   final CalendarConfig config;
@@ -1240,7 +1240,7 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
 /// Prevents both callbacks from firing on mobile devices
 class _CellGestureHandler extends StatefulWidget {
   const _CellGestureHandler({
-    Key? key,
+    super.key,
     required this.cellDateTime,
     required this.cellHeight,
     required this.resource,
@@ -1248,7 +1248,7 @@ class _CellGestureHandler extends StatefulWidget {
     required this.onCellTap,
     required this.onCellLongPress,
     required this.calculateTimeFromOffset,
-  }) : super(key: key);
+  });
 
   final DateTime cellDateTime;
   final double cellHeight;

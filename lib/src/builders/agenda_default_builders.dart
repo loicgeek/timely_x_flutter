@@ -55,9 +55,7 @@ class AgendaDefaultBuilders {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color:
-                    theme.todayHighlightColor?.withOpacity(0.1) ??
-                    Colors.blue.withOpacity(0.1),
+                color: theme.todayHighlightColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -65,7 +63,7 @@ class AgendaDefaultBuilders {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: theme.todayHighlightColor ?? Colors.blue,
+                  color: theme.todayHighlightColor,
                 ),
               ),
             ),
