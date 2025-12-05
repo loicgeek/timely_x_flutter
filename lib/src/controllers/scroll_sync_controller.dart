@@ -23,7 +23,7 @@ class ScrollSyncController {
   bool _isUpdating = false;
 
   // Track if we're actively scrolling to avoid interrupting momentum
-  bool _isActivelyScrolling = false;
+
   int? _frameCallbackId;
 
   /// Link a horizontal scroll controller

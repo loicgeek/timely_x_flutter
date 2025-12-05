@@ -202,7 +202,7 @@ class AgendaDefaultBuilders {
               Container(
                 width: theme.agendaColorBarWidth ?? 4,
                 decoration: BoxDecoration(
-                  color: appointment.color ?? resource.color ?? Colors.blue,
+                  color: appointment.color,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(theme.agendaItemBorderRadius ?? 0),
                     bottomLeft: Radius.circular(

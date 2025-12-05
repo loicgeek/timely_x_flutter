@@ -184,7 +184,7 @@ class UnavailabilityPainter extends CustomPainter {
 
   void _paintDots(Canvas canvas, Rect rect, UnavailabilityStyle style) {
     final paint = Paint()
-      ..color = style.patternColor.withOpacity(style.opacity)
+      ..color = style.patternColor.withValues(alpha: style.opacity)
       ..style = PaintingStyle.fill;
 
     final spacing = style.lineSpacing;
