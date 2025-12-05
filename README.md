@@ -44,27 +44,27 @@ Perfect for scheduling applications, appointment systems, resource management, t
 ### Day View
 Shows all resources for a single day — perfect for detailed scheduling.
 
-![Day View](screenshots/DAY_VIEW.jpeg)
+![Day View](https://raw.githubusercontent.com/loicgeek/timely_x_flutter/main/screenshots/DAY_VIEW.jpeg)
 
 ### Week View
 Your standard weekly layout.
 
-![Week View](screenshots/WEEK_VIEW.jpeg)
+![Week View](https://raw.githubusercontent.com/loicgeek/timely_x_flutter/main/screenshots/WEEK_VIEW.jpeg)
 
 ### Week View – Resources First
 Displays each resource across the week — ideal for team scheduling.
 
-![Week View – Resources First](screenshots/WEEK_VIEW_RESOUCE_FIRST.jpeg)
+![Week View – Resources First](https://raw.githubusercontent.com/loicgeek/timely_x_flutter/main/screenshots/WEEK_VIEW_RESOUCE_FIRST.jpeg)
 
 ### Month View
 A monthly overview with appointment summaries.
 
-![Month View](screenshots/MONTH_VIEW.jpeg)
+![Month View](https://raw.githubusercontent.com/loicgeek/timely_x_flutter/main/screenshots/MONTH_VIEW.jpeg)
 
 ### Agenda View
 A vertical list of appointments across days.
 
-![Agenda View](screenshots/AGENDA_VIEW.jpeg)
+![Agenda View](https://raw.githubusercontent.com/loicgeek/timely_x_flutter/main/screenshots/AGENDA_VIEW.jpeg)
 
 ## 🚀 Getting Started
 
