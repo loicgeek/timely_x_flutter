@@ -397,8 +397,8 @@ CalendarTheme(
 ```
 
 **📚 For complete customization documentation, see:**
-- [CUSTOMIZATION_GUIDE.md](docs/CUSTOMIZATION_GUIDE.md) - Full customization guide
-- [THEME_QUICK_REFERENCE.md](docs/THEME_QUICK_REFERENCE.md) - Quick reference cheat sheet
+- [CUSTOMIZATION_GUIDE.md](doc/CUSTOMIZATION_GUIDE.md) - Full customization guide
+- [THEME_QUICK_REFERENCE.md](doc/THEME_QUICK_REFERENCE.md) - Quick reference cheat sheet
 
 ## 🔧 Advanced Features
 
@@ -859,7 +859,7 @@ Configuration for calendar behavior.
 
 ### CalendarTheme
 
-Visual customization with 65+ properties. See [CUSTOMIZATION_GUIDE.md](docs/CUSTOMIZATION_GUIDE.md) for complete reference.
+Visual customization with 65+ properties. See [CUSTOMIZATION_GUIDE.md](doc/CUSTOMIZATION_GUIDE.md) for complete reference.
 
 ## 🤝 Contributing
 
@@ -869,7 +869,7 @@ Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTIN
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/timely_x.git
+git clone https://github.com/loicgeek/timely_x.git
 
 # Get dependencies
 flutter pub get
@@ -884,7 +884,7 @@ flutter run
 
 ### Reporting Issues
 
-Please use the [issue tracker](https://github.com/yourusername/timely_x/issues) to report bugs or request features.
+Please use the [issue tracker](https://github.com/loicgeek/timely_x/issues) to report bugs or request features.
 
 ## 📝 Examples
 
@@ -931,9 +931,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - 📧 Email: loic.ngou98@gmail.com
-- 💬 Discord: [Join our server](https://discord.gg/example)
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/timely_x/issues)
-- 📖 Documentation: [Full docs](https://yourusername.github.io/timely_x)
+- 🐛 Issues: [GitHub Issues](https://github.com/loicgeek/timely_x/issues)
+- 📖 Documentation: [Full docs](https://loicgeek.github.io/timely_x)
 
 ## 🗺️ Roadmap
 

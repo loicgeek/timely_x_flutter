@@ -64,7 +64,7 @@ timely_x/
 │   │   └── main.dart
 │   └── pubspec.yaml
 │
-├── docs/                      # Documentation
+├── doc/                      # Documentation
 │   ├── CUSTOMIZATION_GUIDE.md
 │   ├── THEME_QUICK_REFERENCE.md
 │   ├── MIGRATION_GUIDE.md
@@ -605,7 +605,7 @@ When contributing, maintain this structure:
 
 1. **New features** go in appropriate directories
 2. **Tests** mirror the `lib/` structure
-3. **Documentation** goes in `docs/`
+3. **Documentation** goes in `doc/`
 4. **Examples** go in `example/`
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for details.
