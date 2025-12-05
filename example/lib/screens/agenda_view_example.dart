@@ -1,7 +1,7 @@
 // example/lib/screens/agenda_view_example.dart
 
 import 'package:flutter/material.dart';
-import 'package:calendar2/calendar2.dart';
+import 'package:timely_x/timely_x.dart';
 
 /// Complete example demonstrating all agenda view features
 class AgendaViewExample extends StatefulWidget {

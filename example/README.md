@@ -1,6 +1,6 @@
-# calendar2_example
+# timely_x_example
 
-Demonstrates how to use the calendar2 plugin.
+Demonstrates how to use the timely_x plugin.
 
 ## Getting Started
 

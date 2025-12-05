@@ -1,7 +1,7 @@
 // test/utils/date_time_utils_test.dart
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:calendar2/src/utils/date_time_utils.dart';
+import 'package:timely_x/src/utils/date_time_utils.dart';
 
 void main() {
   group('DateTimeUtils', () {

@@ -1,6 +1,6 @@
 // lib/src/controllers/calendar_controller.dart (Fixed)
 
-import 'package:calendar2/src/models/agenda_view_config.dart';
+import 'package:timely_x/src/models/agenda_view_config.dart';
 import 'package:flutter/material.dart';
 import '../models/calendar_appointment.dart';
 import '../models/calendar_resource.dart';

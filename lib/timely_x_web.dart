@@ -6,15 +6,15 @@
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:web/web.dart' as web;
 
-import 'calendar2_platform_interface.dart';
+import 'timely_x_platform_interface.dart';
 
-/// A web implementation of the Calendar2Platform of the Calendar2 plugin.
-class Calendar2Web extends Calendar2Platform {
-  /// Constructs a Calendar2Web
-  Calendar2Web();
+/// A web implementation of the TimelyXPlatform of the TimelyX plugin.
+class TimelyXWeb extends TimelyXPlatform {
+  /// Constructs a TimelyXWeb
+  TimelyXWeb();
 
   static void registerWith(Registrar registrar) {
-    Calendar2Platform.instance = Calendar2Web();
+    TimelyXPlatform.instance = TimelyXWeb();
   }
 
   /// Returns a [String] containing the version of the platform.

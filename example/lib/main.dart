@@ -1,7 +1,7 @@
 // example/lib/main.dart - UPDATED WITH PERFORMANCE TESTING
 
 import 'package:flutter/material.dart';
-import 'package:calendar2/calendar2.dart';
+import 'package:timely_x/timely_x.dart';
 import 'package:performance/performance.dart';
 import 'dart:math' as math;
 import 'widgets/custom_navigation_bar.dart';

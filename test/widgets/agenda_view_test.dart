@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:calendar2/calendar2.dart';
-import 'package:calendar2/src/widgets/agenda_view.dart';
+import 'package:timely_x/timely_x.dart';
+import 'package:timely_x/src/widgets/agenda_view.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

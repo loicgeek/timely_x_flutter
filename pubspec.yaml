@@ -1,7 +1,7 @@
-name: calendar2
-description: "A new Flutter plugin project."
-version: 0.0.1
-homepage:
+name: timely_x
+description: "A professional calendar library for Flutter with multi-resource scheduling and comprehensive customization."
+version: 2.0.0
+homepage: https://github.com/loicgeek/timely_x_flutter
 
 environment:
   sdk: ^3.8.0
@@ -39,8 +39,8 @@ flutter:
   plugin:
     platforms:
       web:
-        pluginClass: Calendar2Web
-        fileName: calendar2_web.dart
+        pluginClass: TimelyXWeb
+        fileName: timely_x_web.dart
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

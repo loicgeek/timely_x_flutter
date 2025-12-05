@@ -1,6 +1,6 @@
 // lib/src/models/calendar_theme.dart
 
-import 'package:calendar2/src/models/business_hours.dart';
+import 'package:timely_x/src/models/business_hours.dart';
 import 'package:flutter/material.dart';
 
 class CalendarScrollbarTheme {

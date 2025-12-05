@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:calendar2/calendar2.dart';
+import 'package:timely_x/timely_x.dart';
 
 /// Helper class for creating test resources
 class TestResources {

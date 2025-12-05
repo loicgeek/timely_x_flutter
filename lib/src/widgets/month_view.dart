@@ -1,6 +1,6 @@
 // lib/src/widgets/month_view.dart
 
-import 'package:calendar2/calendar2.dart';
+import 'package:timely_x/timely_x.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../utils/date_time_utils.dart';

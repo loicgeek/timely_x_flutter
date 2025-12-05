@@ -1,6 +1,6 @@
 // lib/src/widgets/resource_header.dart
 
-import 'package:calendar2/calendar2.dart';
+import 'package:timely_x/timely_x.dart';
 import 'package:flutter/material.dart';
 
 class ResourceHeader extends StatefulWidget {

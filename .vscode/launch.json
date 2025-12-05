@@ -6,18 +6,18 @@
     "configurations": [
     
         {
-            "name": "calendar2",
+            "name": "timely_x",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "calendar2 (profile mode)",
+            "name": "timely_x (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "calendar2 (release mode)",
+            "name": "timely_x (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

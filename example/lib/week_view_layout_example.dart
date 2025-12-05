@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
-import 'package:calendar2/calendar2.dart';
+import 'package:timely_x/timely_x.dart';
 import 'widgets/custom_navigation_bar.dart';
 import 'builders/custom_calendar_builders.dart';
 import 'theme/calendar_app_theme.dart';

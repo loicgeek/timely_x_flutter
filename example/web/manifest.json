@@ -1,11 +1,11 @@
 {
-    "name": "calendar2_example",
-    "short_name": "calendar2_example",
+    "name": "timely_x_example",
+    "short_name": "timely_x_example",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Demonstrates how to use the calendar2 plugin.",
+    "description": "Demonstrates how to use the timely_x plugin.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

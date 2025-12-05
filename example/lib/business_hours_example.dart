@@ -1,7 +1,7 @@
 // example/business_hours_example.dart
 
 import 'package:flutter/material.dart';
-import 'package:calendar2/calendar2.dart';
+import 'package:timely_x/timely_x.dart';
 
 void main() {
   runApp(const BusinessHoursExampleApp());

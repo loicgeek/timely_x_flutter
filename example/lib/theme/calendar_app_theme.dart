@@ -1,7 +1,7 @@
 // example/lib/theme/calendar_app_theme.dart
 
 import 'package:flutter/material.dart';
-import 'package:calendar2/calendar2.dart';
+import 'package:timely_x/timely_x.dart';
 
 class CalendarAppTheme {
   // Calendar configuration matching spec

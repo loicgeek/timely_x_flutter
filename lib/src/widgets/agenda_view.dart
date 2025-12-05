@@ -1,6 +1,6 @@
 // lib/src/views/agenda_view.dart
 
-import 'package:calendar2/src/builders/agenda_default_builders.dart';
+import 'package:timely_x/src/builders/agenda_default_builders.dart';
 import 'package:flutter/material.dart';
 import '../models/agenda_view_config.dart';
 import '../models/calendar_config.dart';

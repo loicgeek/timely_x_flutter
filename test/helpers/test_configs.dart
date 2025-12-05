@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:calendar2/calendar2.dart';
+import 'package:timely_x/timely_x.dart';
 import 'package:flutter/material.dart';
 
 /// Helper class for creating test calendar configurations
