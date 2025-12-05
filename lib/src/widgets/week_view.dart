@@ -635,7 +635,6 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
     final totalColumns = resources.length * dates.length;
 
     if (columnIndex < 0 || columnIndex >= totalColumns) {
-      print('Column out of bounds: $columnIndex (max: $totalColumns)');
       return null;
     }
 
@@ -650,9 +649,6 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
         final dateIndex = columnIndex % dates.length;
 
         if (resourceIndex >= resources.length || dateIndex >= dates.length) {
-          print(
-            'Index out of bounds - resource: $resourceIndex, date: $dateIndex',
-          );
           return null;
         }
 
@@ -666,9 +662,6 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
         final resourceIndex = columnIndex % resources.length;
 
         if (dateIndex >= dates.length || resourceIndex >= resources.length) {
-          print(
-            'Index out of bounds - date: $dateIndex, resource: $resourceIndex',
-          );
           return null;
         }
 
@@ -685,7 +678,6 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
 
     // Validate hour is within day bounds
     if (hour < widget.config.dayStartHour || hour >= widget.config.dayEndHour) {
-      print('Hour out of bounds: $hour');
       return null;
     }
 
@@ -711,11 +703,6 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
           apt.startTime.isBefore(dateTime.add(const Duration(hours: 1))) &&
           apt.endTime.isAfter(dateTime);
     }).toList();
-
-    // Debug output
-    print(
-      'Tap: column=$columnIndex, resource=${resource.name}, date=${date.day}/${date.month}, time=$hour:${snappedMinutes.toString().padLeft(2, '0')}',
-    );
 
     return CellTapData(
       resource: resource,
