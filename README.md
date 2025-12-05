@@ -42,16 +42,29 @@ Perfect for scheduling applications, appointment systems, resource management, t
 ## 📸 Screenshots
 
 ### Day View
-Shows all resources for a single day, perfect for detailed scheduling.
+Shows all resources for a single day — perfect for detailed scheduling.
 
-### Week View - Resources First
-Display each resource across the week, ideal for team scheduling.
+![Day View](screenshots/DAY_VIEW.jpeg)
 
-### Week View - Days First
-Display each day across all resources, great for room booking systems.
+### Week View
+Your standard weekly layout.
+
+![Week View](screenshots/WEEK_VIEW.jpeg)
+
+### Week View – Resources First
+Displays each resource across the week — ideal for team scheduling.
+
+![Week View – Resources First](screenshots/WEEK_VIEW_RESOUCE_FIRST.jpeg)
 
 ### Month View
-Monthly overview with appointment summaries.
+A monthly overview with appointment summaries.
+
+![Month View](screenshots/MONTH_VIEW.jpeg)
+
+### Agenda View
+A vertical list of appointments across days.
+
+![Agenda View](screenshots/AGENDA_VIEW.jpeg)
 
 ## 🚀 Getting Started
 
@@ -61,7 +74,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  timely_x: ^1.0.0
+  timely_x: ^2.0.0
   intl: ^0.18.0  # Required for date formatting
 ```
 

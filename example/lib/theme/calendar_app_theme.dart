@@ -21,7 +21,7 @@ class CalendarAppTheme {
     enableSnapping: true,
     snapToMinutes: 15,
     enableDragAndDrop: true,
-    weekViewLayout: WeekViewLayout.daysFirst,
+    weekViewLayout: WeekViewLayout.resourcesFirst,
     firstDayOfWeek: DateTime.sunday,
     showResourceAppointmentCount: true,
   );

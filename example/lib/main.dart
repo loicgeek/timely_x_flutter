@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       title: 'Calendar View Demo',
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       debugShowCheckedModeBanner: false,
-      home: CustomPerformanceOverlay(child: const CalendarDemo()),
+      home: CustomPerformanceOverlay(enabled: false, child: CalendarDemo()),
     );
   }
 }
