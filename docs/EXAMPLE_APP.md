@@ -1,6 +1,6 @@
 # Example Application
 
-This is a complete, working example of a Flutter Resource Calendar application.
+This is a complete, working example of a TimelyX calendar application.
 
 ## Complete Example
 

@@ -1,6 +1,6 @@
 # Project Structure
 
-This document explains the organization of the Flutter Resource Calendar codebase.
+This document explains the organization of the TimelyX codebase.
 
 ## Directory Structure
 

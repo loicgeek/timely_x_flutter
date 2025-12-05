@@ -1,4 +1,4 @@
-# Flutter Resource Calendar
+# TimelyX
 
 A powerful, flexible, and highly customizable calendar widget for Flutter that displays appointments across multiple resources (people, rooms, equipment, etc.) in day, week, and month views.
 

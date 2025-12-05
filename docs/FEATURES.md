@@ -1,6 +1,6 @@
 # Features Overview
 
-This document provides a comprehensive overview of all features available in Flutter Resource Calendar.
+This document provides a comprehensive overview of all features available in TimelyX.
 
 ## Table of Contents
 
