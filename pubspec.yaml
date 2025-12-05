@@ -1,6 +1,6 @@
 name: timely_x
 description: "A professional calendar library for Flutter with multi-resource scheduling and comprehensive customization."
-version: 2.0.0
+version: 2.0.1
 homepage: https://github.com/loicgeek/timely_x_flutter
 
 environment:

@@ -74,7 +74,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  timely_x: ^2.0.0
+  timely_x: latest
   intl: ^0.18.0  # Required for date formatting
 ```
 
