@@ -155,12 +155,12 @@ class _AppointmentWidgetState extends State<AppointmentWidget> {
             widget.isSelected,
           ) ??
           DefaultBuilders.appointment(
-            context,
-            widget.position.appointment,
-            widget.resource,
-            rect,
-            widget.isSelected,
-            widget.theme,
+            context: context,
+            appointment: widget.position.appointment,
+            resource: widget.resource,
+            rect: rect,
+            isSelected: widget.isSelected,
+            theme: widget.theme,
           ),
     );
   }

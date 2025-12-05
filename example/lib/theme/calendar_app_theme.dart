@@ -23,6 +23,7 @@ class CalendarAppTheme {
     enableDragAndDrop: true,
     weekViewLayout: WeekViewLayout.daysFirst,
     firstDayOfWeek: DateTime.sunday,
+    showResourceAppointmentCount: true,
   );
 
   // Calendar theme matching spec colors
@@ -83,6 +84,18 @@ class CalendarAppTheme {
       patternColor: Color(0xFFE0E0E0),
       lineWidth: 1.0,
       lineSpacing: 8.0,
+    ),
+
+    appointmentCountBadgeTheme: CalendarAppointmentCountBadgeTheme(
+      appointmentCountTextStyle: TextStyle(
+        fontSize: 10,
+        color: Colors.grey,
+        fontWeight: FontWeight.w500,
+      ),
+
+      appointmentCountPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      appointmentCountBorderRadius: 12.0,
+      appointmentCountShowBadge: true,
     ),
   );
 }

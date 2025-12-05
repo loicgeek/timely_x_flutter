@@ -1,22 +1,46 @@
 // lib/src/builders/default_builders.dart
 
+import 'package:calendar2/calendar2.dart';
+import 'package:calendar2/src/widgets/appointment_count_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/calendar_appointment.dart';
-import '../models/calendar_resource.dart';
-import '../models/calendar_theme.dart';
 import '../utils/date_time_utils.dart';
 
 /// Default builders for calendar components
 class DefaultBuilders {
-  /// Default resource header builder
-  static Widget resourceHeader(
-    BuildContext context,
-    CalendarResource resource,
-    double width,
-    bool isHovered,
-    CalendarTheme theme,
-  ) {
+  /// Default resource header builder with appointment count support
+  ///
+  /// Parameters:
+  /// - date: For single-day display (day view, week days-first)
+  /// - dates: For multi-day display (week resources-first)
+  static Widget resourceHeader({
+    required BuildContext context,
+    required CalendarResource resource,
+    required double width,
+    required bool isHovered,
+    required CalendarTheme theme,
+    required CalendarConfig config,
+    required CalendarController controller,
+    DateTime? date, // For single-day counting
+    List<DateTime>? dates, // For multi-day counting
+  }) {
+    // Determine appointment count based on what's provided
+    int appointmentCount = 0;
+    if (config.showResourceAppointmentCount) {
+      if (dates != null && dates.isNotEmpty) {
+        // Multi-day mode (week resources-first)
+        appointmentCount = controller.getAppointmentCountForResourceDates(
+          resource.id,
+          dates,
+        );
+      } else if (date != null) {
+        // Single-day mode (day view, week days-first)
+        appointmentCount = controller
+            .getAppointmentsForResourceDate(resource.id, date)
+            .length;
+      }
+    }
+
     return Container(
       width: width,
       padding: theme.resourceHeaderPadding,
@@ -30,6 +54,7 @@ class DefaultBuilders {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // Avatar
           CircleAvatar(
             radius: theme.resourceAvatarRadius,
             backgroundColor: resource.color ?? theme.todayHighlightColor,
@@ -49,6 +74,8 @@ class DefaultBuilders {
                 : null,
           ),
           SizedBox(height: theme.appointmentSpacing * 4),
+
+          // Resource name
           Text(
             resource.name,
             style: theme.resourceNameStyle,
@@ -56,6 +83,19 @@ class DefaultBuilders {
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
           ),
+
+          // Appointment count
+          if (config.showResourceAppointmentCount && appointmentCount > 0) ...[
+            SizedBox(height: theme.appointmentSpacing * 2),
+            if (theme.appointmentCountBadgeTheme?.appointmentCountBuilder !=
+                null)
+              theme.appointmentCountBadgeTheme!.appointmentCountBuilder!(
+                context,
+                appointmentCount,
+              )
+            else
+              AppointmentCountBadge(count: appointmentCount, theme: theme),
+          ],
         ],
       ),
     );
@@ -133,14 +173,14 @@ class DefaultBuilders {
   }
 
   /// Default appointment builder
-  static Widget appointment(
-    BuildContext context,
-    CalendarAppointment appointment,
-    CalendarResource resource,
-    Rect rect,
-    bool isSelected,
-    CalendarTheme theme,
-  ) {
+  static Widget appointment({
+    required BuildContext context,
+    required CalendarAppointment appointment,
+    required CalendarResource resource,
+    required Rect rect,
+    required bool isSelected,
+    required CalendarTheme theme,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: appointment.color,
@@ -187,11 +227,11 @@ class DefaultBuilders {
   }
 
   /// Default current time indicator
-  static Widget currentTimeIndicator(
-    BuildContext context,
-    double width,
-    CalendarTheme theme,
-  ) {
+  static Widget currentTimeIndicator({
+    required BuildContext context,
+    required double width,
+    required CalendarTheme theme,
+  }) {
     return Container(
       width: width,
       height: 2,

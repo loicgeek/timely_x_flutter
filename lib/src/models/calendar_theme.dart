@@ -25,6 +25,27 @@ class CalendarScrollbarTheme {
   });
 }
 
+class CalendarAppointmentCountBadgeTheme {
+  final TextStyle? appointmentCountTextStyle;
+  final Color? appointmentCountBackgroundColor;
+  final Color? appointmentCountBorderColor;
+  final EdgeInsets? appointmentCountPadding;
+  final double? appointmentCountBorderRadius;
+  final bool? appointmentCountShowBadge;
+
+  final Function(BuildContext context, int count)? appointmentCountBuilder;
+
+  const CalendarAppointmentCountBadgeTheme({
+    this.appointmentCountTextStyle,
+    this.appointmentCountBackgroundColor,
+    this.appointmentCountBorderColor,
+    this.appointmentCountPadding,
+    this.appointmentCountBorderRadius,
+    this.appointmentCountShowBadge,
+    this.appointmentCountBuilder,
+  });
+}
+
 /// Theme configuration for the calendar
 class CalendarTheme {
   const CalendarTheme({
@@ -239,6 +260,9 @@ class CalendarTheme {
 
     // Scrollbar theme
     this.scrollbarTheme = const CalendarScrollbarTheme(),
+
+    // Appointment count badge theme
+    this.appointmentCountBadgeTheme,
   });
 
   // Grid colors
@@ -492,6 +516,8 @@ class CalendarTheme {
 
   final CalendarScrollbarTheme scrollbarTheme;
 
+  final CalendarAppointmentCountBadgeTheme? appointmentCountBadgeTheme;
+
   CalendarTheme copyWith({
     Color? gridLineColor,
     Color? hourLineColor,
@@ -604,6 +630,9 @@ class CalendarTheme {
 
     // Scrollbar theme
     CalendarScrollbarTheme? scrollbarTheme,
+
+    // Appointment count badge theme
+    CalendarAppointmentCountBadgeTheme? appointmentCountBadgeTheme,
   }) {
     return CalendarTheme(
       gridLineColor: gridLineColor ?? this.gridLineColor,
@@ -765,6 +794,10 @@ class CalendarTheme {
 
       // Scrollbar theme
       scrollbarTheme: scrollbarTheme ?? this.scrollbarTheme,
+
+      // Appointment count badge theme
+      appointmentCountBadgeTheme:
+          appointmentCountBadgeTheme ?? this.appointmentCountBadgeTheme,
     );
   }
 }

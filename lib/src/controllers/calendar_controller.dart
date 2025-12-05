@@ -462,6 +462,26 @@ class CalendarController extends ChangeNotifier {
         .toList();
   }
 
+  /// Get appointment count for a resource across multiple dates (NEW)
+  int getAppointmentCountForResourceDates(
+    String resourceId,
+    List<DateTime> dates,
+  ) {
+    // Create a set of date-only values for efficient lookup
+    final dateSet = dates.map((d) => DateTime(d.year, d.month, d.day)).toSet();
+
+    return _appointments.where((apt) {
+      if (apt.resourceId != resourceId) return false;
+
+      final aptDate = DateTime(
+        apt.startTime.year,
+        apt.startTime.month,
+        apt.startTime.day,
+      );
+      return dateSet.contains(aptDate);
+    }).length;
+  }
+
   /// Get all appointments for a specific date
   List<CalendarAppointment> getAppointmentsForDate(DateTime date) {
     return _appointments

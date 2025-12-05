@@ -290,6 +290,7 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
   Widget _buildResourcesFirstHeaders() {
     final resources = widget.controller.resources;
     final dates = widget.controller.visibleDates;
+    final visibleDates = widget.controller.visibleDates;
 
     return Column(
       children: [
@@ -333,6 +334,10 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
                           theme: widget.theme,
                           builder: widget.resourceHeaderBuilder,
                           onTap: widget.onResourceHeaderTap,
+                          date: null,
+                          dates: visibleDates,
+                          controller: widget.controller,
+                          config: widget.config,
                         );
                       }).toList(),
                     ),
@@ -494,6 +499,9 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
                               theme: widget.theme,
                               builder: widget.resourceHeaderBuilder,
                               onTap: widget.onResourceHeaderTap,
+                              date: date,
+                              controller: widget.controller,
+                              config: widget.config,
                             ),
                       ],
                     ),

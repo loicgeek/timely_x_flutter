@@ -49,6 +49,7 @@ class CalendarConfig {
     this.firstDayOfWeek = DateTime.monday,
     this.agendaConfig,
     this.monthViewSmallModePredicate = defaultMonthViewSmallModePredicate,
+    this.showResourceAppointmentCount = false,
   });
 
   /// Starting date for the view
@@ -133,6 +134,12 @@ class CalendarConfig {
   /// Function to determine if the month cell width requires switching to a
   /// simplified rendering mode (like dots).
   final MonthViewSmallModePredicate monthViewSmallModePredicate;
+
+  /// Whether to show appointment count in resource headers
+  /// In day view: shows count for the current day
+  /// In week view: shows count for each specific day column
+  /// Default: false
+  final bool showResourceAppointmentCount;
 
   /// Total height of the grid
   double get totalGridHeight {
@@ -232,6 +239,7 @@ class CalendarConfig {
     DateSelectionMode? dateSelectionMode,
     int? firstDayOfWeek,
     AgendaViewConfig? agendaConfig,
+    bool? showResourceAppointmentCount,
   }) {
     return CalendarConfig(
       startDate: startDate ?? this.startDate,
@@ -260,6 +268,8 @@ class CalendarConfig {
       dateSelectionMode: dateSelectionMode ?? this.dateSelectionMode,
       firstDayOfWeek: firstDayOfWeek ?? this.firstDayOfWeek,
       agendaConfig: agendaConfig ?? this.agendaConfig,
+      showResourceAppointmentCount:
+          showResourceAppointmentCount ?? this.showResourceAppointmentCount,
     );
   }
 }

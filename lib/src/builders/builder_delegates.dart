@@ -7,12 +7,13 @@ import '../models/interaction_data.dart';
 
 /// Builder for resource header
 typedef ResourceHeaderBuilder =
-    Widget Function(
-      BuildContext context,
-      CalendarResource resource,
-      double width,
-      bool isHovered,
-    );
+    Widget Function({
+      required BuildContext context,
+      required CalendarResource resource,
+      required double width,
+      required bool isHovered,
+      required int appointmentsCount,
+    });
 
 /// Builder for date header
 typedef DateHeaderBuilder =

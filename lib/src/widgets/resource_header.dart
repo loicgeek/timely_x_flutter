@@ -1,15 +1,11 @@
 // lib/src/widgets/resource_header.dart
 
+import 'package:calendar2/calendar2.dart';
 import 'package:flutter/material.dart';
-import '../models/calendar_resource.dart';
-import '../models/calendar_theme.dart';
-import '../builders/builder_delegates.dart';
-import '../builders/default_builders.dart';
-import '../models/interaction_data.dart';
 
 class ResourceHeader extends StatefulWidget {
   const ResourceHeader({
-    Key? key,
+    super.key,
     required this.resource,
     required this.width,
     required this.theme,
@@ -17,7 +13,11 @@ class ResourceHeader extends StatefulWidget {
     this.onTap,
     this.onLongPress,
     this.onSecondaryTap,
-  }) : super(key: key);
+    this.date,
+    this.dates,
+    required this.controller,
+    required this.config,
+  });
 
   final CalendarResource resource;
   final double width;
@@ -26,6 +26,16 @@ class ResourceHeader extends StatefulWidget {
   final OnResourceHeaderTap? onTap;
   final OnResourceHeaderTap? onLongPress;
   final OnResourceHeaderTap? onSecondaryTap;
+
+  final CalendarController controller;
+
+  /// Single date for counting (day view, week days-first)
+  final DateTime? date;
+
+  /// Multiple dates for counting (week resources-first)
+  final List<DateTime>? dates;
+
+  final CalendarConfig config;
 
   @override
   State<ResourceHeader> createState() => _ResourceHeaderState();
@@ -66,17 +76,35 @@ class _ResourceHeaderState extends State<ResourceHeader> {
         },
         child:
             widget.builder?.call(
-              context,
-              widget.resource,
-              widget.width,
-              _isHovered,
+              context: context,
+              resource: widget.resource,
+              width: widget.width,
+              isHovered: _isHovered,
+              appointmentsCount:
+                  widget.dates != null && widget.dates!.isNotEmpty
+                  ? widget.controller.getAppointmentCountForResourceDates(
+                      widget.resource.id,
+                      widget.dates!,
+                    )
+                  : widget.date != null
+                  ? widget.controller
+                        .getAppointmentsForResourceDate(
+                          widget.resource.id,
+                          widget.date!,
+                        )
+                        .length
+                  : 0,
             ) ??
             DefaultBuilders.resourceHeader(
-              context,
-              widget.resource,
-              widget.width,
-              _isHovered,
-              widget.theme,
+              context: context,
+              resource: widget.resource,
+              width: widget.width,
+              isHovered: _isHovered,
+              theme: widget.theme,
+              config: widget.config,
+              controller: widget.controller,
+              date: widget.date,
+              dates: widget.dates,
             ),
       ),
     );

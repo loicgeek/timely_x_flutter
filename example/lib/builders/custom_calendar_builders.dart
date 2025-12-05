@@ -16,12 +16,13 @@ class CustomCalendarBuilders {
   final Function(ResourceHeaderTapData)? onResourceHeaderTap;
 
   // Resource Header Builder - Matches spec exactly
-  Widget buildResourceHeader(
-    BuildContext context,
-    CalendarResource resource,
-    double width,
-    bool isHovered,
-  ) {
+  Widget buildResourceHeader({
+    required BuildContext context,
+    required CalendarResource resource,
+    required double width,
+    required bool isHovered,
+    required int appointmentsCount,
+  }) {
     return Container(
       width: width,
       height: 100,
@@ -38,7 +39,7 @@ class CustomCalendarBuilders {
         children: [
           // Avatar: 40-48px circular
           CircleAvatar(
-            radius: 22,
+            radius: 16,
             backgroundColor: resource.color ?? Colors.blue,
             backgroundImage: resource.avatarUrl != null
                 ? NetworkImage(resource.avatarUrl!)
@@ -71,6 +72,7 @@ class CustomCalendarBuilders {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          if (appointmentsCount > 0) Badge.count(count: appointmentsCount),
         ],
       ),
     );

@@ -248,6 +248,7 @@ class _CalendarDayViewState extends State<CalendarDayView> {
 
   Widget _buildHeader() {
     final resources = widget.controller.resources;
+    final currentDate = widget.controller.currentDate; // The day being shown
 
     return SizedBox(
       height: widget.config.resourceHeaderHeight,
@@ -292,6 +293,9 @@ class _CalendarDayViewState extends State<CalendarDayView> {
                       theme: widget.theme,
                       builder: widget.resourceHeaderBuilder,
                       onTap: widget.onResourceHeaderTap,
+                      date: currentDate,
+                      controller: widget.controller,
+                      config: widget.config,
                     );
                   }).toList(),
                 ),
