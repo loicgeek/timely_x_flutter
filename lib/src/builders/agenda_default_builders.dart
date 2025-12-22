@@ -174,7 +174,7 @@ class AgendaDefaultBuilders {
   ) {
     final appointment = agendaItem.appointment;
     final resource = agendaItem.resource;
-    final duration = appointment.endTime.difference(appointment.startTime);
+    final duration = appointment.duration;
 
     Color backgroundColor;
     if (isSelected) {
