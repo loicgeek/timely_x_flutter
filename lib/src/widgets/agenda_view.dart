@@ -341,6 +341,8 @@ class _AgendaViewState extends State<AgendaView> {
         item,
         isSelected,
         isHovered,
+        _theme,
+        _agendaConfig,
       );
     } else {
       itemWidget = AgendaDefaultBuilders.item(

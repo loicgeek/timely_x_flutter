@@ -1,6 +1,7 @@
 // lib/src/builders/agenda_builder_delegates.dart
 
 import 'package:flutter/material.dart';
+import 'package:timely_x/timely_x.dart';
 import '../models/calendar_appointment.dart';
 import '../models/calendar_resource.dart';
 import '../utils/agenda_grouping.dart';
@@ -28,6 +29,8 @@ typedef AgendaItemBuilder =
       AgendaItem item,
       bool isSelected,
       bool isHovered,
+      CalendarTheme theme,
+      AgendaViewConfig config,
     );
 
 /// Builder for empty state when no appointments exist
