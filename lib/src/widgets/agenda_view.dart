@@ -132,7 +132,6 @@ class _AgendaViewState extends State<AgendaView> {
 
   @override
   Widget build(BuildContext context) {
-    final appointments = widget.controller.appointments;
     final resources = widget.controller.resources;
 
     // Use the controller's effective config
@@ -195,6 +194,11 @@ class _AgendaViewState extends State<AgendaView> {
             999,
           );
     }
+
+    final appointments = widget.controller.getAgendaAppointments(
+      startDate: startDate,
+      endDate: endDate,
+    );
 
     // Group appointments
     final groups = AgendaGroupingUtils.groupAppointments(
