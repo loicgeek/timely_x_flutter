@@ -320,7 +320,7 @@ class _CompleteMonthViewState extends State<CompleteMonthView> {
     final now = DateTime.now();
     _createAppointment(
       CellTapData(
-        resource: _controller.resources.first,
+        resource: _controller.filteredResources.first,
         dateTime: DateTime(now.year, now.month, now.day, 9, 0),
         globalPosition: Offset.zero,
       ),

@@ -427,7 +427,7 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
         widget.controller.selectedAppointment?.id == appointment.id;
 
     // Get the first resource for this appointment (for callback)
-    final resource = widget.controller.resources.firstWhere(
+    final resource = widget.controller.filteredResources.firstWhere(
       (r) => r.id == appointment.resourceId,
       orElse: () => _createDefaultResource(appointment.resourceId),
     );
@@ -482,7 +482,7 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
                 ),
               ),
               // Resource indicator (if multiple resources)
-              if (widget.controller.resources.length > 1) ...[
+              if (widget.controller.filteredResources.length > 1) ...[
                 SizedBox(width: 4),
                 Container(
                   width: 6,
@@ -545,8 +545,8 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
     if (widget.onCellTap == null) return;
 
     // Use first resource or create default
-    final resource = widget.controller.resources.isNotEmpty
-        ? widget.controller.resources.first
+    final resource = widget.controller.filteredResources.isNotEmpty
+        ? widget.controller.filteredResources.first
         : _createDefaultResource('default');
 
     widget.onCellTap!.call(
@@ -572,8 +572,8 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
   ) {
     if (widget.onCellLongPress == null) return;
 
-    final resource = widget.controller.resources.isNotEmpty
-        ? widget.controller.resources.first
+    final resource = widget.controller.filteredResources.isNotEmpty
+        ? widget.controller.filteredResources.first
         : _createDefaultResource('default');
 
     widget.onCellLongPress!.call(
@@ -668,11 +668,12 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
                   itemCount: appointments.length,
                   itemBuilder: (context, index) {
                     final appointment = appointments[index];
-                    final resource = widget.controller.resources.firstWhere(
-                      (r) => r.id == appointment.resourceId,
-                      orElse: () =>
-                          _createDefaultResource(appointment.resourceId),
-                    );
+                    final resource = widget.controller.filteredResources
+                        .firstWhere(
+                          (r) => r.id == appointment.resourceId,
+                          orElse: () =>
+                              _createDefaultResource(appointment.resourceId),
+                        );
 
                     return ListTile(
                       leading: Container(

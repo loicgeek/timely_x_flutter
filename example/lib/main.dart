@@ -319,7 +319,7 @@ class _CalendarDemoState extends State<CalendarDemo> {
   void _addMoreAppointments() {
     final random = math.Random();
     final newAppointments = _generateAppointments(
-      resources: _controller.resources,
+      resources: _controller.filteredResources,
       numberOfDays: 7,
       appointmentsPerDay: 3,
       random: random,
@@ -344,8 +344,8 @@ class _CalendarDemoState extends State<CalendarDemo> {
   }
 
   void _handleAddPressed() {
-    if (_controller.resources.isNotEmpty) {
-      _showCreateDialog(_controller.resources.first, DateTime.now());
+    if (_controller.filteredResources.isNotEmpty) {
+      _showCreateDialog(_controller.filteredResources.first, DateTime.now());
     }
   }
 

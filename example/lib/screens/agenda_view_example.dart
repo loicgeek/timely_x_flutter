@@ -404,7 +404,7 @@ class _AgendaViewExampleState extends State<AgendaViewExample> {
           width: double.maxFinite,
           child: ListView(
             shrinkWrap: true,
-            children: _controller.resources.map((resource) {
+            children: _controller.filteredResources.map((resource) {
               return CheckboxListTile(
                 title: Text(resource.name),
                 subtitle: Text(resource.category ?? ''),

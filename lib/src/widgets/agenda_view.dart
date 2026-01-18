@@ -132,7 +132,7 @@ class _AgendaViewState extends State<AgendaView> {
 
   @override
   Widget build(BuildContext context) {
-    final resources = widget.controller.resources;
+    final resources = widget.controller.filteredResources;
 
     // Use the controller's effective config
     final CalendarConfig primaryConfig = widget.controller.config;

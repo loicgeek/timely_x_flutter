@@ -290,7 +290,7 @@ class _SlotAvailabilityExampleState extends State<SlotAvailabilityExample> {
           Wrap(
             spacing: 16,
             runSpacing: 8,
-            children: _controller.resources.map((resource) {
+            children: _controller.filteredResources.map((resource) {
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

@@ -22,7 +22,7 @@ void main() {
       test('should initialize with default values', () {
         expect(controller.currentDate, isNotNull);
         expect(controller.viewType, equals(CalendarViewType.day));
-        expect(controller.resources, isEmpty);
+        expect(controller.filteredResources, isEmpty);
         expect(controller.appointments, isEmpty);
         expect(controller.selectedAppointment, isNull);
       });
@@ -201,8 +201,8 @@ void main() {
         final resources = TestResources.multipleResources(count: 3);
         controller.updateResources(resources);
 
-        expect(controller.resources.length, equals(3));
-        expect(controller.resources, equals(resources));
+        expect(controller.filteredResources.length, equals(3));
+        expect(controller.filteredResources, equals(resources));
       });
 
       test('should notify listeners when resources change', () {
@@ -223,7 +223,7 @@ void main() {
 
         controller.updateResources([]);
 
-        expect(controller.resources, isEmpty);
+        expect(controller.filteredResources, isEmpty);
       });
     });
 
@@ -634,7 +634,7 @@ void main() {
         // These should not throw
         expect(() => controller.currentDate, returnsNormally);
         expect(() => controller.appointments, returnsNormally);
-        expect(() => controller.resources, returnsNormally);
+        expect(() => controller.filteredResources, returnsNormally);
       });
 
       test('should not notify listeners after disposal', () {

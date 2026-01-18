@@ -254,7 +254,7 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
   void _calculateColumnWidth(double viewportWidth) {
     final dimensions = widget.config.calculateColumnDimensions(
       viewportWidth: viewportWidth,
-      numberOfResources: widget.controller.resources.length,
+      numberOfResources: widget.controller.filteredResources.length,
       effectiveNumberOfDays: widget.controller.effectiveNumberOfDays,
     );
 
@@ -288,7 +288,7 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
   }
 
   Widget _buildResourcesFirstHeaders() {
-    final resources = widget.controller.resources;
+    final resources = widget.controller.filteredResources;
     final dates = widget.controller.visibleDates;
     final visibleDates = widget.controller.visibleDates;
 
@@ -403,7 +403,7 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
   }
 
   Widget _buildDaysFirstHeaders() {
-    final resources = widget.controller.resources;
+    final resources = widget.controller.filteredResources;
     final dates = widget.controller.visibleDates;
 
     return Column(
@@ -714,7 +714,7 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
   }
 
   Widget _buildGrid() {
-    final resources = widget.controller.resources;
+    final resources = widget.controller.filteredResources;
     final dates = widget.controller.visibleDates;
     final totalWidth = _columnWidth * resources.length * dates.length;
     final totalHeight = widget.config.totalGridHeight;

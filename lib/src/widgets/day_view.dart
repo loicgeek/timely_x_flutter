@@ -222,7 +222,7 @@ class _CalendarDayViewState extends State<CalendarDayView> {
   void _calculateColumnWidth(double viewportWidth) {
     final dimensions = widget.config.calculateColumnDimensions(
       viewportWidth: viewportWidth,
-      numberOfResources: widget.controller.resources.length,
+      numberOfResources: widget.controller.filteredResources.length,
       effectiveNumberOfDays: widget.controller.effectiveNumberOfDays,
     );
 
@@ -247,7 +247,7 @@ class _CalendarDayViewState extends State<CalendarDayView> {
   }
 
   Widget _buildHeader() {
-    final resources = widget.controller.resources;
+    final resources = widget.controller.filteredResources;
     final currentDate = widget.controller.currentDate; // The day being shown
 
     return SizedBox(
@@ -381,7 +381,7 @@ class _CalendarDayViewState extends State<CalendarDayView> {
   }
 
   Widget _buildGrid() {
-    final resources = widget.controller.resources;
+    final resources = widget.controller.filteredResources;
     final totalWidth = _columnWidth * resources.length;
     final totalHeight = widget.config.totalGridHeight;
 
