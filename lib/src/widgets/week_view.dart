@@ -695,14 +695,15 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
     );
 
     // Get appointments at this location
-    final cellAppointments = widget.controller.appointments.where((apt) {
-      return apt.resourceId == resource.id &&
-          apt.startTime.year == date.year &&
-          apt.startTime.month == date.month &&
-          apt.startTime.day == date.day &&
-          apt.startTime.isBefore(dateTime.add(const Duration(hours: 1))) &&
-          apt.endTime.isAfter(dateTime);
-    }).toList();
+    final cellAppointments = widget.controller
+        .getAppointmentsForResourceDate(resource.id, date)
+        .where((apt) {
+          return apt.startTime.isBefore(
+                dateTime.add(const Duration(hours: 1)),
+              ) &&
+              apt.endTime.isAfter(dateTime);
+        })
+        .toList();
 
     return CellTapData(
       resource: resource,
@@ -877,81 +878,6 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
         ),
       );
     }
-  }
-
-  List<Widget> _buildCellInteractionLayer(
-    List<CalendarResource> resources,
-    List<DateTime> dates,
-  ) {
-    return [];
-    final widgets = <Widget>[];
-    final cellHeight = widget.config.hourHeight;
-    int columnIndex = 0;
-
-    // Determine column order based on layout
-    final List<({CalendarResource resource, DateTime date})> cellOrder;
-
-    switch (widget.config.weekViewLayout) {
-      case WeekViewLayout.resourcesFirst:
-        // Resources first: Resource1[Day1, Day2...], Resource2[Day1, Day2...]
-        cellOrder = [
-          for (final resource in resources)
-            for (final date in dates) (resource: resource, date: date),
-        ];
-        break;
-      case WeekViewLayout.daysFirst:
-        // Days first: Day1[Resource1, Resource2...], Day2[Resource1, Resource2...]
-        cellOrder = [
-          for (final date in dates)
-            for (final resource in resources) (resource: resource, date: date),
-        ];
-        break;
-    }
-
-    for (final cell in cellOrder) {
-      final hours = widget.config.dayEndHour - widget.config.dayStartHour;
-
-      for (int hour = 0; hour < hours; hour++) {
-        final cellDateTime = DateTime(
-          cell.date.year,
-          cell.date.month,
-          cell.date.day,
-          widget.config.dayStartHour + hour,
-        );
-
-        // Get appointments for this cell
-        final cellAppointments = widget.controller.appointments.where((apt) {
-          return apt.resourceId == cell.resource.id &&
-              apt.startTime.year == cell.date.year &&
-              apt.startTime.month == cell.date.month &&
-              apt.startTime.day == cell.date.day &&
-              apt.startTime.hour <= cellDateTime.hour &&
-              apt.endTime.hour > cellDateTime.hour;
-        }).toList();
-
-        widgets.add(
-          Positioned(
-            left: columnIndex * _columnWidth,
-            top: hour * cellHeight.toDouble(),
-            width: _columnWidth,
-            height: cellHeight,
-            child: _CellGestureHandler(
-              cellDateTime: cellDateTime,
-              cellHeight: cellHeight,
-              resource: cell.resource,
-              cellAppointments: cellAppointments,
-              onCellTap: widget.onCellTap,
-              onCellLongPress: widget.onCellLongPress,
-              calculateTimeFromOffset: _calculateTimeFromOffset,
-            ),
-          ),
-        );
-      }
-
-      columnIndex++;
-    }
-
-    return widgets;
   }
 
   List<Widget> _buildAppointments(

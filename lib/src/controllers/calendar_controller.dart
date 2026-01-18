@@ -448,20 +448,6 @@ class CalendarController extends ChangeNotifier {
     }
   }
 
-  /// Get appointments for a specific resource and date
-  List<CalendarAppointment> getAppointmentsForResourceDate(
-    String resourceId,
-    DateTime date,
-  ) {
-    return _appointments
-        .where(
-          (a) =>
-              a.resourceId == resourceId &&
-              DateTimeUtils.isSameDay(a.startTime, date),
-        )
-        .toList();
-  }
-
   /// Get appointment count for a resource across multiple dates (NEW)
   int getAppointmentCountForResourceDates(
     String resourceId,
@@ -482,16 +468,29 @@ class CalendarController extends ChangeNotifier {
     }).length;
   }
 
-  /// Get all appointments for a specific date
+  List<CalendarAppointment> getAppointmentsForResourceDate(
+    String resourceId,
+    DateTime date,
+  ) {
+    return filteredAppointments // ✅ Reuse existing getter
+        .where(
+          (a) =>
+              a.resourceId == resourceId &&
+              DateTimeUtils.isSameDay(a.startTime, date),
+        )
+        .toList();
+  }
+
   List<CalendarAppointment> getAppointmentsForDate(DateTime date) {
-    return _appointments
+    return filteredAppointments // ✅ Reuse existing getter
         .where((a) => DateTimeUtils.isSameDay(a.startTime, date))
         .toList();
   }
 
-  /// Get all appointments for a specific resource
   List<CalendarAppointment> getAppointmentsForResource(String resourceId) {
-    return _appointments.where((a) => a.resourceId == resourceId).toList();
+    return filteredAppointments // ✅ Reuse existing getter
+        .where((a) => a.resourceId == resourceId)
+        .toList();
   }
 
   /// Check if a time slot is available for a resource
@@ -694,14 +693,7 @@ class CalendarController extends ChangeNotifier {
     final start = startDate ?? _agendaStartDate;
     var end = endDate ?? _agendaEndDate;
 
-    var filtered = _appointments;
-
-    // Apply resource filter
-    if (_selectedResourceIds.isNotEmpty) {
-      filtered = filtered
-          .where((apt) => _selectedResourceIds.contains(apt.resourceId))
-          .toList();
-    }
+    var filtered = [...filteredAppointments];
 
     // Apply date range filter
     if (start != null && end != null) {

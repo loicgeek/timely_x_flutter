@@ -527,14 +527,13 @@ class _CalendarDayViewState extends State<CalendarDayView> {
         );
 
         // Get appointments for this cell
-        final cellAppointments = widget.controller.appointments.where((apt) {
-          return apt.resourceId == resource.id &&
-              apt.startTime.year == currentDate.year &&
-              apt.startTime.month == currentDate.month &&
-              apt.startTime.day == currentDate.day &&
-              apt.startTime.hour <= cellDateTime.hour &&
-              apt.endTime.hour > cellDateTime.hour;
-        }).toList();
+        final cellAppointments = widget.controller
+            .getAppointmentsForResourceDate(resource.id, currentDate)
+            .where((apt) {
+              return apt.startTime.hour <= cellDateTime.hour &&
+                  apt.endTime.hour > cellDateTime.hour;
+            })
+            .toList();
 
         widgets.add(
           Positioned(
