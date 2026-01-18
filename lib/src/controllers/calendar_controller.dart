@@ -140,6 +140,16 @@ class CalendarController extends ChangeNotifier {
         .toList();
   }
 
+  /// Get filtered appointments based on selected resources
+  List<CalendarResource> get filteredResources {
+    if (_selectedResourceIds.isEmpty) {
+      return _resources;
+    }
+    return _resources
+        .where((apt) => _selectedResourceIds.contains(apt.id))
+        .toList();
+  }
+
   /// Check if a date is selected
   bool isDateSelected(DateTime date) {
     final normalizedDate = DateTime(date.year, date.month, date.day);

@@ -385,7 +385,7 @@ class _CalendarPageState extends State<CalendarPage> {
           // Quick create
           _createAppointment(
             CellTapData(
-              resource: _controller.resources.first,
+              resource: _controller.filteredResources.first,
               dateTime: DateTime.now(),
               globalPosition: Offset.zero,
             ),

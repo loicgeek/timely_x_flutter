@@ -728,7 +728,7 @@ print('Viewing: $period'); // "Nov 18-24, 2025"
 print('Current date: ${controller.currentDate}');
 print('View type: ${controller.viewType}');
 print('Visible dates: ${controller.visibleDates}');
-print('Resource count: ${controller.resources.length}');
+print('Resource count: ${controller.filteredResources.length}');
 print('Appointment count: ${controller.appointments.length}');
 ```
 
