@@ -239,7 +239,7 @@ class CustomNavigationBar extends StatelessWidget {
         ),
       ),
       onSelected: (value) {
-        controller.updateResources([value]);
+        controller.addResourceToFilter(value.id);
       },
       itemBuilder: (context) => resources
           .map(
