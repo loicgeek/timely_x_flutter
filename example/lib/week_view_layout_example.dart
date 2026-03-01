@@ -46,7 +46,7 @@ class _CalendarDemoState extends State<CalendarDemo> {
       config: CalendarConfig(
         viewType: CalendarViewType.week,
         weekViewLayout: _currentLayout,
-        hourHeight: 80.0,
+        timeSlotHeight: 50.0,
         dayStartHour: 8,
         dayEndHour: 18,
         firstDayOfWeek: DateTime.sunday,

@@ -42,7 +42,7 @@ class _BusinessHoursExampleState extends State<BusinessHoursExample> {
         viewType: CalendarViewType.week,
         dayStartHour: 7,
         dayEndHour: 20,
-        hourHeight: 80.0,
+        timeSlotHeight: 50.0,
       ),
     );
 
@@ -235,7 +235,7 @@ class _BusinessHoursExampleState extends State<BusinessHoursExample> {
                 viewType: CalendarViewType.week,
                 dayStartHour: 5,
                 dayEndHour: 24,
-                hourHeight: 80.0,
+                timeSlotHeight: 50.0,
               ),
               onCellTap: (data) {
                 _showNewAppointmentDialog(data);

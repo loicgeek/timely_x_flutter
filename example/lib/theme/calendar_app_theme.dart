@@ -7,7 +7,7 @@ class CalendarAppTheme {
   // Calendar configuration matching spec
   static const config = CalendarConfig(
     viewType: CalendarViewType.week,
-    hourHeight: 100.0, // 100px per hour as per spec
+    timeSlotHeight: 50.0, // 100px per hour as per spec
     minColumnWidth: 120.0, // 120-150px per resource
     maxColumnWidth: double.infinity,
     preferredColumnWidth: 130.0,

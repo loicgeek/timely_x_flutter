@@ -43,7 +43,7 @@ class _SlotAvailabilityExampleState extends State<SlotAvailabilityExample> {
         viewType: CalendarViewType.week,
         dayStartHour: 8,
         dayEndHour: 20,
-        hourHeight: 80.0,
+        timeSlotHeight: 50.0,
       ),
     );
 
@@ -247,7 +247,7 @@ class _SlotAvailabilityExampleState extends State<SlotAvailabilityExample> {
                 viewType: CalendarViewType.week,
                 dayStartHour: 8,
                 dayEndHour: 20,
-                hourHeight: 80.0,
+                timeSlotHeight: 50.0,
               ),
               onCellTap: (data) {
                 _handleCellTap(data);

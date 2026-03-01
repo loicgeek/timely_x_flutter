@@ -81,6 +81,11 @@ class CalendarTheme {
       fontSize: 13,
       color: Color(0xFF666666),
     ),
+    this.subHourTimeTextStyle = const TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.w300,
+      color: Color(0xFF9E9E9E),
+    ),
     this.resourceNameStyle = const TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.w600,
@@ -294,6 +299,11 @@ class CalendarTheme {
 
   // Text styles
   final TextStyle timeTextStyle;
+
+  /// Text style for sub-hour time labels (:15, :30, :45).
+  /// Defaults to a smaller, lighter version of [timeTextStyle].
+  final TextStyle subHourTimeTextStyle;
+
   final TextStyle resourceNameStyle;
   final TextStyle dateTextStyle;
   final TextStyle weekdayTextStyle;
@@ -540,6 +550,7 @@ class CalendarTheme {
     Color? gridBackgroundColor,
     Color? timeColumnBackgroundColor,
     TextStyle? timeTextStyle,
+    TextStyle? subHourTimeTextStyle,
     TextStyle? resourceNameStyle,
     TextStyle? dateTextStyle,
     TextStyle? weekdayTextStyle,
@@ -663,6 +674,7 @@ class CalendarTheme {
       timeColumnBackgroundColor:
           timeColumnBackgroundColor ?? this.timeColumnBackgroundColor,
       timeTextStyle: timeTextStyle ?? this.timeTextStyle,
+      subHourTimeTextStyle: subHourTimeTextStyle ?? this.subHourTimeTextStyle,
       resourceNameStyle: resourceNameStyle ?? this.resourceNameStyle,
       dateTextStyle: dateTextStyle ?? this.dateTextStyle,
       weekdayTextStyle: weekdayTextStyle ?? this.weekdayTextStyle,

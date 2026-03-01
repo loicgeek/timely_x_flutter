@@ -1,4 +1,4 @@
-// lib/src/models/calendar_config.dart (Fixed)
+// lib/src/models/calendar_config.dart (updated)
 
 import 'package:flutter/material.dart';
 
@@ -8,13 +8,9 @@ import 'week_view_layout.dart';
 
 /// Predicate that determines if the month cell should switch to a simplified
 /// appointment rendering (e.g., dots instead of titles) based on available width.
-///
-/// [context] is the build context for accessing theme/data.
-/// Returns true when the screen width is less than 600px, indicating small screens.
 typedef MonthViewSmallModePredicate = bool Function(BuildContext context);
 
 /// Default predicate for small mode in month view
-/// Returns true when the screen width is less than 600px, indicating small screens.
 bool defaultMonthViewSmallModePredicate(BuildContext context) {
   return MediaQuery.of(context).size.width < 600;
 }
@@ -28,7 +24,19 @@ class CalendarConfig {
     this.numberOfDays,
     this.dayStartHour = 0,
     this.dayEndHour = 24,
-    this.hourHeight = 100.0,
+    // ─── PRIMARY SIZING PARAM ───────────────────────────────────────────────
+    // timeSlotHeight is the height in pixels of ONE timeSlotDuration block.
+    //
+    // Examples with default timeSlotDuration = 30 min:
+    //   timeSlotHeight: 60 → 120 px/hr   (spacious)
+    //   timeSlotHeight: 50 → 100 px/hr   (comfortable — previous default)
+    //   timeSlotHeight: 30 → 60  px/hr   (compact)
+    //
+    // With timeSlotDuration = 15 min:
+    //   timeSlotHeight: 25 → 100 px/hr
+    //   timeSlotHeight: 30 → 120 px/hr
+    this.timeSlotHeight = 50.0,
+    // ────────────────────────────────────────────────────────────────────────
     this.minColumnWidth = 120.0,
     this.maxColumnWidth = 300.0,
     this.preferredColumnWidth = 180.0,
@@ -49,7 +57,7 @@ class CalendarConfig {
     this.firstDayOfWeek = DateTime.monday,
     this.agendaConfig,
     this.monthViewSmallModePredicate = defaultMonthViewSmallModePredicate,
-    this.showResourceAppointmentCount = false,
+    this.showResourceAppointmentCount = true,
   });
 
   /// Starting date for the view
@@ -70,8 +78,30 @@ class CalendarConfig {
   /// Hour to end the day at (1-24)
   final int dayEndHour;
 
-  /// Height of each hour in pixels
-  final double hourHeight;
+  /// Height of a single time slot in pixels.
+  ///
+  /// This is the primary visual sizing unit. One slot = one [timeSlotDuration].
+  ///
+  /// - 30-min slots, timeSlotHeight: 60 → renders at 120 px per hour
+  /// - 15-min slots, timeSlotHeight: 25 → renders at 100 px per hour
+  /// - 60-min slots, timeSlotHeight: 60 → renders at 60 px per hour
+  ///
+  /// Use [hourHeight] (computed getter) if you need to work in per-hour units
+  /// for custom painters or position calculations.
+  final double timeSlotHeight;
+
+  /// Computed: number of slots that fit in one hour.
+  /// e.g. 4 for 15-min slots, 2 for 30-min, 1 for 60-min.
+  int get slotsPerHour => 60 ~/ timeSlotDuration.inMinutes;
+
+  /// Computed: total pixel height of one hour in the grid.
+  ///
+  /// = [timeSlotHeight] × [slotsPerHour]
+  ///
+  /// All internal painters and position calculators use this value.
+  /// You do not need to set it — it is derived automatically from
+  /// [timeSlotHeight] and [timeSlotDuration].
+  double get hourHeight => timeSlotHeight * slotsPerHour;
 
   /// Minimum width for columns (day view: resources, week view: days)
   final double minColumnWidth;
@@ -94,7 +124,7 @@ class CalendarConfig {
   /// Height of all-day event section
   final double allDayEventHeight;
 
-  /// Duration of each time slot for snapping
+  /// Duration of each time slot for snapping and rendering
   final Duration timeSlotDuration;
 
   /// Whether to show weekends
@@ -125,7 +155,6 @@ class CalendarConfig {
   final DateSelectionMode dateSelectionMode;
 
   /// First day of the week (1 = Monday, 7 = Sunday)
-  /// Follows Dart's DateTime.weekday convention
   final int firstDayOfWeek;
 
   /// Configuration for agenda view (when viewType is agenda)
@@ -135,13 +164,10 @@ class CalendarConfig {
   /// simplified rendering mode (like dots).
   final MonthViewSmallModePredicate monthViewSmallModePredicate;
 
-  /// Whether to show appointment count in resource headers
-  /// In day view: shows count for the current day
-  /// In week view: shows count for each specific day column
-  /// Default: false
+  /// Whether to show the number of appointments in the resource header
   final bool showResourceAppointmentCount;
 
-  /// Total height of the grid
+  /// Total height of the grid in pixels.
   double get totalGridHeight {
     final hours = dayEndHour - dayStartHour;
     return hours * hourHeight;
@@ -161,24 +187,18 @@ class CalendarConfig {
       );
     }
 
-    // Calculate total columns based on view type
     int totalColumns;
     switch (viewType) {
       case CalendarViewType.day:
-        // Day view: one column per resource
         totalColumns = numberOfResources;
         break;
       case CalendarViewType.week:
-        // Week view: resources × days
         totalColumns = numberOfResources * effectiveNumberOfDays;
         break;
       case CalendarViewType.month:
-        // Month view: different layout (grid)
-        totalColumns = 7; // Days of week
+        totalColumns = 7;
         break;
       case CalendarViewType.agenda:
-        // Agenda view: list layout, no column calculation needed
-        // Return default dimensions as agenda view doesn't use columns
         return ColumnDimensions(
           columnWidth: viewportWidth,
           requiresHorizontalScroll: false,
@@ -219,7 +239,7 @@ class CalendarConfig {
     int? numberOfDays,
     int? dayStartHour,
     int? dayEndHour,
-    double? hourHeight,
+    double? timeSlotHeight, // ← was hourHeight
     double? minColumnWidth,
     double? maxColumnWidth,
     double? preferredColumnWidth,
@@ -248,7 +268,7 @@ class CalendarConfig {
       numberOfDays: numberOfDays ?? this.numberOfDays,
       dayStartHour: dayStartHour ?? this.dayStartHour,
       dayEndHour: dayEndHour ?? this.dayEndHour,
-      hourHeight: hourHeight ?? this.hourHeight,
+      timeSlotHeight: timeSlotHeight ?? this.timeSlotHeight, // ← was hourHeight
       minColumnWidth: minColumnWidth ?? this.minColumnWidth,
       maxColumnWidth: maxColumnWidth ?? this.maxColumnWidth,
       preferredColumnWidth: preferredColumnWidth ?? this.preferredColumnWidth,

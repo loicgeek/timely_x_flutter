@@ -351,16 +351,18 @@ class _CalendarDayViewState extends State<CalendarDayView> {
     final slots = <Widget>[];
     final hours = widget.config.dayEndHour - widget.config.dayStartHour;
     final slotsPerHour = 60 ~/ widget.config.timeSlotDuration.inMinutes;
+    final slotMinutes = widget.config.timeSlotDuration.inMinutes;
 
     for (int i = 0; i < hours * slotsPerHour; i++) {
       final hour = widget.config.dayStartHour + (i ~/ slotsPerHour);
-      final minute =
-          (i % slotsPerHour) * widget.config.timeSlotDuration.inMinutes;
+      final minute = (i % slotsPerHour) * slotMinutes;
       final time = DateTime(2000, 1, 1, hour, minute);
-      final isHourMark = i % slotsPerHour == 0;
+      final isHourMark = minute == 0;
+      final isHalfHour = minute == 30;
       final slotHeight = widget.config.hourHeight / slotsPerHour;
 
       if (isHourMark) {
+        // Full hour label — prominent
         slots.add(
           Container(
             height: slotHeight,
@@ -370,6 +372,28 @@ class _CalendarDayViewState extends State<CalendarDayView> {
               DateFormat(widget.theme.timeFormat).format(time),
               style: widget.theme.timeTextStyle,
             ),
+          ),
+        );
+      } else if (slotsPerHour > 1) {
+        // Sub-hour label — only show when slot height is large enough to fit
+        final showLabel = slotHeight >= 14;
+        // Half-hour gets a slightly stronger format (:30), quarters get :mm only
+        final labelText = isHalfHour
+            ? DateFormat('h:mm').format(time) // e.g. "2:30"
+            : ':${minute.toString().padLeft(2, '0')}'; // e.g. ":15", ":45"
+
+        slots.add(
+          Container(
+            height: slotHeight,
+            alignment: Alignment.topCenter,
+            padding: const EdgeInsets.only(top: 2, right: 4),
+            child: showLabel
+                ? Text(
+                    labelText,
+                    style: widget.theme.subHourTimeTextStyle,
+                    overflow: TextOverflow.clip,
+                  )
+                : const SizedBox.shrink(),
           ),
         );
       } else {
