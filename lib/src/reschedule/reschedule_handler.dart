@@ -290,7 +290,12 @@ Future<bool> showDefaultRescheduleDialog(
               children: [
                 const Icon(Icons.schedule, size: 20),
                 const SizedBox(width: 8),
-                const Text('Reschedule Appointment'),
+                Flexible(
+                  child: const Text(
+                    'Update Appointment',
+                    style: TextStyle(fontSize: 17),
+                  ),
+                ),
               ],
             ),
             content: Column(
