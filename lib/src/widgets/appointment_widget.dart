@@ -45,13 +45,21 @@ class _AppointmentWidgetState extends State<AppointmentWidget> {
     // onLongPress fires here because LongPressDraggable owns the long-press
     // gesture — a separate GestureDetector.onLongPress on the same node
     // would compete and cause double-fires.
-    widget.onLongPress?.call(
-      AppointmentLongPressData(
-        appointment: widget.position.appointment,
-        resource: widget.resource,
-        globalPosition: Offset.zero,
-      ),
-    );
+    // Use a post-frame callback to let the Draggable
+    // finish its 'start' sequence before notifying the parent.
+
+    //TODO: find a different way to handle longpress
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (mounted) {
+    //     widget.onLongPress?.call(
+    //       AppointmentLongPressData(
+    //         appointment: widget.position.appointment,
+    //         resource: widget.resource,
+    //         globalPosition: Offset.zero,
+    //       ),
+    //     );
+    //   }
+    // });
   }
 
   void _onDragEnd(DraggableDetails _) => setState(() => _isDragging = false);

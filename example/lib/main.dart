@@ -40,8 +40,8 @@ class _CalendarDemoState extends State<CalendarDemo> {
 
   // PERFORMANCE TESTING CONFIGURATION
   static const int numberOfResources = 6;
-  static const int numberOfDays = 21; // 2 weeks
-  static const int appointmentsPerResourcePerDay = 10; // Adjust this!
+  static const int numberOfDays = 10; // 2 weeks
+  static const int appointmentsPerResourcePerDay = 3; // Adjust this!
 
   // Total appointments = 6 resources × 21 days × 10 = 1260 appointments
 
