@@ -1,5 +1,7 @@
 // lib/src/widgets/day_view.dart (FIXED)
 
+import 'package:timely_x/src/gestures/cell_gesture_handler.dart';
+import 'package:timely_x/src/gestures/grid_gesture_detector.dart';
 import 'package:timely_x/timely_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -406,8 +408,13 @@ class _CalendarDayViewState extends State<CalendarDayView> {
 
   Widget _buildGrid() {
     final resources = widget.controller.filteredResources;
+    final currentDate = widget.controller.currentDate;
     final totalWidth = _columnWidth * resources.length;
     final totalHeight = widget.config.totalGridHeight;
+
+    // Flat column lists — one entry per column
+    final flatResources = resources; // already one-per-column
+    final flatDates = List.filled(resources.length, currentDate);
 
     return SingleChildScrollView(
       controller: _gridVerticalController,
@@ -422,28 +429,38 @@ class _CalendarDayViewState extends State<CalendarDayView> {
           child: SizedBox(
             width: totalWidth,
             height: totalHeight,
-            child: Stack(
-              children: [
-                // Grid background
-                CustomPaint(
-                  size: Size(totalWidth, totalHeight),
-                  painter: GridPainter(
-                    config: widget.config,
-                    theme: widget.theme,
-                    numberOfColumns: resources.length,
-                    columnWidth: _columnWidth,
+            child: GridGestureDetector(
+              config: widget.config,
+              controller: widget.controller,
+              columnWidth: _columnWidth,
+              resources: flatResources,
+              dates: flatDates,
+              verticalScrollOffset: _gridVerticalController.hasClients
+                  ? _gridVerticalController.position.pixels
+                  : 0.0,
+              horizontalScrollOffset: _gridHorizontalController.hasClients
+                  ? _gridHorizontalController.position.pixels
+                  : 0.0,
+              onCellTap: widget.onCellTap,
+              onCellLongPress: widget.onCellLongPress,
+              onAppointmentDragEnd: widget.onAppointmentDragEnd,
+              child: Stack(
+                children: [
+                  CustomPaint(
+                    size: Size(totalWidth, totalHeight),
+                    painter: GridPainter(
+                      config: widget.config,
+                      theme: widget.theme,
+                      numberOfColumns: resources.length,
+                      columnWidth: _columnWidth,
+                    ),
                   ),
-                ),
-                // Unavailability layers (business hours)
-                ..._buildUnavailabilityLayers(resources),
-                // Cell interaction layer
-                ..._buildCellInteractionLayer(resources),
-                // Appointments
-                ..._buildAppointments(resources),
-                // Current time indicator
-                if (_shouldShowCurrentTimeIndicator())
-                  _buildCurrentTimeIndicator(totalWidth),
-              ],
+                  ..._buildUnavailabilityLayers(resources),
+                  ..._buildAppointments(resources),
+                  if (_shouldShowCurrentTimeIndicator())
+                    _buildCurrentTimeIndicator(totalWidth),
+                ],
+              ),
             ),
           ),
         ),
@@ -565,7 +582,7 @@ class _CalendarDayViewState extends State<CalendarDayView> {
             top: hour * cellHeight,
             width: _columnWidth,
             height: cellHeight,
-            child: _CellGestureHandler(
+            child: CellGestureHandler(
               cellDateTime: cellDateTime,
               cellHeight: cellHeight,
               resource: resource,
@@ -573,6 +590,9 @@ class _CalendarDayViewState extends State<CalendarDayView> {
               onCellTap: widget.onCellTap,
               onCellLongPress: widget.onCellLongPress,
               calculateTimeFromOffset: _calculateTimeFromOffset,
+              config: widget.config,
+              controller: widget.controller,
+              onAppointmentDragEnd: widget.onAppointmentDragEnd,
             ),
           ),
         );
@@ -699,98 +719,6 @@ class _CalendarDayViewState extends State<CalendarDayView> {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// Helper widget to properly handle cell tap and long press gestures
-/// Prevents both callbacks from firing on mobile devices
-class _CellGestureHandler extends StatefulWidget {
-  const _CellGestureHandler({
-    Key? key,
-    required this.cellDateTime,
-    required this.cellHeight,
-    required this.resource,
-    required this.cellAppointments,
-    required this.onCellTap,
-    required this.onCellLongPress,
-    required this.calculateTimeFromOffset,
-  }) : super(key: key);
-
-  final DateTime cellDateTime;
-  final double cellHeight;
-  final CalendarResource resource;
-  final List<CalendarAppointment> cellAppointments;
-  final OnCellTap? onCellTap;
-  final OnCellLongPress? onCellLongPress;
-  final DateTime Function(DateTime, double, double) calculateTimeFromOffset;
-
-  @override
-  State<_CellGestureHandler> createState() => _CellGestureHandlerState();
-}
-
-class _CellGestureHandlerState extends State<_CellGestureHandler> {
-  bool _longPressTriggered = false;
-  Offset? _tapDownPosition;
-  Offset? _tapDownGlobalPosition;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (details) {
-        // Track tap position for later use
-        _longPressTriggered = false;
-        _tapDownPosition = details.localPosition;
-        _tapDownGlobalPosition = details.globalPosition;
-      },
-      onTapUp: (details) {
-        // Only fire tap if long press wasn't triggered
-        if (!_longPressTriggered && widget.onCellTap != null) {
-          final exactDateTime = widget.calculateTimeFromOffset(
-            widget.cellDateTime,
-            details.localPosition.dy,
-            widget.cellHeight,
-          );
-
-          widget.onCellTap!.call(
-            CellTapData(
-              resource: widget.resource,
-              dateTime: exactDateTime,
-              globalPosition: details.globalPosition,
-              appointments: widget.cellAppointments,
-            ),
-          );
-        }
-        // Reset flag
-        _longPressTriggered = false;
-      },
-      onTapCancel: () {
-        // Reset flag on cancel
-        _longPressTriggered = false;
-      },
-      onLongPressStart: (details) {
-        // Mark that long press was triggered
-        _longPressTriggered = true;
-
-        if (widget.onCellLongPress != null) {
-          final exactDateTime = widget.calculateTimeFromOffset(
-            widget.cellDateTime,
-            details.localPosition.dy,
-            widget.cellHeight,
-          );
-
-          widget.onCellLongPress!.call(
-            CellTapData(
-              resource: widget.resource,
-              dateTime: exactDateTime,
-              globalPosition: details.globalPosition,
-              appointments: widget.cellAppointments,
-            ),
-          );
-        }
-      },
-      child: Container(color: Colors.transparent),
     );
   }
 }
