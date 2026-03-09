@@ -21,6 +21,7 @@ export 'src/controllers/calendar_controller.dart';
 // Builders
 export 'src/builders/builder_delegates.dart';
 export 'src/builders/default_builders.dart';
+export 'src/reschedule/reschedule_handler.dart';
 
 // Main Widgets
 export 'src/widgets/calendar_view.dart';
