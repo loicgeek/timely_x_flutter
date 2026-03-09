@@ -73,29 +73,20 @@ class _GridGestureDetectorState extends State<GridGestureDetector> {
   // as passed by the parent. Both day view and week view pre-flatten the
   // column list into a single ordered sequence before passing it here,
   // so this widget needs no layout-mode knowledge.
-
   _GridHitResult? _hitTest(Offset localPosition) {
-    final gridX = localPosition.dx + widget.horizontalScrollOffset;
-    final gridY = localPosition.dy + widget.verticalScrollOffset;
+    // localPosition is already in canvas space (inside SizedBox).
+    // Do NOT add scroll offsets — the scroll views already account for them.
+    final gridX = localPosition.dx;
+    final gridY = localPosition.dy;
 
     final totalColumns = widget.resources.length * widget.dates.length;
     final colIndex = (gridX / widget.columnWidth).floor();
 
     if (colIndex < 0 || colIndex >= totalColumns) return null;
 
-    // In day view: resources.length columns, dates.length == 1
-    // In week view (resourcesFirst): resources[i] × dates[j]  → col = i*nDates + j
-    // In week view (daysFirst):      dates[j] × resources[i]  → col = j*nRes + i
-    // The parent passes resources & dates already in column order so we just:
-    //   resource = resources[colIndex % resources.length]  ... NO — parent flattens.
-    //
-    // Parent passes a flat `resources` list where resources[colIndex] is correct
-    // for day view, and for week view the parent interleaves them.
-    // See the note in the factory constructors below.
     final resource = widget.resources[colIndex];
     final date = widget.dates[colIndex];
 
-    // Time from Y
     final hourFloat = gridY / widget.config.hourHeight;
     final rawHour = widget.config.dayStartHour + hourFloat.floor();
     final rawMinutes = ((hourFloat - hourFloat.floor()) * 60).round();
@@ -135,42 +126,22 @@ class _GridGestureDetectorState extends State<GridGestureDetector> {
     );
   }
 
-  // ── Drop ───────────────────────────────────────────────────────────────
   void _onDrop(DragTargetDetails<CalendarAppointment> details) {
     if (widget.onAppointmentDragEnd == null) return;
 
     final appointment = details.data;
-    final duration = appointment.endTime.difference(appointment.startTime);
+    final duration = appointment.duration;
 
-    // details.offset = global top-left of the feedback widget.
-    // Convert to local (viewport) position, then apply scroll offsets.
     final box = context.findRenderObject() as RenderBox;
-    final localTopLeft = box.globalToLocal(details.offset);
+    // globalToLocal already gives canvas-space coordinates.
+    // No scroll offset addition needed.
+    final localPointer = box.globalToLocal(details.offset);
 
-    // Use center of the feedback as the logical pointer
-    final feedbackHeight = (duration.inMinutes / 60) * widget.config.hourHeight;
-    final center = Offset(
-      localTopLeft.dx + widget.columnWidth / 2,
-      localTopLeft.dy + feedbackHeight / 2,
-    );
-
-    final hit = _hitTest(center);
+    final hit = _hitTest(localPointer);
     if (hit == null) return;
 
     var newStart = hit.dateTime;
     var newEnd = newStart.add(duration);
-
-    // Clamp to day end
-    final dayEnd = DateTime(
-      hit.date.year,
-      hit.date.month,
-      hit.date.day,
-      widget.config.dayEndHour,
-    );
-    if (newEnd.isAfter(dayEnd)) {
-      newEnd = dayEnd;
-      newStart = dayEnd.subtract(duration);
-    }
 
     final oldResource = widget.controller.resources.firstWhere(
       (r) => r.id == appointment.resourceId,

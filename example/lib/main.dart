@@ -275,6 +275,7 @@ class _CalendarDemoState extends State<CalendarDemo> {
               appointmentBuilder: _builders.buildAppointment,
               currentTimeIndicatorBuilder: _builders.buildCurrentTimeIndicator,
               onAppointmentTap: _handleAppointmentTap,
+              onAppointmentDragEnd: _handleAppointmentDragEnd,
               onAppointmentLongPress: _handleAppointmentLongPress,
               onAppointmentSecondaryTap: _handleAppointmentSecondaryTap,
               onCellTap: _handleCellTap,
@@ -351,6 +352,11 @@ class _CalendarDemoState extends State<CalendarDemo> {
 
   void _handleAppointmentTap(AppointmentTapData data) {
     _showAppointmentDialog(data.appointment);
+  }
+
+  void _handleAppointmentDragEnd(AppointmentDragData data) {
+    print("Appointment drag end: ${data.newStartTime}");
+    // _showContextMenu(context, data.appointment, data.globalPosition);
   }
 
   void _handleAppointmentLongPress(AppointmentLongPressData data) {
