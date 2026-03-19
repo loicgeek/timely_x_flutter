@@ -714,19 +714,8 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
 
   // Helper to create default resource when needed
   CalendarResource _createDefaultResource(String id) {
-    return _DefaultResource(id: id, name: 'Unknown');
+    return DefaultResourceWithBusinessHours(id: id, name: 'Unknown');
   }
-}
-
-// Simple default resource for cases where resource is not found
-class _DefaultResource extends CalendarResource {
-  _DefaultResource({required this.id, required this.name});
-
-  @override
-  final String id;
-
-  @override
-  final String name;
 }
 
 /// Helper widget to properly handle month cell tap and long press gestures
