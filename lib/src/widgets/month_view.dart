@@ -713,7 +713,8 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
   }
 
   // Helper to create default resource when needed
-  CalendarResource _createDefaultResource(String id) {
+  // ✅ After
+  DefaultResourceWithBusinessHours _createDefaultResource(String id) {
     return DefaultResourceWithBusinessHours(id: id, name: 'Unknown');
   }
 }
