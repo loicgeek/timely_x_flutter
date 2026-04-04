@@ -90,7 +90,37 @@ enum UnavailabilityPattern {
   grid,
 
   /// Custom pattern (use builder)
-  custom,
+  custom;
+
+  static UnavailabilityPattern fromName(String name) {
+    switch (name) {
+      case 'solid':
+        return UnavailabilityPattern.solid;
+      case 'diagonalLines':
+      case 'diagonal_lines':
+        return UnavailabilityPattern.diagonalLines;
+      case 'diagonalLinesReverse':
+      case 'diagonal_lines_reverse':
+        return UnavailabilityPattern.diagonalLinesReverse;
+      case 'crossHatch':
+      case 'cross_hatch':
+        return UnavailabilityPattern.crossHatch;
+      case 'horizontalLines':
+      case 'horizontal_lines':
+        return UnavailabilityPattern.horizontalLines;
+      case 'verticalLines':
+      case 'vertical_lines':
+        return UnavailabilityPattern.verticalLines;
+      case 'dots':
+        return UnavailabilityPattern.dots;
+      case 'grid':
+        return UnavailabilityPattern.grid;
+      case 'custom':
+        return UnavailabilityPattern.custom;
+      default:
+        return UnavailabilityPattern.solid;
+    }
+  }
 }
 
 /// Configuration for unavailability visual style
