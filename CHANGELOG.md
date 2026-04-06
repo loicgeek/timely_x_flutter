@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.5] - 2026-04-06
+### Fixed
+* Fixed DST calculation issues by introducing a helper to normalize date differences and bump version to 2.0.5
+
+
 ## [2.0.3] - 2026-03-01
 ### BREAKING CHANGES
 * Removed hourHeight from CalendarConfig
