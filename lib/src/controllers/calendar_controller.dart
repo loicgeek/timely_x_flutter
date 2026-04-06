@@ -77,6 +77,14 @@ class CalendarController extends ChangeNotifier {
     }
   }
 
+  Duration getDifference(DateTime startDate, DateTime endDate) {
+    return DateTime.utc(
+      endDate.year,
+      endDate.month,
+      endDate.day,
+    ).difference(DateTime.utc(startDate.year, startDate.month, startDate.day));
+  }
+
   /// Get effective number of days to display
   int get effectiveNumberOfDays {
     if (_config.numberOfDays != null) return _config.numberOfDays!;
@@ -89,11 +97,11 @@ class CalendarController extends ChangeNotifier {
       case CalendarViewType.month:
         final date = viewStartDate;
         final nextMonth = DateTime(date.year, date.month + 1, 1);
-        return nextMonth.difference(date).inDays;
+        return getDifference(date, nextMonth).inDays;
       case CalendarViewType.agenda:
         // Use agenda config or calculate from custom range
         if (_agendaStartDate != null && _agendaEndDate != null) {
-          return _agendaEndDate!.difference(_agendaStartDate!).inDays + 1;
+          return getDifference(_agendaStartDate!, _agendaEndDate!).inDays + 1;
         }
         final agendaConfig = _config.agendaConfig ?? const AgendaViewConfig();
         return agendaConfig.daysToShow;
@@ -445,7 +453,10 @@ class CalendarController extends ChangeNotifier {
     _selectedDates.clear();
 
     // Calculate number of days in range
-    final daysDifference = _rangeEndDate!.difference(_rangeStartDate!).inDays;
+    final daysDifference = getDifference(
+      _rangeStartDate!,
+      _rangeEndDate!,
+    ).inDays;
 
     // Use calendar arithmetic to avoid DST issues
     for (int i = 0; i <= daysDifference; i++) {
